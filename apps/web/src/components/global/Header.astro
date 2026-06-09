@@ -1,0 +1,542 @@
+---
+import type { NavigationHeader, SolutionsMenu } from '../../lib/types';
+import { DEFAULT_NAV } from '../../lib/nav-data';
+
+interface Props {
+  nav?: NavigationHeader;
+  solutionsMenu?: SolutionsMenu;
+  currentLang?: string;
+}
+
+const { nav = DEFAULT_NAV.header, solutionsMenu, currentLang = 'en' } = Astro.props;
+const { ctaLabel, ctaHref, secondaryCtaLabel, secondaryCtaHref } = nav;
+
+const featuresItems = [
+  { label: 'AI Agent', href: '/features/ai-agent/', desc: 'Get quick, contextual responses' },
+  { label: 'Customization', href: '/features/customization/', desc: 'Adapt workflows to your needs' },
+  { label: 'Asset Management', href: '/features/asset-management/', desc: 'Manage hardware and software assets' },
+  { label: 'Ticket Assignment', href: '/features/ticket-assignment/', desc: 'Auto-assign tickets to agents' },
+  { label: 'Automations', href: '/features/automations/', desc: 'Automate repetitive tasks' },
+  { label: 'Reports & Analytics', href: '/features/reports/', desc: 'In-depth reporting and tracking' },
+  { label: 'SLAs', href: '/features/slas/', desc: 'Set and track service timelines' },
+  { label: 'Approval Management', href: '/features/approval-management/', desc: 'Approvals made effortless' },
+  { label: 'Knowledge Base', href: '/features/knowledge-base/', desc: 'Centralize information sharing' },
+  { label: 'Helpdesk Security', href: '/features/security/', desc: 'Stay secure and compliant' }
+];
+const mid = Math.ceil(featuresItems.length / 2);
+const featuresCol1 = featuresItems.slice(0, mid);
+const featuresCol2 = featuresItems.slice(mid);
+
+const resourcesItems = [
+  { label: 'Help Center', href: 'https://support.desk365.io', desc: 'Troubleshooting advice and user guides for configuring and utilizing Desk365 efficiently.' },
+  { label: 'Videos', href: '/videos/', desc: 'Video tutorials and step-by-step demonstrations will show you exactly how to use Desk365.' },
+  { label: 'Blog', href: '/blog/', desc: 'Insights, tips, and stay up-to-date on the latest trends on customer service and more.' },
+  { label: 'Customer Stories', href: '/customer-stories/', desc: 'Case studies on how customers use Desk365 to streamline support.' },
+  { label: 'Glossary', href: '/glossary/', desc: 'Providing definitions of specific customer service terms to aid comprehension.' }
+];
+
+// Hardcoded Solutions layout (schema cannot represent 2-col sections + video card)
+const industriesLinks = [
+  { label: 'Banking and Finance', href: '/industries/banking-finance/', desc: 'Secure financial customer care' },
+  { label: 'Healthcare',          href: '/industries/healthcare/',      desc: 'Provide outstanding support' },
+  { label: 'MSP',                 href: '/industries/msp/',             desc: 'Optimize IT efficiency' },
+  { label: 'Government',          href: '/industries/government/',      desc: 'Streamline public service delivery' },
+  { label: 'Non-Profit',          href: '/industries/non-profit/',      desc: 'Strengthen mission operations' },
+];
+const teamsLinks = [
+  { label: 'IT Services',       href: '/it-help-desk/',                desc: 'Strategically address and resolve technical problems' },
+  { label: 'Customer Support',  href: '/customer-support-ticketing/',  desc: 'Resolve client inquiries efficiently and effectively' },
+  { label: 'Human Resources',   href: '/hr-help-desk/',                desc: 'Effectively manage workforce issues and relations' },
+  { label: 'Facilities',        href: '/facilities-management/',       desc: 'Manage operational environments effectively' },
+];
+
+// ── Icon helpers ─────────────────────────────────────────────────────────────
+const featureColors: Record<string, { bg: string; ic: string }> = {
+  'AI Agent':            { bg: 'bg-pink-50',    ic: 'text-pink-600' },
+  'Customization':       { bg: 'bg-blue-50',    ic: 'text-blue-600' },
+  'Asset Management':    { bg: 'bg-blue-900',   ic: 'text-white' },
+  'Ticket Assignment':   { bg: 'bg-violet-50',  ic: 'text-violet-600' },
+  'Automations':         { bg: 'bg-sky-50',     ic: 'text-sky-600' },
+  'Reports & Analytics': { bg: 'bg-indigo-50',  ic: 'text-indigo-600' },
+  'SLAs':                { bg: 'bg-cyan-50',    ic: 'text-cyan-600' },
+  'SLA Management':      { bg: 'bg-cyan-50',    ic: 'text-cyan-600' },
+  'Approval Management': { bg: 'bg-emerald-50', ic: 'text-emerald-600' },
+  'Knowledge Base':      { bg: 'bg-sky-50',     ic: 'text-sky-600' },
+  'Helpdesk Security':   { bg: 'bg-slate-100',  ic: 'text-slate-500' },
+  'Email Ticketing':     { bg: 'bg-blue-50',    ic: 'text-blue-600' },
+  'Change Management':   { bg: 'bg-purple-50',  ic: 'text-purple-600' },
+  'Contact Management':  { bg: 'bg-teal-50',    ic: 'text-teal-600' },
+  'Helpdesk Ticketing':  { bg: 'bg-indigo-50',  ic: 'text-indigo-600' },
+  'Notifications':       { bg: 'bg-amber-50',   ic: 'text-amber-600' },
+};
+
+const featureIconPaths: Record<string, string> = {
+  'AI Agent':            `<path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>`,
+  'Asset Management':    `<path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25"/>`,
+  'Automations':         `<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/>`,
+  'SLAs':                `<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>`,
+  'SLA Management':      `<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>`,
+  'Knowledge Base':      `<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>`,
+  'Helpdesk Security':   `<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>`,
+  'Customization':       `<path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/>`,
+  'Reports & Analytics': `<path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/>`,
+  'Approval Management': `<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z"/>`,
+  'Ticket Assignment':   `<path stroke-linecap="round" stroke-linejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z"/>`,
+  'Email Ticketing':     `<path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>`,
+  'Change Management':   `<path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/>`,
+  'Contact Management':  `<path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>`,
+  'Helpdesk Ticketing':  `<path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z"/>`,
+  'Notifications':       `<path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/>`,
+};
+
+const solutionIconPaths: Record<string, string> = {
+  'Banking and Finance': `<path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z"/>`,
+  'Healthcare':          `<path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/>`,
+  'MSP':                 `<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z"/>`,
+  'Government':          `<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/>`,
+  'Non-Profit':          `<path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/>`,
+  'IT Services':         `<path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25"/>`,
+  'Customer Support':    `<path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"/>`,
+  'Human Resources':     `<path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>`,
+  'Facilities':          `<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z"/>`,
+};
+
+const resourceIconPaths: Record<string, string> = {
+  'Help Center':      `<path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/>`,
+  'Videos':           `<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/>`,
+  'Blog':             `<path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/>`,
+  'Customer Stories': `<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>`,
+  'Glossary':         `<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0118 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>`,
+};
+
+const resourceColors: Record<string, { bg: string; ic: string }> = {
+  'Help Center':      { bg: 'bg-blue-50',    ic: 'text-blue-600' },
+  'Videos':           { bg: 'bg-red-50',     ic: 'text-red-600' },
+  'Blog':             { bg: 'bg-violet-50',  ic: 'text-violet-600' },
+  'Customer Stories': { bg: 'bg-amber-50',   ic: 'text-amber-600' },
+  'Glossary':         { bg: 'bg-emerald-50', ic: 'text-emerald-600' },
+};
+
+const defaultPath = `<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>`;
+const getFC = (l: string) => featureColors[l]  ?? { bg: 'bg-blue-50', ic: 'text-blue-600' };
+const getRC = (l: string) => resourceColors[l] ?? { bg: 'bg-blue-50', ic: 'text-blue-600' };
+---
+
+<header id="site-header" class="sticky top-0 z-50 bg-white border-b border-gray-200 transition-shadow duration-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="flex items-center h-16 gap-2">
+
+      <!-- Logo -->
+      <a href="/" class="flex items-center flex-shrink-0 mr-4" aria-label="Desk365 home">
+        {nav.logo?.asset?.url ? (
+          <img src={nav.logo.asset.url} alt={nav.logoAlt ?? 'Desk365.io'} class="h-8 w-auto" width="140" height="32" />
+        ) : (
+          <img src="/desk365-logo.png" alt={nav.logoAlt ?? 'Desk365.io'} class="h-8 w-auto" width="140" height="32" />
+        )}
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="hidden lg:flex items-center gap-0 flex-1" aria-label="Main navigation">
+        <!-- Features Mega Menu -->
+        <div class="nav-dropdown">
+          <button type="button"
+            class="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors focus:outline-none"
+            aria-expanded="false" aria-haspopup="true">
+            Features
+            <svg class="w-3.5 h-3.5 transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="dropdown-panel left-0 w-[640px] p-5">
+            <div class="grid grid-cols-2 gap-1 mb-4">
+              {featuresCol1.map(item => {
+                const fc = getFC(item.label);
+                return (
+                  <a href={item.href} class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition-colors group/fi">
+                    <span class={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${fc.bg}`}>
+                      <svg class={`w-4.5 h-4.5 ${fc.ic}`} style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" set:html={featureIconPaths[item.label] ?? defaultPath}></svg>
+                    </span>
+                    <span>
+                      <span class="block text-sm font-semibold text-gray-900 group-hover/fi:text-blue-600 transition-colors leading-tight">{item.label}</span>
+                      {item.desc && <span class="block text-xs text-gray-500 mt-0.5 leading-relaxed">{item.desc}</span>}
+                    </span>
+                  </a>
+                );
+              })}
+              {featuresCol2.map(item => {
+                const fc = getFC(item.label);
+                return (
+                  <a href={item.href} class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition-colors group/fi">
+                    <span class={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${fc.bg}`}>
+                      <svg class={`w-4.5 h-4.5 ${fc.ic}`} style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" set:html={featureIconPaths[item.label] ?? defaultPath}></svg>
+                    </span>
+                    <span>
+                      <span class="block text-sm font-semibold text-gray-900 group-hover/fi:text-blue-600 transition-colors leading-tight">{item.label}</span>
+                      {item.desc && <span class="block text-xs text-gray-500 mt-0.5 leading-relaxed">{item.desc}</span>}
+                    </span>
+                  </a>
+                );
+              })}
+            </div>
+            <div class="border-t border-gray-100 pt-3">
+              <a href="/features/" class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider border border-[#7CB518] text-[#5A8000] hover:bg-[#7CB518] hover:text-white px-4 py-2 rounded-lg transition-colors">
+                <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/>
+                </svg>
+                Explore All Features
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Solutions Mega Menu -->
+        <div class="nav-dropdown">
+          <button type="button"
+            class="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors focus:outline-none"
+            aria-expanded="false" aria-haspopup="true">
+            Solutions
+            <svg class="w-3.5 h-3.5 transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="dropdown-panel left-0 w-[680px] p-5">
+            <div class="grid grid-cols-2 gap-0 divide-x divide-gray-100">
+              <div class="pr-5">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 px-1 mb-3">Industries</p>
+                <div class="space-y-0.5">
+                  {industriesLinks.map(item => (
+                    <a href={item.href} class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-gray-50 transition-colors group/si">
+                      <span class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" set:html={solutionIconPaths[item.label] ?? defaultPath}></svg>
+                      </span>
+                      <span>
+                        <span class="block text-sm font-semibold text-gray-900 group-hover/si:text-blue-600 transition-colors leading-tight">{item.label}</span>
+                        <span class="block text-xs text-gray-500 mt-0.5">{item.desc}</span>
+                      </span>
+                    </a>
+                  ))}
+                </div>
+                <a href="/industries/" class="inline-flex items-center gap-1 mt-3 px-2 text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors">
+                  <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25"/>
+                  </svg>
+                  Explore All Industries
+                </a>
+              </div>
+              <div class="pl-5">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 px-1 mb-3">Teams</p>
+                <div class="space-y-0.5">
+                  {teamsLinks.map(item => (
+                    <a href={item.href} class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-gray-50 transition-colors group/st">
+                      <span class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" set:html={solutionIconPaths[item.label] ?? defaultPath}></svg>
+                      </span>
+                      <span>
+                        <span class="block text-sm font-semibold text-gray-900 group-hover/st:text-blue-600 transition-colors leading-tight">{item.label}</span>
+                        <span class="block text-xs text-gray-500 mt-0.5 leading-snug">{item.desc}</span>
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-100">
+              <a href="/videos/" class="flex items-center justify-between gap-4 p-3 rounded-xl bg-gray-50 hover:bg-blue-50 transition-colors group/vc">
+                <div>
+                  <p class="text-sm font-semibold text-gray-900 group-hover/vc:text-blue-700 leading-snug">
+                    Getting Started with Desk365: Your Modern Helpdesk Ticketing System
+                  </p>
+                  <span class="inline-flex items-center gap-1 mt-1.5 text-xs font-semibold text-[#7CB518]">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/>
+                    </svg>
+                    Watch Video
+                  </span>
+                </div>
+                <div class="flex-shrink-0 w-24 h-16 rounded-lg bg-blue-100 flex items-center justify-center overflow-hidden">
+                  <svg class="w-8 h-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/>
+                  </svg>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <a href="/microsoft-teams-ticketing-system/"
+          class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
+          Microsoft Teams
+        </a>
+
+        <a href="/pricing/"
+          class="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
+          Pricing
+        </a>
+
+        <div class="nav-dropdown">
+          <button type="button"
+            class="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors focus:outline-none"
+            aria-expanded="false" aria-haspopup="true">
+            Resources
+            <svg class="w-3.5 h-3.5 transition-transform duration-150" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="dropdown-panel left-0 w-80 p-3">
+            {resourcesItems.map(item => {
+              const rc = getRC(item.label);
+              return (
+                <a href={item.href} class="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group/ri"
+                  {...item.href?.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {}}>
+                  <span class={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${rc.bg}`}>
+                    <svg class={`w-4.5 h-4.5 ${rc.ic}`} style="width:18px;height:18px" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" set:html={resourceIconPaths[item.label] ?? defaultPath}></svg>
+                  </span>
+                  <span>
+                    <span class="block text-sm font-semibold text-gray-900 group-hover/ri:text-blue-600 transition-colors">{item.label}</span>
+                    {item.desc && <span class="block text-xs text-gray-500 mt-0.5 leading-relaxed">{item.desc}</span>}
+                  </span>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      </nav>
+
+      <!-- Desktop Right -->
+      <div class="hidden lg:flex items-center gap-2 ml-auto">
+
+        <!-- Language switcher -->
+        <div class="nav-dropdown">
+          <button type="button"
+            class="flex items-center justify-center w-9 h-9 text-gray-500 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors focus:outline-none"
+            aria-label="Switch language">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/>
+            </svg>
+          </button>
+          <div class="dropdown-panel right-0 w-64 p-3">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 px-2 mb-2.5">Language</p>
+            <div class="grid grid-cols-2 gap-0.5">
+              {DEFAULT_NAV.footer.languages.map(lang => (
+                <a href={lang.href}
+                  class={`px-2.5 py-1.5 text-sm rounded-lg transition-colors ${lang.code === currentLang ? 'text-blue-700 font-semibold' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'}`}>
+                  {lang.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <!-- Sign-in -->
+        <a href="https://app.desk365.io/login"
+          class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+          </svg>
+          Sign-in
+        </a>
+
+        <!-- Book a Demo -->
+        {secondaryCtaLabel && (
+          <a href={secondaryCtaHref ?? '/request-demo/'}
+            class="inline-flex items-center px-4 py-2 text-sm font-semibold rounded-lg border border-[#7CB518] text-[#4A7000] hover:bg-[#7CB518] hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7CB518]">
+            {secondaryCtaLabel}
+          </a>
+        )}
+
+        <!-- Free Trial -->
+        <a href={ctaHref}
+          class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-[#7CB518] hover:bg-[#6BA315] rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7CB518] focus-visible:ring-offset-2 shadow-sm">
+          {ctaLabel}
+        </a>
+      </div>
+
+      <!-- Hamburger -->
+      <button id="hamburger" type="button"
+        class="lg:hidden ml-auto flex items-center justify-center w-10 h-10 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none"
+        aria-label="Toggle navigation" aria-expanded="false" aria-controls="mobile-menu">
+        <svg id="icon-menu" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+        <svg id="icon-close" class="w-5 h-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="hidden lg:hidden border-t border-gray-100 bg-white max-h-[calc(100vh-64px)] overflow-y-auto"
+    role="navigation" aria-label="Mobile navigation">
+    <div class="px-4 py-3 space-y-1">
+      <div>
+        <button type="button"
+          class="mobile-accordion-trigger w-full flex items-center justify-between px-3 py-3 text-sm font-semibold text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors text-left"
+          aria-expanded="false" data-target="mobile-acc-features">
+          Features
+          <svg class="w-4 h-4 transition-transform duration-200 chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+        <div id="mobile-acc-features" class="mobile-accordion-content px-2">
+          <div class="pl-2 pb-2 space-y-0.5 border-l-2 border-blue-100 ml-3">
+            {[...featuresCol1, ...featuresCol2].map(item => (
+              <a href={item.href} class="flex items-center gap-2.5 px-3 py-2.5 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors">
+                <span class="font-medium">{item.label}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+      
+      <div>
+        <button type="button"
+          class="mobile-accordion-trigger w-full flex items-center justify-between px-3 py-3 text-sm font-semibold text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors text-left"
+          aria-expanded="false" data-target="mobile-acc-solutions">
+          Solutions
+          <svg class="w-4 h-4 transition-transform duration-200 chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+        <div id="mobile-acc-solutions" class="mobile-accordion-content px-2">
+          <div class="pl-2 pb-2 space-y-0.5 border-l-2 border-blue-100 ml-3">
+            {[...industriesLinks, ...teamsLinks].map(item => (
+              <a href={item.href} class="flex items-center gap-2.5 px-3 py-2.5 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors">
+                <span class="font-medium">{item.label}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <a href="/microsoft-teams-ticketing-system/"
+        class="block px-3 py-3 text-sm font-semibold text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors">
+        Microsoft Teams
+      </a>
+
+      <a href="/pricing/"
+        class="block px-3 py-3 text-sm font-semibold text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors">
+        Pricing
+      </a>
+
+      <div>
+        <button type="button"
+          class="mobile-accordion-trigger w-full flex items-center justify-between px-3 py-3 text-sm font-semibold text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors text-left"
+          aria-expanded="false" data-target="mobile-acc-resources">
+          Resources
+          <svg class="w-4 h-4 transition-transform duration-200 chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+        <div id="mobile-acc-resources" class="mobile-accordion-content px-2">
+          <div class="pl-2 pb-2 space-y-0.5 border-l-2 border-blue-100 ml-3">
+            {resourcesItems.map(item => (
+              <a href={item.href} class="flex items-center gap-2.5 px-3 py-2.5 text-sm text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
+                 {...(item as any).href?.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {}}>
+                <span class="font-medium">{item.label}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <!-- Language (mobile) -->
+      <div>
+        <button type="button"
+          class="mobile-accordion-trigger w-full flex items-center justify-between px-3 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-xl transition-colors text-left"
+          data-target="mobile-lang">
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3"/>
+            </svg>
+            Language
+          </span>
+          <svg class="w-4 h-4 transition-transform duration-200 chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+        <div id="mobile-lang" class="mobile-accordion-content px-2">
+          <div class="pl-2 pb-2 border-l-2 border-gray-100 ml-3">
+            <div class="grid grid-cols-2 gap-0.5 py-1">
+              {DEFAULT_NAV.footer.languages.map(lang => (
+                <a href={lang.href}
+                  class={`px-3 py-2 text-sm rounded-xl transition-colors ${lang.code === currentLang ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}>
+                  {lang.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile CTAs -->
+    <div class="px-4 pb-4 pt-2 border-t border-gray-100 space-y-2.5">
+      <a href="https://app.desk365.io/login"
+        class="block w-full text-center px-4 py-3 text-sm font-semibold text-gray-700 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">
+        Sign-in
+      </a>
+      {secondaryCtaLabel && (
+        <a href={secondaryCtaHref ?? '/request-demo/'}
+          class="block w-full text-center px-4 py-3 text-sm font-semibold border border-[#7CB518] text-[#4A7000] rounded-xl hover:bg-[#7CB518] hover:text-white transition-colors">
+          {secondaryCtaLabel}
+        </a>
+      )}
+      <a href={ctaHref}
+        class="block w-full text-center px-4 py-3 text-sm font-semibold text-white bg-[#7CB518] hover:bg-[#6BA315] rounded-xl transition-colors">
+        {ctaLabel}
+      </a>
+    </div>
+  </div>
+</header>
+
+<script>
+  const header    = document.getElementById('site-header');
+  const sentinel  = document.createElement('div');
+  document.body.prepend(sentinel);
+  new IntersectionObserver(([e]) => {
+    header?.classList.toggle('shadow-md', !e.isIntersecting);
+  }).observe(sentinel);
+
+  const hamburger  = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const iconMenu   = document.getElementById('icon-menu');
+  const iconClose  = document.getElementById('icon-close');
+
+  hamburger?.addEventListener('click', () => {
+    const isOpen = !mobileMenu?.classList.contains('hidden');
+    mobileMenu?.classList.toggle('hidden', isOpen);
+    iconMenu?.classList.toggle('hidden', !isOpen);
+    iconClose?.classList.toggle('hidden', isOpen);
+    hamburger.setAttribute('aria-expanded', String(!isOpen));
+  });
+
+  document.querySelectorAll<HTMLButtonElement>('.mobile-accordion-trigger').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const panel   = document.getElementById(btn.dataset.target!);
+      const chevron = btn.querySelector('.chevron');
+      if (!panel) return;
+      const isOpen = panel.classList.contains('open');
+      panel.classList.toggle('open', !isOpen);
+      chevron?.classList.toggle('rotate-180', !isOpen);
+      btn.setAttribute('aria-expanded', String(!isOpen));
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>('.nav-dropdown').forEach(dropdown => {
+    const trigger = dropdown.querySelector('button');
+    const panel   = dropdown.querySelector<HTMLElement>('.dropdown-panel');
+    trigger?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const visible = panel?.style.visibility === 'visible';
+        panel!.style.cssText = visible ? '' : 'opacity:1;transform:translateY(0);pointer-events:auto;visibility:visible';
+      }
+      if (e.key === 'Escape') { panel!.style.cssText = ''; trigger.focus(); }
+    });
+    panel?.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { panel.style.cssText = ''; trigger?.focus(); }
+    });
+  });
+</script>

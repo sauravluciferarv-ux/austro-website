@@ -1,0 +1,26 @@
+---
+import type { StatsSection } from '../../lib/types';
+interface Props { section: StatsSection }
+const { section } = Astro.props;
+const { heading, subheading, stats = [] } = section;
+---
+
+<section class="py-20 px-4 bg-blue-600 text-white">
+  <div class="max-w-5xl mx-auto text-center">
+    {heading && <h2 class="text-3xl font-bold mb-3">{heading}</h2>}
+    {subheading && (
+      <p class="text-blue-100 mb-12 max-w-xl mx-auto leading-relaxed">{subheading}</p>
+    )}
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+      {stats.map(stat => (
+        <div>
+          <p class="text-4xl font-extrabold tracking-tight">{stat.value}</p>
+          <p class="text-blue-100 mt-1 text-sm font-semibold">{stat.label}</p>
+          {stat.description && (
+            <p class="text-blue-200 mt-1 text-xs">{stat.description}</p>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,116 @@
+---
+import '../styles/global.css';
+import BaseHead from '../components/seo/BaseHead.astro';
+import Header from '../components/global/Header.astro';
+import Footer from '../components/global/Footer.astro';
+import { sanityClient } from '../lib/sanity';
+import { navigationQuery } from '../lib/queries';
+import { DEFAULT_NAV } from '../lib/nav-data';
+import type { Navigation, SeoData } from '../lib/types';
+
+interface Props {
+  seo?: Partial<SeoData>;
+  pageType?: 'website' | 'article' | 'product';
+  currentLang?: string;
+}
+
+const { seo = {}, pageType = 'website', currentLang = 'en' } = Astro.props;
+
+let nav: Navigation = DEFAULT_NAV;
+try {
+  const fetched = await sanityClient.fetch<Navigation>(navigationQuery);
+  if (fetched?.header && fetched?.footer) nav = fetched;
+} catch {
+  // Sanity not yet configured — use static fallback
+}
+
+// Organization schema — emitted on every page
+const orgSchema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'Desk365',
+  url: 'https://www.desk365.io',
+  logo: 'https://www.desk365.io/logo.svg',
+  sameAs: [
+    'https://www.linkedin.com/company/desk365/',
+    'https://twitter.com/desk365io',
+  ],
+});
+
+const websiteSchema = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Desk365',
+  url: 'https://www.desk365.io',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: 'https://www.desk365.io/search/?q={search_term_string}',
+    'query-input': 'required name=search_term_string',
+  },
+});
+---
+
+<!doctype html>
+<html lang={currentLang === 'cn' ? 'zh-CN' : currentLang === 'jp' ? 'ja' : currentLang} class="scroll-smooth">
+<head>
+  <BaseHead seo={seo} pageType={pageType} />
+
+  <!-- Organization + WebSite schema on every page -->
+  <script type="application/ld+json" set:html={orgSchema} />
+  <script type="application/ld+json" set:html={websiteSchema} />
+
+  <!--
+    ╔══════════════════════════════════════════════════════════════════╗
+    ║  Google Consent Mode v2 — MUST run before GTM                   ║
+    ║  Replace GTM-XXXXXXX with your actual GTM container ID          ║
+    ╚══════════════════════════════════════════════════════════════════╝
+  -->
+  <script is:inline>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', {
+      'ad_storage': 'denied',
+      'analytics_storage': 'denied',
+      'ad_user_data': 'denied',
+      'ad_personalization': 'denied',
+      'wait_for_update': 500,
+    });
+  </script>
+
+  <!--
+    CookieYes — load before GTM, synchronous
+    Replace XXXXXXXX with your CookieYes client key
+  -->
+  <!-- <script id="cookieyes" type="text/javascript" src="https://cdn-cookieyes.com/client_data/XXXXXXXX/script.js"></script> -->
+
+  <!--
+    Google Tag Manager — replace GTM-XXXXXXX
+  -->
+  <!-- <script is:inline>
+    (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-XXXXXXX');
+  </script> -->
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!--
+    GTM noscript fallback — replace GTM-XXXXXXX
+  -->
+  <!-- <noscript>
+    <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX"
+      height="0" width="0" style="display:none;visibility:hidden"></iframe>
+  </noscript> -->
+
+  <Header nav={nav.header} solutionsMenu={nav.solutionsMenu} currentLang={currentLang} />
+
+  <main class="flex-1">
+    <slot />
+  </main>
+
+  <Footer nav={nav.footer} currentLang={currentLang} />
+
+</body>
+</html>

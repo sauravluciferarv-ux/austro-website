@@ -1,0 +1,71 @@
+/* Font loaded via <link> in BaseHead.astro — no @import needed here */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-sans text-gray-900 antialiased;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+}
+
+@layer components {
+  /* Dropdown nav */
+  .nav-dropdown {
+    position: relative;
+  }
+
+  .nav-dropdown .dropdown-panel {
+    @apply absolute top-full mt-1 bg-white shadow-xl rounded-2xl border border-gray-100 z-50;
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    visibility: hidden;
+  }
+
+  .nav-dropdown:hover .dropdown-panel,
+  .nav-dropdown:focus-within .dropdown-panel {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  /* Header scroll shadow */
+  .header-scrolled {
+    @apply shadow-sm;
+  }
+
+  /* Feature icon wrapper */
+  .feature-icon {
+    @apply w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0;
+  }
+
+  /* Mobile accordion */
+  .mobile-accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease;
+  }
+
+  .mobile-accordion-content.open {
+    max-height: 600px;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

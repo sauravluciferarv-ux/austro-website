@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { sanityClient } from '../lib/sanity';
+import { homepageQuery } from '../lib/queries';
+import HeroSection from '../components/sections/HeroSection.astro';
+import LogosSection from '../components/sections/LogosSection.astro';
+import FeaturesSection from '../components/sections/FeaturesSection.astro';
+import StatsSection from '../components/sections/StatsSection.astro';
+import CtaSection from '../components/sections/CtaSection.astro';
+import type { HomepageSection } from '../lib/types';
+
+const homepage = await sanityClient.fetch(homepageQuery);
+const seo = homepage?.seo ?? {};
+
+// Resolve template references — if a section is a reference, use the template's section data
+const sections: HomepageSection[] = (homepage?.sections ?? [])
+  .map((s: any) => s._type === 'reference' ? s.resolvedTemplate : s)
+  .filter(Boolean);
+---
+
+<BaseLayout
+  seo={{
+    metaTitle: seo.metaTitle || 'Desk365 — Simple Helpdesk & Ticketing Software',
+    metaDescription: seo.metaDescription || 'Scale your support with a simple yet feature-packed helpdesk. Automate workflows, enable self-service, and give your team the tools they need.',
+    ogImage: seo.ogImage,
+  }}
+>
+  {sections.map((section) => (
+    section._type === 'heroSection' ? <HeroSection section={section} /> :
+    section._type === 'logosSection' ? <LogosSection section={section} /> :
+    section._type === 'featuresSection' ? <FeaturesSection section={section} /> :
+    section._type === 'statsSection' ? <StatsSection section={section} /> :
+    section._type === 'ctaSection' ? <CtaSection section={section} /> :
+    null
+  ))}
+
+  {sections.length === 0 && (
+    <section class="flex flex-col items-center justify-center py-32 px-4 text-center bg-gradient-to-b from-blue-50 to-white">
+      <span class="inline-flex items-center gap-1.5 bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-6">
+        🚀 Now with AI Agent
+      </span>
+      <h1 class="text-5xl font-extrabold text-gray-900 tracking-tight max-w-3xl leading-tight">
+        The helpdesk your team will actually <span class="text-blue-600">love using</span>
+      </h1>
+      <p class="mt-5 text-xl text-gray-500 max-w-2xl leading-relaxed">
+        Scale your support with a simple yet powerful helpdesk. Automate workflows, enable self-service, and resolve issues faster.
+      </p>
+      <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+        <a href="/pricing/" class="inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors shadow-sm">
+          Start Free Trial
+        </a>
+        <a href="/request-demo/" class="inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">
+          Book a Demo
+        </a>
+      </div>
+      <p class="mt-4 text-sm text-gray-400">No credit card required · 21-day free trial</p>
+    </section>
+  )}
+</BaseLayout>

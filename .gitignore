@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.DS_Store
+.env
+.astro/
+coverage/
+apps/web/dist/
+apps/web/.astro/
+apps/studio/dist/

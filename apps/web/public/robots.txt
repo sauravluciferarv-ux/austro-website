@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /studio/
+Disallow: /api/
+Disallow: /thank-you/
+Disallow: /preview/
+
+Sitemap: https://www.desk365.io/sitemap-index.xml

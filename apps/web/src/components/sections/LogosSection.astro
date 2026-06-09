@@ -1,0 +1,32 @@
+---
+import type { LogosSection } from '../../lib/types';
+interface Props { section: LogosSection }
+const { section } = Astro.props;
+const { heading, logos = [] } = section;
+---
+
+<section class="py-12 px-4 bg-white border-y border-gray-100">
+  <div class="max-w-5xl mx-auto">
+    {heading && (
+      <p class="text-center text-sm font-medium text-gray-400 uppercase tracking-widest mb-8">
+        {heading}
+      </p>
+    )}
+    <div class="flex flex-wrap items-center justify-center gap-10 opacity-60 grayscale">
+      {logos.map(logo => (
+        logo.href ? (
+          <a href={logo.href} target="_blank" rel="noopener noreferrer" title={logo.name}>
+            {logo.image
+              ? <img src={logo.image.asset.url} alt={logo.name} class="h-7 object-contain" />
+              : <span class="text-gray-500 font-medium text-sm">{logo.name}</span>
+            }
+          </a>
+        ) : (
+          logo.image
+            ? <img src={logo.image.asset.url} alt={logo.name} class="h-7 object-contain" />
+            : <span class="text-gray-500 font-medium text-sm">{logo.name}</span>
+        )
+      ))}
+    </div>
+  </div>
+</section>

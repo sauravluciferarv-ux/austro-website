@@ -1,0 +1,37 @@
+---
+import type { FeaturesSection } from '../../lib/types';
+interface Props { section: FeaturesSection }
+const { section } = Astro.props;
+const { eyebrow, heading, subheading, features = [] } = section;
+---
+
+<section class="py-20 px-4 bg-white">
+  <div class="max-w-6xl mx-auto">
+    {(eyebrow || heading || subheading) && (
+      <div class="text-center mb-14">
+        {eyebrow && (
+          <p class="text-blue-600 text-sm font-semibold uppercase tracking-widest mb-3">{eyebrow}</p>
+        )}
+        {heading && (
+          <h2 class="text-4xl font-bold text-gray-900 tracking-tight">{heading}</h2>
+        )}
+        {subheading && (
+          <p class="mt-4 text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">{subheading}</p>
+        )}
+      </div>
+    )}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {features.map(feature => (
+        <div class="p-6 rounded-2xl border border-gray-100 hover:border-blue-100 hover:shadow-sm transition-all">
+          {feature.icon && (
+            <img src={feature.icon.asset.url} alt="" class="w-8 h-8 mb-4" aria-hidden="true" />
+          )}
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">{feature.heading}</h3>
+          {feature.description && (
+            <p class="text-gray-500 leading-relaxed text-sm">{feature.description}</p>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
