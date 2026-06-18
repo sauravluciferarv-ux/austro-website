@@ -9,7 +9,7 @@ export default defineType({
       name: 'name',
       title: 'Template Name',
       type: 'string',
-      description: 'Internal label e.g. "Hero — Free Trial CTA" or "Bottom CTA — Dark"',
+      description: 'Internal label e.g. "Hero — Free Trial CTA"',
       validation: R => R.required(),
     }),
     defineField({
@@ -21,16 +21,8 @@ export default defineType({
     defineField({
       name: 'section',
       title: 'Section',
-      type: 'array',
-      description: 'Add exactly one section — this becomes the reusable template.',
-      validation: R => R.required().min(1).max(1),
-      of: [
-        { type: 'heroSection' },
-        { type: 'logosSection' },
-        { type: 'featuresSection' },
-        { type: 'statsSection' },
-        { type: 'ctaSection' },
-      ],
+      type: 'pageSection',
+      description: 'The reusable section content.',
     }),
   ],
   preview: {

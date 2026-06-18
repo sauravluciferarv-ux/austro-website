@@ -1,0 +1,48 @@
+---
+import type { PageSectionBlock } from '../../lib/types';
+
+interface Props {
+  block: PageSectionBlock;
+  isPreview?: boolean;
+  dataSanity?: string;
+}
+
+const { block, isPreview, dataSanity } = Astro.props;
+const { image, title, description, link, alignment = 'center', blockId, blockClass } = block;
+
+const id = blockId || `block-${block._key}`;
+const cls = blockClass || `imgbox-${block._key}`;
+
+const alignClass =
+  alignment === 'center'
+    ? 'items-center text-center'
+    : alignment === 'right'
+    ? 'items-end text-right'
+    : 'items-start text-left';
+
+const hideClasses = [
+  block.hideOnMobile && 'hidden md:flex',
+  block.hideOnDesktop && 'flex md:hidden',
+].filter(Boolean);
+---
+
+<div
+  id={id}
+  class:list={[cls, 'flex flex-col gap-3', alignClass, ...hideClasses, isPreview && 'pb-outline-block']}
+  data-block-type="imageBoxBlock"
+  data-sanity={dataSanity}
+>
+  {image?.asset?.url && (
+    <img
+      src={image.asset.url}
+      alt={image.alt ?? ''}
+      class="max-w-full rounded-lg"
+      loading="lazy"
+    />
+  )}
+  {title && <h3 class="font-semibold text-lg text-gray-900">{title}</h3>}
+  {description && <p class="text-gray-600">{description}</p>}
+  {link && (
+    <a href={link} class="text-blue-600 hover:underline text-sm font-medium">Learn more &rarr;</a>
+  )}
+</div>

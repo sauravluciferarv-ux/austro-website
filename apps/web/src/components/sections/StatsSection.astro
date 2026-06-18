@@ -1,11 +1,15 @@
 ---
 import type { StatsSection } from '../../lib/types';
+import SectionCustomCode from './SectionCustomCode.astro';
+
 interface Props { section: StatsSection }
 const { section } = Astro.props;
-const { heading, subheading, stats = [] } = section;
+const { _key, key, heading, subheading, stats = [], customCode } = section;
+
+const sectionId = `section-${_key ?? key ?? 'stats'}`;
 ---
 
-<section class="py-20 px-4 bg-blue-600 text-white">
+<section id={sectionId} class="py-20 px-4 bg-blue-600 text-white">
   <div class="max-w-5xl mx-auto text-center">
     {heading && <h2 class="text-3xl font-bold mb-3">{heading}</h2>}
     {subheading && (
@@ -23,4 +27,13 @@ const { heading, subheading, stats = [] } = section;
       ))}
     </div>
   </div>
+
+  {customCode?.enabled && (
+    <SectionCustomCode
+      sectionId={sectionId}
+      html={customCode.html}
+      css={customCode.css}
+      javascript={customCode.javascript}
+    />
+  )}
 </section>

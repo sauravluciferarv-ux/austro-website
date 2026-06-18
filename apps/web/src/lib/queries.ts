@@ -75,7 +75,18 @@ const sectionFields = groq`
   eyebrow, heading, subheading,
   features[] { heading, description, icon { asset->{ url } } },
   stats[] { value, label, description },
-  bgStyle
+  bgStyle,
+  testimonials[] {
+    quote, body, authorName, authorTitle, industry,
+    companyLogo { asset->{ url } },
+    source, rating
+  },
+  customCode {
+    enabled,
+    "html": html.code,
+    "css": css.code,
+    "javascript": javascript.code
+  }
 `;
 
 export const homepageQuery = groq`
@@ -99,6 +110,168 @@ export const homepageQuery = groq`
     }
   }
 `;
+
+// ── Sitemap queries ──────────────────────────────────────────────────────────
+
+export const pageSitemapQuery = groq`
+  *[_type == "page"] | order(publishedAt desc) {
+    "slug": slug.current,
+    "lastmod": coalesce(lastModified, _updatedAt),
+    "publishedAt": publishedAt,
+    "changefreq": coalesce(seo.changefreq, "monthly"),
+    "priority": coalesce(seo.priority, 0.7),
+    "noIndex": coalesce(seo.noIndex, false)
+  }
+`;
+
+export const postSitemapQuery = groq`
+  *[_type == "blogPost"] | order(publishedAt desc) {
+    "slug": slug.current,
+    "lastmod": coalesce(lastModified, _updatedAt),
+    "publishedAt": publishedAt,
+    "changefreq": coalesce(seo.changefreq, "weekly"),
+    "priority": coalesce(seo.priority, 0.6),
+    "noIndex": coalesce(seo.noIndex, false)
+  }
+`;
+
+export const authorSitemapQuery = groq`
+  *[_type == "author"] | order(name asc) {
+    "slug": slug.current,
+    "lastmod": _updatedAt
+  }
+`;
+
+// ── Page Builder queries ─────────────────────────────────────────────────────
+
+// Shared block projection — all content fields for any block type
+const blockFields = groq`
+  _type,
+  _key,
+  blockId,
+  blockClass,
+  customCss,
+  hideOnMobile,
+  hideOnDesktop,
+  level,
+  text,
+  image { asset->{ url, _id }, alt },
+  images[] { _key, asset->{ url }, alt, caption },
+  caption,
+  link,
+  openInNewTab,
+  width,
+  alignment,
+  content[] { ..., _type == "image" => { asset->{ url } } },
+  url,
+  thumbnail { asset->{ url } },
+  autoplay,
+  muted,
+  controls,
+  aspectRatio,
+  href,
+  style,
+  size,
+  icon,
+  color,
+  thickness,
+  height,
+  heightMobile,
+  items[] { _key, title, content[] { ... }, buttonText, buttonHref, description, image { asset->{ url }, alt } },
+  openFirst,
+  allowMultiple,
+  html,
+  code,
+  title,
+  description,
+  formTitle,
+  fields[] { _key, type, label, name, placeholder, required, options },
+  submitText,
+  successMessage,
+  webhookUrl,
+  source,
+  itemCount,
+  columns,
+  gap,
+  slides[] { _key, title, description, image { asset->{ url }, alt }, buttonText, buttonHref },
+  autoplayInterval,
+  showDots,
+  showArrows,
+  template->{ name }
+`;
+
+const sectionFields_pb = groq`
+  _key,
+  sectionId,
+  sectionClass,
+  label,
+  containerWidth,
+  layout,
+  gap,
+  verticalAlign,
+  horizontalAlign,
+  bgColor,
+  bgImage { asset->{ url } },
+  bgGradient,
+  paddingTop,
+  paddingBottom,
+  paddingLeft,
+  paddingRight,
+  marginTop,
+  marginBottom,
+  minHeight,
+  hideOnMobile,
+  hideOnDesktop,
+  customCss,
+  blocks[] { ${blockFields} }
+`;
+
+export const pageBySlugQuery = groq`
+  *[_type == "page" && slug.current == $slug][0] {
+    _id,
+    _updatedAt,
+    title,
+    slug,
+    publishedAt,
+    lastModified,
+    seo {
+      metaTitle,
+      metaDescription,
+      ogImage { asset->{ url } },
+      ogTitle,
+      ogDescription,
+      noIndex,
+      canonicalUrl,
+      structuredData
+    },
+    pageBuilder[] { ${sectionFields_pb} }
+  }
+`;
+
+export const allPageSlugsQuery = groq`
+  *[_type == "page" && defined(slug.current)] { "slug": slug.current }
+`;
+
+// Homepage using the page builder (same block system as dynamic pages)
+export const homepagePageBuilderQuery = groq`
+  *[_type == "homepage" && _id in ["homepage", "drafts.homepage"]][0] {
+    _id,
+    _type,
+    seo {
+      metaTitle,
+      metaDescription,
+      ogImage { asset->{ url } },
+      ogTitle,
+      ogDescription,
+      noIndex,
+      canonicalUrl,
+      structuredData
+    },
+    pageBuilder[] { ${sectionFields_pb} }
+  }
+`;
+
+// ── Blog post detail query ───────────────────────────────────────────────────
 
 export const blogPostQuery = groq`
   *[_type == "blogPost" && slug.current == $slug][0] {

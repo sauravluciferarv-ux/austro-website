@@ -1,38 +1,26 @@
 import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
-import sitemap from '@astrojs/sitemap';
+
+// Only load the Vercel adapter when building on Vercel (VERCEL env var is set
+// automatically). During local development (`astro dev`), Astro's built-in dev
+// server handles SSR natively — no adapter needed.
+let adapter;
+if (process.env.VERCEL) {
+  const { default: vercel } = await import('@astrojs/vercel/serverless');
+  adapter = vercel();
+}
 
 export default defineConfig({
   site: 'https://www.desk365.io',
-  trailingSlash: 'always',
+  // 'ignore' lets API routes be called without a trailing slash (e.g. from
+  // Sanity's Presentation Tool) while still serving HTML pages at /path/ if
+  // linked that way. Canonical tags in BaseHead.astro handle SEO deduplication.
+  trailingSlash: 'ignore',
   integrations: [
     tailwind({ applyBaseStyles: false }),
-    sitemap({
-      filter: (page) =>
-        !page.includes('/thank-you') &&
-        !page.includes('/404') &&
-        !page.includes('/studio') &&
-        !page.includes('/preview'),
-      changefreq: 'weekly',
-      priority: 0.7,
-      lastmod: new Date(),
-      i18n: {
-        defaultLocale: 'en',
-        locales: {
-          de: 'de',
-          fr: 'fr',
-          nl: 'nl',
-          es: 'es',
-          it: 'it',
-          pl: 'pl',
-          pt: 'pt',
-          sv: 'sv',
-          cn: 'zh-CN',
-          jp: 'ja',
-          ko: 'ko',
-        },
-      },
-    }),
   ],
-  output: 'static',
+  // Hybrid mode: pages are static by default; routes with `prerender = false`
+  // are server-rendered (used for the preview API and the homepage).
+  output: 'hybrid',
+  adapter,
 });

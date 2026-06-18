@@ -1,0 +1,144 @@
+---
+import type { PageSection } from '../lib/types';
+import BlockRenderer from './blocks/BlockRenderer.astro';
+import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
+
+interface Props {
+  section: PageSection;
+  isPreview?: boolean;
+  /** Sanity document _id — required for click-to-edit overlays in Presentation mode */
+  docId?: string;
+  /** Sanity document type, e.g. "page" or "homepage" */
+  docType?: string;
+}
+
+const { section, isPreview, docId, docType = 'page' } = Astro.props;
+
+const key = section._key ?? Math.random().toString(36).slice(2);
+const sectionId = section.sectionId || `section-${key}`;
+const sectionClass = section.sectionClass || `pb-section-${key}`;
+
+// data-sanity attribute for Sanity Presentation visual editing overlays
+let sectionSanityAttr: string | undefined;
+if (docId && section._key) {
+  try {
+    const da = createDataAttribute({ id: docId, type: docType });
+    sectionSanityAttr = da(`pageBuilder[_key=="${section._key}"]`);
+  } catch {
+    // Non-critical: silently skip if encoding fails
+  }
+}
+
+// Container width classes
+const containerMap: Record<string, string> = {
+  full: 'w-full',
+  wide: 'max-w-[1400px] mx-auto',
+  contained: 'max-w-[1200px] mx-auto',
+  narrow: 'max-w-[800px] mx-auto',
+};
+const containerClass = containerMap[section.containerWidth ?? 'contained'] ?? containerMap.contained;
+
+// Layout classes for the blocks wrapper
+const layoutMap: Record<string, string> = {
+  stack: 'flex flex-col',
+  'cols-2': 'grid grid-cols-1 md:grid-cols-2',
+  'cols-3': 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
+  'cols-4': 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4',
+  grid: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+  carousel: 'flex overflow-x-auto snap-x snap-mandatory',
+};
+const layoutClass = layoutMap[section.layout ?? 'stack'] ?? layoutMap.stack;
+
+const gapMap: Record<string, string> = {
+  none: 'gap-0',
+  xs: 'gap-2',
+  sm: 'gap-4',
+  md: 'gap-6',
+  lg: 'gap-8',
+  xl: 'gap-12',
+};
+const gapClass = gapMap[section.gap ?? 'md'] ?? gapMap.md;
+
+const vAlignMap: Record<string, string> = {
+  start: 'items-start',
+  center: 'items-center',
+  end: 'items-end',
+  stretch: 'items-stretch',
+};
+const hAlignMap: Record<string, string> = {
+  start: 'justify-start',
+  center: 'justify-center',
+  end: 'justify-end',
+  between: 'justify-between',
+  around: 'justify-around',
+};
+const vAlignClass = vAlignMap[section.verticalAlign ?? 'start'] ?? '';
+const hAlignClass = hAlignMap[section.horizontalAlign ?? 'start'] ?? '';
+
+// Build inline section styles
+const sectionStyles: string[] = [];
+if (section.bgColor) sectionStyles.push(`background-color:${section.bgColor}`);
+if (section.bgGradient) sectionStyles.push(`background:${section.bgGradient}`);
+if (section.bgImage?.asset?.url) {
+  sectionStyles.push(
+    `background-image:url('${section.bgImage.asset.url}');background-size:cover;background-position:center`
+  );
+}
+if (section.paddingTop) sectionStyles.push(`padding-top:${section.paddingTop}`);
+if (section.paddingBottom) sectionStyles.push(`padding-bottom:${section.paddingBottom}`);
+if (section.paddingLeft) sectionStyles.push(`padding-left:${section.paddingLeft}`);
+if (section.paddingRight) sectionStyles.push(`padding-right:${section.paddingRight}`);
+if (section.marginTop) sectionStyles.push(`margin-top:${section.marginTop}`);
+if (section.marginBottom) sectionStyles.push(`margin-bottom:${section.marginBottom}`);
+if (section.minHeight) sectionStyles.push(`min-height:${section.minHeight}`);
+
+// Collect custom CSS from this section and its blocks
+function buildCustomCss(sec: PageSection, secClass: string): string {
+  const parts: string[] = [];
+  if (sec.customCss) {
+    parts.push(sec.customCss);
+  }
+  for (const block of sec.blocks ?? []) {
+    if (!block.customCss) continue;
+    parts.push(block.customCss);
+  }
+  return parts.join('\n');
+}
+
+const pageCustomCss = buildCustomCss(section, sectionClass);
+
+const hideOnMobile = section.hideOnMobile ?? false;
+const hideOnDesktop = section.hideOnDesktop ?? false;
+---
+
+{pageCustomCss && <style is:inline set:html={pageCustomCss} />}
+
+<section
+  id={sectionId}
+  class:list={[
+    sectionClass,
+    hideOnMobile && 'hidden md:block',
+    hideOnDesktop && 'block md:hidden',
+    isPreview && 'pb-section-wrapper',
+  ]}
+  style={sectionStyles.join(';')}
+  data-section-id={sectionId}
+  data-sanity={sectionSanityAttr}
+>
+  {isPreview && section.label && (
+    <div class="pb-section-label">{section.label}</div>
+  )}
+  <div class={containerClass}>
+    <div class:list={[layoutClass, gapClass, vAlignClass, hAlignClass]}>
+      {(section.blocks ?? []).map(block => (
+        <BlockRenderer
+          block={block}
+          isPreview={isPreview}
+          docId={docId}
+          docType={docType}
+          sectionKey={section._key}
+        />
+      ))}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,48 @@
+---
+import type { PageSectionBlock } from '../../lib/types';
+
+interface Props {
+  block: PageSectionBlock;
+  isPreview?: boolean;
+  dataSanity?: string;
+}
+
+const { block, isPreview, dataSanity } = Astro.props;
+const { icon, title, description, link, alignment = 'left', blockId, blockClass } = block;
+
+const id = blockId || `block-${block._key}`;
+const cls = blockClass || `iconbox-${block._key}`;
+
+const alignClass =
+  alignment === 'center'
+    ? 'items-center text-center'
+    : alignment === 'right'
+    ? 'items-end text-right'
+    : 'items-start text-left';
+
+const hideClasses = [
+  block.hideOnMobile && 'hidden md:flex',
+  block.hideOnDesktop && 'flex md:hidden',
+].filter(Boolean);
+---
+
+<div
+  id={id}
+  class:list={[cls, 'flex flex-col gap-3', alignClass, ...hideClasses, isPreview && 'pb-outline-block']}
+  data-block-type="iconBoxBlock"
+  data-sanity={dataSanity}
+>
+  {(icon as any)?.asset?.url && (
+    <img
+      src={(icon as any).asset.url}
+      alt=""
+      class="w-12 h-12 object-contain"
+      loading="lazy"
+    />
+  )}
+  {title && <h3 class="font-semibold text-lg text-gray-900">{title}</h3>}
+  {description && <p class="text-gray-600">{description}</p>}
+  {link && (
+    <a href={link} class="text-blue-600 hover:underline text-sm font-medium">Learn more &rarr;</a>
+  )}
+</div>

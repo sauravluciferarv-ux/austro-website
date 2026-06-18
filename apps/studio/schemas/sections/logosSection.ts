@@ -4,17 +4,23 @@ export default defineType({
   name: 'logosSection',
   title: 'Logos / Trusted By',
   type: 'object',
+  groups: [
+    { name: 'content', title: 'Content', default: true },
+    { name: 'advanced', title: 'Custom Code' },
+  ],
   fields: [
     defineField({
       name: 'heading',
       title: 'Heading',
       type: 'string',
+      group: 'content',
       description: 'e.g. "Trusted by 6,500+ companies worldwide"',
     }),
     defineField({
       name: 'logos',
       title: 'Logos',
       type: 'array',
+      group: 'content',
       of: [{
         type: 'object',
         fields: [
@@ -24,6 +30,12 @@ export default defineType({
         ],
         preview: { select: { title: 'name', media: 'image' } },
       }],
+    }),
+    defineField({
+      name: 'customCode',
+      title: 'Custom Code',
+      type: 'customCode',
+      group: 'advanced',
     }),
   ],
   preview: {

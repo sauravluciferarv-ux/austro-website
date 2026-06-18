@@ -1,0 +1,57 @@
+---
+/**
+ * SectionCustomCode — injects user-authored HTML, CSS, and JS into a section.
+ *
+ * CSS is injected with a `#<sectionId>` prefix automatically so styles are
+ * scoped to this section only. JS receives a `section` variable bound to the
+ * section DOM element and runs inside an IIFE for isolation.
+ *
+ * Never render this component when `customCode.enabled` is false — the parent
+ * section component is responsible for that guard.
+ */
+interface Props {
+  sectionId: string;
+  html?: string;
+  css?: string;
+  javascript?: string;
+}
+const { sectionId, html, css, javascript } = Astro.props;
+
+// Scope every top-level CSS selector to the section ID.
+// Skips @-rules (media, keyframes, layer, etc.) and empty lines.
+function scopeCss(raw: string, id: string): string {
+  return raw
+    .split('\n')
+    .map(line => {
+      const trimmed = line.trim();
+      // Leave @-rules, closing braces, and empty lines untouched
+      if (!trimmed || trimmed.startsWith('@') || trimmed === '}') return line;
+      // Only prepend to lines that start a new selector (contain '{')
+      if (trimmed.includes('{') && !trimmed.startsWith('#' + id)) {
+        return line.replace(/^(\s*)/, `$1#${id} `);
+      }
+      return line;
+    })
+    .join('\n');
+}
+
+const scopedCss = css ? scopeCss(css, sectionId) : '';
+---
+
+{scopedCss && (
+  <style is:inline set:html={scopedCss} />
+)}
+
+{html && (
+  <div class="section-custom-html" set:html={html} />
+)}
+
+{javascript && (
+  <script is:inline set:html={`
+(function() {
+  var section = document.getElementById(${JSON.stringify(sectionId)});
+  if (!section) return;
+  ${javascript}
+})();
+`} />
+)}

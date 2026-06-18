@@ -1,0 +1,125 @@
+---
+import type { PageSectionBlock } from '../../lib/types';
+
+interface Props {
+  block: PageSectionBlock;
+  isPreview?: boolean;
+  dataSanity?: string;
+}
+
+const { block, isPreview, dataSanity } = Astro.props;
+const {
+  slides = [],
+  autoplay,
+  showDots = true,
+  showArrows = true,
+  blockId,
+  blockClass,
+} = block;
+
+const id = blockId || `block-${block._key}`;
+const cls = blockClass || `slides-${block._key}`;
+
+const hideClasses = [
+  block.hideOnMobile && 'hidden md:block',
+  block.hideOnDesktop && 'block md:hidden',
+].filter(Boolean);
+---
+
+<div
+  id={id}
+  class:list={[cls, 'relative overflow-hidden', ...hideClasses, isPreview && 'pb-outline-block']}
+  data-block-type="slidesBlock"
+  data-sanity={dataSanity}
+  data-autoplay={autoplay ? 'true' : 'false'}
+>
+  <div class="slides-track flex transition-transform duration-500" style="will-change:transform;">
+    {slides.map((slide, i) => (
+      <div class="slide flex-shrink-0 w-full relative min-h-[400px] flex flex-col items-center justify-center text-center p-8">
+        {slide.image?.asset?.url && (
+          <img
+            src={slide.image.asset.url}
+            alt={slide.image.alt ?? ''}
+            class="absolute inset-0 w-full h-full object-cover"
+            loading={i === 0 ? 'eager' : 'lazy'}
+          />
+        )}
+        <div class="relative z-10">
+          {slide.title && (
+            <h2 class="text-3xl font-bold text-white mb-3 drop-shadow">{slide.title}</h2>
+          )}
+          {slide.description && (
+            <p class="text-lg text-white/90 mb-6 drop-shadow">{slide.description}</p>
+          )}
+          {slide.buttonText && slide.buttonHref && (
+            <a
+              href={slide.buttonHref}
+              class="inline-block bg-white text-gray-900 font-semibold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              {slide.buttonText}
+            </a>
+          )}
+        </div>
+      </div>
+    ))}
+  </div>
+
+  {showArrows && slides.length > 1 && (
+    <>
+      <button
+        class="slides-prev absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full w-10 h-10 flex items-center justify-center shadow z-20 text-xl"
+        aria-label="Previous"
+      >
+        &#8249;
+      </button>
+      <button
+        class="slides-next absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full w-10 h-10 flex items-center justify-center shadow z-20 text-xl"
+        aria-label="Next"
+      >
+        &#8250;
+      </button>
+    </>
+  )}
+
+  {showDots && slides.length > 1 && (
+    <div class="slides-dots absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-20">
+      {slides.map((_, i) => (
+        <button
+          class:list={[
+            'slides-dot w-3 h-3 rounded-full border-2 border-white transition-colors',
+            i === 0 ? 'bg-white' : 'bg-transparent',
+          ]}
+          data-index={i}
+          aria-label={`Slide ${i + 1}`}
+        />
+      ))}
+    </div>
+  )}
+</div>
+
+<script>
+  document.querySelectorAll('[data-block-type="slidesBlock"]').forEach(el => {
+    const track = el.querySelector('.slides-track') as HTMLElement | null;
+    const slides = el.querySelectorAll('.slide');
+    const dots = el.querySelectorAll('.slides-dot');
+    if (!track || slides.length === 0) return;
+    let current = 0;
+
+    const go = (n: number) => {
+      current = (n + slides.length) % slides.length;
+      track.style.transform = `translateX(-${current * 100}%)`;
+      dots.forEach((d, i) => {
+        d.classList.toggle('bg-white', i === current);
+        d.classList.toggle('bg-transparent', i !== current);
+      });
+    };
+
+    el.querySelector('.slides-prev')?.addEventListener('click', () => go(current - 1));
+    el.querySelector('.slides-next')?.addEventListener('click', () => go(current + 1));
+    dots.forEach((d, i) => d.addEventListener('click', () => go(i)));
+
+    if ((el as HTMLElement).dataset.autoplay === 'true') {
+      setInterval(() => go(current + 1), 5000);
+    }
+  });
+</script>

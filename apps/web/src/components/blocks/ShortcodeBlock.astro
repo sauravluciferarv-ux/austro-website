@@ -1,0 +1,30 @@
+---
+import type { PageSectionBlock } from '../../lib/types';
+
+interface Props {
+  block: PageSectionBlock;
+  isPreview?: boolean;
+  dataSanity?: string;
+}
+
+const { block, isPreview, dataSanity } = Astro.props;
+const { code = '', caption, blockId, blockClass } = block;
+
+const id = blockId || `block-${block._key}`;
+const cls = blockClass || `embed-${block._key}`;
+
+const hideClasses = [
+  block.hideOnMobile && 'hidden md:block',
+  block.hideOnDesktop && 'block md:hidden',
+].filter(Boolean);
+---
+
+<div
+  id={id}
+  class:list={[cls, ...hideClasses, isPreview && 'pb-outline-block']}
+  data-block-type="shortcodeBlock"
+  data-sanity={dataSanity}
+>
+  <div set:html={code} />
+  {caption && <p class="text-sm text-gray-500 text-center mt-2">{caption}</p>}
+</div>

@@ -1,0 +1,26 @@
+---
+import type { PageSectionBlock } from '../../lib/types';
+
+interface Props {
+  block: PageSectionBlock;
+  isPreview?: boolean;
+  dataSanity?: string;
+}
+
+const { block, isPreview, dataSanity } = Astro.props;
+const { height = '40px', heightMobile = '20px', blockId, blockClass } = block;
+
+const id = blockId || `block-${block._key}`;
+const cls = blockClass || `spacer-${block._key}`;
+---
+
+<div
+  id={id}
+  class:list={[cls, isPreview && 'pb-outline-block pb-outline-block--spacer']}
+  data-block-type="spacerBlock"
+  data-sanity={dataSanity}
+  aria-hidden="true"
+>
+  {isPreview && <span class="text-xs text-gray-400 font-mono">Spacer {height}</span>}
+</div>
+<style is:inline set:html={`.${cls} { height: ${height}; } @media (max-width: 768px) { .${cls} { height: ${heightMobile}; } }`} />

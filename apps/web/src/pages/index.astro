@@ -1,21 +1,29 @@
 ---
+// SSR enables preview mode: the middleware reads the preview cookie and switches
+// to draft content. In production, Vercel will cache this response automatically.
+export const prerender = false;
+
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { sanityClient } from '../lib/sanity';
-import { homepageQuery } from '../lib/queries';
-import HeroSection from '../components/sections/HeroSection.astro';
-import LogosSection from '../components/sections/LogosSection.astro';
-import FeaturesSection from '../components/sections/FeaturesSection.astro';
-import StatsSection from '../components/sections/StatsSection.astro';
-import CtaSection from '../components/sections/CtaSection.astro';
-import type { HomepageSection } from '../lib/types';
+import PageSection from '../components/PageSection.astro';
+import { sanityClient, getDraftClient } from '../lib/sanity';
+import { homepagePageBuilderQuery } from '../lib/queries';
+import type { HomepagePageBuilder, PageSection as PageSectionType } from '../lib/types';
 
-const homepage = await sanityClient.fetch(homepageQuery);
+const isPreview = Astro.locals.isPreview;
+
+const client = isPreview ? getDraftClient() : sanityClient;
+const homepage = await client.fetch<HomepagePageBuilder>(homepagePageBuilderQuery);
 const seo = homepage?.seo ?? {};
+const docId = homepage?._id;
 
-// Resolve template references — if a section is a reference, use the template's section data
-const sections: HomepageSection[] = (homepage?.sections ?? [])
-  .map((s: any) => s._type === 'reference' ? s.resolvedTemplate : s)
-  .filter(Boolean);
+if (!isPreview) {
+  Astro.response.headers.set(
+    'Cache-Control',
+    's-maxage=60, stale-while-revalidate=300'
+  );
+}
+
+const pageBuilder: PageSectionType[] = homepage?.pageBuilder ?? [];
 ---
 
 <BaseLayout
@@ -25,16 +33,16 @@ const sections: HomepageSection[] = (homepage?.sections ?? [])
     ogImage: seo.ogImage,
   }}
 >
-  {sections.map((section) => (
-    section._type === 'heroSection' ? <HeroSection section={section} /> :
-    section._type === 'logosSection' ? <LogosSection section={section} /> :
-    section._type === 'featuresSection' ? <FeaturesSection section={section} /> :
-    section._type === 'statsSection' ? <StatsSection section={section} /> :
-    section._type === 'ctaSection' ? <CtaSection section={section} /> :
-    null
+  {pageBuilder.map((section) => (
+    <PageSection
+      section={section}
+      isPreview={isPreview}
+      docId={docId}
+      docType="homepage"
+    />
   ))}
 
-  {sections.length === 0 && (
+  {pageBuilder.length === 0 && (
     <section class="flex flex-col items-center justify-center py-32 px-4 text-center bg-gradient-to-b from-blue-50 to-white">
       <span class="inline-flex items-center gap-1.5 bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-6">
         🚀 Now with AI Agent
@@ -54,6 +62,9 @@ const sections: HomepageSection[] = (homepage?.sections ?? [])
         </a>
       </div>
       <p class="mt-4 text-sm text-gray-400">No credit card required · 21-day free trial</p>
+      <p class="mt-8 text-sm text-gray-400 border border-dashed border-gray-300 rounded-lg px-4 py-3 max-w-md">
+        Open <strong>Sanity Studio → Homepage → Page Builder</strong> to add sections and content to this page.
+      </p>
     </section>
   )}
 </BaseLayout>

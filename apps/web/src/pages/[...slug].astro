@@ -1,0 +1,38 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageSection from '../components/PageSection.astro';
+import { sanityClient, getDraftClient } from '../lib/sanity';
+import { pageBySlugQuery } from '../lib/queries';
+import type { PageBuilderPage } from '../lib/types';
+
+const { slug } = Astro.params;
+
+// Redirect bare root hits — shouldn't happen with index.astro in place but guard anyway
+if (!slug) return Astro.redirect('/');
+
+const isPreview = Astro.locals.isPreview ?? false;
+const client = isPreview ? getDraftClient() : sanityClient;
+
+const page = await client
+  .fetch<PageBuilderPage>(pageBySlugQuery, { slug })
+  .catch(() => null);
+
+if (!page) {
+  return new Response(null, { status: 404, statusText: 'Page not found' });
+}
+
+if (!isPreview) {
+  Astro.response.headers.set(
+    'Cache-Control',
+    'public, max-age=60, stale-while-revalidate=300'
+  );
+}
+---
+
+<BaseLayout seo={page.seo}>
+  {(page.pageBuilder ?? []).map(section => (
+    <PageSection section={section} isPreview={isPreview} docId={page._id} docType="page" />
+  ))}
+</BaseLayout>

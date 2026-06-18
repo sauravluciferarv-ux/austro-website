@@ -1,0 +1,33 @@
+---
+// Catch Sanity intent URLs that land in the preview iframe instead of Studio.
+// When `@sanity/visual-editing` overlays are clicked they navigate to
+// `/intent/edit/...` as a relative URL, which ends up here (port 4321).
+// This page forwards the full URL to Studio (port 3333) by navigating
+// the top-level browser window — bypassing the cross-origin iframe restriction.
+export const prerender = false;
+
+const studioOrigin = import.meta.env.PUBLIC_SANITY_STUDIO_URL ?? 'http://localhost:3333';
+---
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting to Studio…</title>
+  </head>
+  <body>
+    <script define:vars={{ studioOrigin }}>
+      const intentPath = window.location.pathname + window.location.search;
+      const target = studioOrigin + intentPath;
+      // Inside the Presentation tool iframe: navigate the top-level window to Studio.
+      // Browsers allow cross-origin iframes to navigate the top frame (no sandbox block here).
+      if (window.top && window.top !== window) {
+        window.top.location.href = target;
+      } else {
+        window.location.replace(target);
+      }
+    </script>
+    <p style="font-family:sans-serif;padding:2rem;color:#555">
+      Redirecting to Sanity Studio…
+    </p>
+  </body>
+</html>

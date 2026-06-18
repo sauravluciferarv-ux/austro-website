@@ -1,0 +1,93 @@
+---
+import type { PageSectionBlock } from '../../lib/types';
+
+interface Props {
+  block: PageSectionBlock;
+  isPreview?: boolean;
+  dataSanity?: string;
+}
+
+const { block, isPreview, dataSanity } = Astro.props;
+const { items = [], openFirst = true, allowMultiple = false, blockId, blockClass } = block;
+
+const id = blockId || `block-${block._key}`;
+const cls = blockClass || `accordion-${block._key}`;
+
+function renderPortableText(blocks: any[]): string {
+  if (!blocks) return '';
+  return blocks
+    .map(b => {
+      if (b._type !== 'block') return '';
+      const tagMap: Record<string, string> = { h2: 'h2', h3: 'h3', h4: 'h4', blockquote: 'blockquote', normal: 'p' };
+      const tag = tagMap[b.style ?? 'normal'] ?? 'p';
+      const html = (b.children ?? [])
+        .map((s: any) => {
+          let t = (s.text ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+          if (s.marks?.includes('strong')) t = `<strong>${t}</strong>`;
+          if (s.marks?.includes('em')) t = `<em>${t}</em>`;
+          if (s.marks?.includes('underline')) t = `<u>${t}</u>`;
+          if (s.marks?.includes('code')) t = `<code>${t}</code>`;
+          return t;
+        })
+        .join('');
+      return `<${tag}>${html}</${tag}>`;
+    })
+    .join('');
+}
+
+const hideClasses = [
+  block.hideOnMobile && 'hidden md:block',
+  block.hideOnDesktop && 'block md:hidden',
+].filter(Boolean);
+---
+
+<div
+  id={id}
+  class:list={[cls, 'space-y-2', ...hideClasses, isPreview && 'pb-outline-block']}
+  data-block-type="accordionBlock"
+  data-sanity={dataSanity}
+  data-allow-multiple={allowMultiple ? 'true' : 'false'}
+>
+  {items.map((item, i) => (
+    <details
+      open={openFirst && i === 0 ? true : undefined}
+      class="border border-gray-200 rounded-lg overflow-hidden"
+    >
+      <summary class="flex items-center justify-between px-5 py-4 font-medium cursor-pointer hover:bg-gray-50 list-none">
+        <span>{item.title}</span>
+        <svg
+          class="w-5 h-5 text-gray-500 transition-transform"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </summary>
+      <div
+        class="px-5 py-4 prose prose-gray max-w-none"
+        set:html={renderPortableText(item.content ?? [])}
+      />
+    </details>
+  ))}
+</div>
+
+<script>
+  // Close sibling <details> elements when one opens, unless allowMultiple is set
+  document.querySelectorAll('[data-block-type="accordionBlock"]').forEach(el => {
+    if ((el as HTMLElement).dataset.allowMultiple === 'true') return;
+    el.querySelectorAll('details').forEach(details => {
+      details.addEventListener('toggle', () => {
+        if (details.open) {
+          el.querySelectorAll('details').forEach(other => {
+            if (other !== details) (other as HTMLDetailsElement).open = false;
+          });
+        }
+      });
+    });
+  });
+</script>

@@ -1,0 +1,73 @@
+---
+import type { PageSectionBlock } from '../../lib/types';
+
+interface Props {
+  block: PageSectionBlock;
+  isPreview?: boolean;
+  dataSanity?: string;
+}
+
+const { block, isPreview, dataSanity } = Astro.props;
+const {
+  text = 'Button',
+  href = '#',
+  style = 'primary',
+  size = 'md',
+  alignment = 'left',
+  openInNewTab,
+  blockId,
+  blockClass,
+} = block;
+
+const id = blockId || `block-${block._key}`;
+const cls = blockClass || `btn-${block._key}`;
+
+const sizeMap: Record<string, string> = {
+  sm: 'px-4 py-2 text-sm',
+  md: 'px-6 py-3 text-base',
+  lg: 'px-8 py-4 text-lg',
+};
+const styleMap: Record<string, string> = {
+  primary: 'bg-blue-600 text-white hover:bg-blue-700',
+  secondary: 'bg-gray-600 text-white hover:bg-gray-700',
+  outline: 'border-2 border-blue-600 text-blue-600 hover:bg-blue-50',
+  ghost: 'text-blue-600 hover:bg-blue-50',
+  link: 'text-blue-600 underline hover:text-blue-800',
+};
+const alignMap: Record<string, string> = {
+  left: 'justify-start',
+  center: 'justify-center',
+  right: 'justify-end',
+};
+
+const hideClasses = [
+  block.hideOnMobile && 'hidden md:flex',
+  block.hideOnDesktop && 'flex md:hidden',
+].filter(Boolean);
+---
+
+<div
+  id={id}
+  class:list={[
+    cls,
+    'flex',
+    alignMap[alignment] ?? 'justify-start',
+    ...hideClasses,
+    isPreview && 'pb-outline-block',
+  ]}
+  data-block-type="buttonBlock"
+  data-sanity={dataSanity}
+>
+  <a
+    href={href}
+    target={openInNewTab ? '_blank' : '_self'}
+    rel={openInNewTab ? 'noopener noreferrer' : undefined}
+    class:list={[
+      'inline-flex items-center gap-2 rounded-lg font-medium transition-colors',
+      sizeMap[size] ?? sizeMap.md,
+      styleMap[style] ?? styleMap.primary,
+    ]}
+  >
+    {text}
+  </a>
+</div>

@@ -1,0 +1,108 @@
+---
+import type { PageSectionBlock } from '../../lib/types';
+
+interface Props {
+  block: PageSectionBlock;
+  isPreview?: boolean;
+  dataSanity?: string;
+}
+
+const { block, isPreview, dataSanity } = Astro.props;
+const {
+  images = [],
+  autoplay,
+  autoplayInterval = 3000,
+  showDots = true,
+  showArrows = true,
+  blockId,
+  blockClass,
+} = block;
+
+const id = blockId || `block-${block._key}`;
+const cls = blockClass || `imgcarousel-${block._key}`;
+
+const hideClasses = [
+  block.hideOnMobile && 'hidden md:block',
+  block.hideOnDesktop && 'block md:hidden',
+].filter(Boolean);
+---
+
+<div
+  id={id}
+  class:list={[cls, 'relative overflow-hidden', ...hideClasses, isPreview && 'pb-outline-block']}
+  data-block-type="imageCarouselBlock"
+  data-sanity={dataSanity}
+  data-autoplay={autoplay ? 'true' : 'false'}
+  data-interval={autoplayInterval}
+>
+  <div class="carousel-track flex transition-transform duration-500" style="will-change:transform;">
+    {images.map((img, i) => (
+      <div class="carousel-slide flex-shrink-0 w-full">
+        <img
+          src={img.asset?.url}
+          alt={img.alt ?? ''}
+          class="w-full object-cover"
+          loading={i === 0 ? 'eager' : 'lazy'}
+        />
+        {img.caption && <p class="text-sm text-gray-500 text-center mt-2">{img.caption}</p>}
+      </div>
+    ))}
+  </div>
+
+  {showArrows && images.length > 1 && (
+    <>
+      <button
+        class="carousel-prev absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full w-10 h-10 flex items-center justify-center shadow text-xl"
+        aria-label="Previous"
+      >
+        &#8249;
+      </button>
+      <button
+        class="carousel-next absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full w-10 h-10 flex items-center justify-center shadow text-xl"
+        aria-label="Next"
+      >
+        &#8250;
+      </button>
+    </>
+  )}
+
+  {showDots && images.length > 1 && (
+    <div class="carousel-dots flex justify-center gap-2 mt-3">
+      {images.map((_, i) => (
+        <button
+          class:list={['carousel-dot w-2 h-2 rounded-full transition-colors', i === 0 ? 'bg-blue-600' : 'bg-gray-300']}
+          data-index={i}
+          aria-label={`Slide ${i + 1}`}
+        />
+      ))}
+    </div>
+  )}
+</div>
+
+<script>
+  document.querySelectorAll('[data-block-type="imageCarouselBlock"]').forEach(el => {
+    const track = el.querySelector('.carousel-track') as HTMLElement | null;
+    const slides = el.querySelectorAll('.carousel-slide');
+    const dots = el.querySelectorAll('.carousel-dot');
+    if (!track || slides.length === 0) return;
+    let current = 0;
+
+    const go = (n: number) => {
+      current = (n + slides.length) % slides.length;
+      track.style.transform = `translateX(-${current * 100}%)`;
+      dots.forEach((d, i) => {
+        d.classList.toggle('bg-blue-600', i === current);
+        d.classList.toggle('bg-gray-300', i !== current);
+      });
+    };
+
+    el.querySelector('.carousel-prev')?.addEventListener('click', () => go(current - 1));
+    el.querySelector('.carousel-next')?.addEventListener('click', () => go(current + 1));
+    dots.forEach((d, i) => d.addEventListener('click', () => go(i)));
+
+    if ((el as HTMLElement).dataset.autoplay === 'true') {
+      const interval = Number((el as HTMLElement).dataset.interval) || 3000;
+      setInterval(() => go(current + 1), interval);
+    }
+  });
+</script>

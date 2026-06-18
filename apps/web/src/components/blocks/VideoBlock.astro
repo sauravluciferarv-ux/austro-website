@@ -1,0 +1,81 @@
+---
+import type { PageSectionBlock } from '../../lib/types';
+
+interface Props {
+  block: PageSectionBlock;
+  isPreview?: boolean;
+  dataSanity?: string;
+}
+
+const { block, isPreview, dataSanity } = Astro.props;
+const {
+  url = '',
+  autoplay,
+  muted,
+  controls = true,
+  aspectRatio = '16/9',
+  blockId,
+  blockClass,
+} = block;
+
+const id = blockId || `block-${block._key}`;
+const cls = blockClass || `video-${block._key}`;
+
+// Detect YouTube / Vimeo and build embed URL
+function getEmbedUrl(raw: string): string {
+  const ytMatch = raw.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
+  if (ytMatch) {
+    const params = new URLSearchParams();
+    if (autoplay) params.set('autoplay', '1');
+    if (muted) params.set('mute', '1');
+    if (!controls) params.set('controls', '0');
+    const qs = params.toString();
+    return `https://www.youtube.com/embed/${ytMatch[1]}${qs ? `?${qs}` : ''}`;
+  }
+  const vmMatch = raw.match(/vimeo\.com\/(\d+)/);
+  if (vmMatch) {
+    const params = new URLSearchParams();
+    if (autoplay) params.set('autoplay', '1');
+    if (muted) params.set('muted', '1');
+    const qs = params.toString();
+    return `https://player.vimeo.com/video/${vmMatch[1]}${qs ? `?${qs}` : ''}`;
+  }
+  return raw;
+}
+
+const embedUrl = getEmbedUrl(url);
+const isEmbed =
+  embedUrl.includes('youtube.com/embed') || embedUrl.includes('player.vimeo.com');
+
+const hideClasses = [
+  block.hideOnMobile && 'hidden md:block',
+  block.hideOnDesktop && 'block md:hidden',
+].filter(Boolean);
+---
+
+<div
+  id={id}
+  class:list={[cls, 'w-full', ...hideClasses, isPreview && 'pb-outline-block']}
+  data-block-type="videoBlock"
+  data-sanity={dataSanity}
+  style={`aspect-ratio:${aspectRatio};`}
+>
+  {isEmbed ? (
+    <iframe
+      src={embedUrl}
+      class="w-full h-full"
+      allowfullscreen
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      loading="lazy"
+    />
+  ) : (
+    <video
+      src={url}
+      class="w-full h-full object-cover"
+      autoplay={autoplay}
+      muted={muted}
+      controls={controls}
+      playsinline
+    />
+  )}
+</div>

@@ -1,0 +1,31 @@
+---
+import type { PageSectionBlock } from '../../lib/types';
+
+interface Props {
+  block: PageSectionBlock;
+  isPreview?: boolean;
+  dataSanity?: string;
+}
+
+const { block, isPreview, dataSanity } = Astro.props;
+const { level = 'h2', text = '', alignment = 'left', blockId, blockClass } = block;
+
+const Tag = level as any;
+const id = blockId || `block-${block._key}`;
+const cls = blockClass || `heading-${block._key}`;
+
+const hideClasses = [
+  block.hideOnMobile && 'hidden md:block',
+  block.hideOnDesktop && 'block md:hidden',
+].filter(Boolean);
+---
+
+<Tag
+  id={id}
+  class:list={[cls, `text-${alignment}`, ...hideClasses, isPreview && 'pb-outline-block']}
+  data-block-type="headingBlock"
+  data-sanity={dataSanity}
+>
+  {text}
+</Tag>
+{isPreview && <span class="pb-block-label">{level}: {text?.slice(0, 30)}</span>}

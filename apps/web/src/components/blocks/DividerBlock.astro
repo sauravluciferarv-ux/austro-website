@@ -1,0 +1,30 @@
+---
+import type { PageSectionBlock } from '../../lib/types';
+
+interface Props {
+  block: PageSectionBlock;
+  isPreview?: boolean;
+  dataSanity?: string;
+}
+
+const { block, isPreview, dataSanity } = Astro.props;
+const {
+  style: divStyle = 'solid',
+  color = '#e5e7eb',
+  thickness = '1px',
+  width = '100%',
+  blockId,
+  blockClass,
+} = block;
+
+const id = blockId || `block-${block._key}`;
+const cls = blockClass || `divider-${block._key}`;
+---
+
+<hr
+  id={id}
+  class:list={[cls, isPreview && 'pb-outline-block']}
+  data-block-type="dividerBlock"
+  data-sanity={dataSanity}
+  style={`border-style:${divStyle};border-color:${color};border-top-width:${thickness};width:${width};border-bottom:none;border-left:none;border-right:none;`}
+/>

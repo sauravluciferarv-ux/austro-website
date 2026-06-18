@@ -5,4 +5,4 @@ Disallow: /api/
 Disallow: /thank-you/
 Disallow: /preview/
 
-Sitemap: https://www.desk365.io/sitemap-index.xml
+Sitemap: https://www.desk365.io/sitemap_index.xml

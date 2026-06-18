@@ -1,0 +1,119 @@
+---
+import type { PageSectionBlock } from '../../lib/types';
+
+interface Props {
+  block: PageSectionBlock;
+  isPreview?: boolean;
+  dataSanity?: string;
+}
+
+const { block, isPreview, dataSanity } = Astro.props;
+const {
+  formTitle,
+  fields = [],
+  submitText = 'Submit',
+  successMessage = 'Thank you!',
+  webhookUrl,
+  blockId,
+  blockClass,
+} = block;
+
+const id = blockId || `block-${block._key}`;
+const cls = blockClass || `form-${block._key}`;
+
+const hideClasses = [
+  block.hideOnMobile && 'hidden md:block',
+  block.hideOnDesktop && 'block md:hidden',
+].filter(Boolean);
+---
+
+<div
+  id={id}
+  class:list={[cls, ...hideClasses, isPreview && 'pb-outline-block']}
+  data-block-type="formBlock"
+  data-sanity={dataSanity}
+>
+  {formTitle && <h3 class="text-xl font-semibold text-gray-900 mb-4">{formTitle}</h3>}
+  <form class="space-y-4" data-webhook={webhookUrl} data-success={successMessage}>
+    {fields.map(field => (
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium text-gray-700" for={field.name}>
+          {field.label}
+          {field.required && <span class="text-red-500 ml-1">*</span>}
+        </label>
+        {field.type === 'textarea' ? (
+          <textarea
+            id={field.name}
+            name={field.name}
+            placeholder={field.placeholder}
+            required={field.required}
+            rows={4}
+            class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+          />
+        ) : field.type === 'select' ? (
+          <select
+            id={field.name}
+            name={field.name}
+            required={field.required}
+            class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">{field.placeholder ?? 'Select…'}</option>
+            {(field.options ?? []).map(opt => <option value={opt}>{opt}</option>)}
+          </select>
+        ) : field.type === 'checkbox' ? (
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              id={field.name}
+              name={field.name}
+              required={field.required}
+              class="w-4 h-4 accent-blue-600"
+            />
+            <span class="text-sm text-gray-700">{field.placeholder ?? field.label}</span>
+          </label>
+        ) : (
+          <input
+            type={field.type ?? 'text'}
+            id={field.name}
+            name={field.name}
+            placeholder={field.placeholder}
+            required={field.required}
+            class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        )}
+      </div>
+    ))}
+    <button
+      type="submit"
+      class="bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+    >
+      {submitText}
+    </button>
+    <p class="form-success hidden text-green-600 font-medium">{successMessage}</p>
+  </form>
+</div>
+
+<script>
+  document.querySelectorAll('[data-block-type="formBlock"] form').forEach(form => {
+    const el = form as HTMLFormElement;
+    const webhook = el.dataset.webhook;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(el));
+      if (webhook) {
+        try {
+          await fetch(webhook, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+          });
+        } catch {
+          // Fail silently — still show success message
+        }
+      }
+      (el as HTMLElement).style.display = 'none';
+      const success = el.parentElement?.querySelector('.form-success');
+      if (success) success.classList.remove('hidden');
+    });
+  });
+</script>

@@ -1,8 +1,12 @@
 ---
 import type { CtaSection } from '../../lib/types';
+import SectionCustomCode from './SectionCustomCode.astro';
+
 interface Props { section: CtaSection }
 const { section } = Astro.props;
-const { heading, subheading, primaryCta, secondaryCta, footnote, bgStyle = 'brand' } = section;
+const { _key, key, heading, subheading, primaryCta, secondaryCta, footnote, bgStyle = 'brand', customCode } = section;
+
+const sectionId = `section-${_key ?? key ?? 'cta'}`;
 
 const bg = { white: 'bg-white', light: 'bg-gray-50', dark: 'bg-gray-900', brand: 'bg-blue-600' }[bgStyle];
 const headingClass = bgStyle === 'dark' || bgStyle === 'brand' ? 'text-white' : 'text-gray-900';
@@ -18,7 +22,7 @@ const secondaryClass = bgStyle === 'brand'
   : 'inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors';
 ---
 
-<section class={`py-20 px-4 ${bg}`}>
+<section id={sectionId} class={`py-20 px-4 ${bg}`}>
   <div class="max-w-3xl mx-auto text-center">
     {heading && <h2 class={`text-4xl font-bold tracking-tight ${headingClass}`}>{heading}</h2>}
     {subheading && <p class={`mt-4 text-lg leading-relaxed ${subClass}`}>{subheading}</p>}
@@ -30,4 +34,13 @@ const secondaryClass = bgStyle === 'brand'
     )}
     {footnote && <p class={`mt-4 text-sm ${footnoteClass}`}>{footnote}</p>}
   </div>
+
+  {customCode?.enabled && (
+    <SectionCustomCode
+      sectionId={sectionId}
+      html={customCode.html}
+      css={customCode.css}
+      javascript={customCode.javascript}
+    />
+  )}
 </section>

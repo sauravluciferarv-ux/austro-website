@@ -4,14 +4,19 @@ export default defineType({
   name: 'featuresSection',
   title: 'Features Section',
   type: 'object',
+  groups: [
+    { name: 'content', title: 'Content', default: true },
+    { name: 'advanced', title: 'Custom Code' },
+  ],
   fields: [
-    defineField({ name: 'eyebrow', title: 'Eyebrow', type: 'string', description: 'Small label above the heading, e.g. "Everything you need"' }),
-    defineField({ name: 'heading', title: 'Heading', type: 'string' }),
-    defineField({ name: 'subheading', title: 'Subheading', type: 'text', rows: 2 }),
+    defineField({ name: 'eyebrow', title: 'Eyebrow', type: 'string', group: 'content', description: 'Small label above the heading, e.g. "Everything you need"' }),
+    defineField({ name: 'heading', title: 'Heading', type: 'string', group: 'content' }),
+    defineField({ name: 'subheading', title: 'Subheading', type: 'text', rows: 2, group: 'content' }),
     defineField({
       name: 'features',
       title: 'Features',
       type: 'array',
+      group: 'content',
       of: [{
         type: 'object',
         fields: [
@@ -21,6 +26,12 @@ export default defineType({
         ],
         preview: { select: { title: 'heading', subtitle: 'description', media: 'icon' } },
       }],
+    }),
+    defineField({
+      name: 'customCode',
+      title: 'Custom Code',
+      type: 'customCode',
+      group: 'advanced',
     }),
   ],
   preview: {

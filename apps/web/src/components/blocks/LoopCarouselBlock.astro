@@ -1,0 +1,94 @@
+---
+import type { PageSectionBlock } from '../../lib/types';
+
+interface Props {
+  block: PageSectionBlock;
+  isPreview?: boolean;
+  dataSanity?: string;
+}
+
+const { block, isPreview, dataSanity } = Astro.props;
+const { items = [], autoplay, blockId, blockClass } = block;
+
+const id = blockId || `block-${block._key}`;
+const cls = blockClass || `loopcarousel-${block._key}`;
+
+const hideClasses = [
+  block.hideOnMobile && 'hidden md:block',
+  block.hideOnDesktop && 'block md:hidden',
+].filter(Boolean);
+---
+
+<div
+  id={id}
+  class:list={[cls, 'relative overflow-hidden', ...hideClasses, isPreview && 'pb-outline-block']}
+  data-block-type="loopCarouselBlock"
+  data-sanity={dataSanity}
+  data-autoplay={autoplay ? 'true' : 'false'}
+>
+  <div class="lc-track flex gap-6 transition-transform duration-500" style="will-change:transform;">
+    {items.map(item => (
+      <div class="lc-slide flex-shrink-0 w-72">
+        {item.image?.asset?.url && (
+          <img
+            src={item.image.asset.url}
+            alt={item.description ?? ''}
+            class="w-full rounded-lg mb-3 object-cover"
+            loading="lazy"
+          />
+        )}
+        {item.title && <h3 class="font-semibold text-gray-900">{item.title}</h3>}
+        {item.description && <p class="text-gray-600 text-sm mt-1">{item.description}</p>}
+        {item.link && (
+          <a href={item.link} class="text-blue-600 hover:underline text-sm mt-2 block">
+            Learn more &rarr;
+          </a>
+        )}
+      </div>
+    ))}
+  </div>
+
+  {items.length > 0 && (
+    <div class="flex justify-center gap-4 mt-4">
+      <button
+        class="lc-prev bg-gray-100 hover:bg-gray-200 rounded-full w-9 h-9 flex items-center justify-center text-lg"
+        aria-label="Previous"
+      >
+        &#8249;
+      </button>
+      <button
+        class="lc-next bg-gray-100 hover:bg-gray-200 rounded-full w-9 h-9 flex items-center justify-center text-lg"
+        aria-label="Next"
+      >
+        &#8250;
+      </button>
+    </div>
+  )}
+</div>
+
+<script>
+  document.querySelectorAll('[data-block-type="loopCarouselBlock"]').forEach(el => {
+    const track = el.querySelector('.lc-track') as HTMLElement | null;
+    const slides = el.querySelectorAll('.lc-slide');
+    if (!track || slides.length === 0) return;
+
+    const slideWidth = 288 + 24; // w-72 (288px) + gap-6 (24px)
+    let offset = 0;
+    const max = Math.max(0, (slides.length - 3) * slideWidth);
+
+    const go = (dir: number) => {
+      offset = Math.max(0, Math.min(max, offset + dir * slideWidth));
+      track.style.transform = `translateX(-${offset}px)`;
+    };
+
+    el.querySelector('.lc-prev')?.addEventListener('click', () => go(-1));
+    el.querySelector('.lc-next')?.addEventListener('click', () => go(1));
+
+    if ((el as HTMLElement).dataset.autoplay === 'true') {
+      setInterval(() => {
+        if (offset >= max) offset = -slideWidth;
+        go(1);
+      }, 4000);
+    }
+  });
+</script>

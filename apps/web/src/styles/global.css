@@ -1,4 +1,5 @@
-/* Font loaded via <link> in BaseHead.astro — no @import needed here */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -68,4 +69,65 @@
   .text-balance {
     text-wrap: balance;
   }
+}
+
+/* ── Page Builder Preview Mode Styles ──────────────────────────────────────── */
+.pb-section-wrapper {
+  position: relative;
+  outline: 2px dashed rgba(59, 130, 246, 0.4);
+  outline-offset: 4px;
+}
+.pb-section-wrapper:hover {
+  outline-color: rgba(59, 130, 246, 0.8);
+}
+.pb-section-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: #3b82f6;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 0 0 4px 0;
+  z-index: 10;
+  pointer-events: none;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.pb-outline-block {
+  position: relative;
+  outline: 1px dashed rgba(99, 102, 241, 0.4);
+  outline-offset: 2px;
+}
+.pb-outline-block:hover {
+  outline-color: rgba(99, 102, 241, 0.8);
+}
+.pb-outline-block--spacer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 4px,
+    rgba(99, 102, 241, 0.05) 4px,
+    rgba(99, 102, 241, 0.05) 8px
+  );
+}
+.pb-block-label {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: rgba(99, 102, 241, 0.85);
+  color: white;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 0 0 0 4px;
+  pointer-events: none;
+  z-index: 10;
+  display: none;
+}
+.pb-outline-block:hover .pb-block-label {
+  display: block;
 }

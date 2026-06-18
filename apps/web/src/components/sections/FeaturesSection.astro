@@ -1,11 +1,15 @@
 ---
 import type { FeaturesSection } from '../../lib/types';
+import SectionCustomCode from './SectionCustomCode.astro';
+
 interface Props { section: FeaturesSection }
 const { section } = Astro.props;
-const { eyebrow, heading, subheading, features = [] } = section;
+const { _key, key, eyebrow, heading, subheading, features = [], customCode } = section;
+
+const sectionId = `section-${_key ?? key ?? 'features'}`;
 ---
 
-<section class="py-20 px-4 bg-white">
+<section id={sectionId} class="py-20 px-4 bg-white">
   <div class="max-w-6xl mx-auto">
     {(eyebrow || heading || subheading) && (
       <div class="text-center mb-14">
@@ -34,4 +38,13 @@ const { eyebrow, heading, subheading, features = [] } = section;
       ))}
     </div>
   </div>
+
+  {customCode?.enabled && (
+    <SectionCustomCode
+      sectionId={sectionId}
+      html={customCode.html}
+      css={customCode.css}
+      javascript={customCode.javascript}
+    />
+  )}
 </section>

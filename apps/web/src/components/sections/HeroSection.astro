@@ -1,8 +1,12 @@
 ---
 import type { HeroSection } from '../../lib/types';
+import SectionCustomCode from './SectionCustomCode.astro';
+
 interface Props { section: HeroSection }
 const { section } = Astro.props;
 const {
+  _key,
+  key,
   badge,
   headline,
   headlineHighlight,
@@ -14,8 +18,10 @@ const {
   heroImage,
   heroImageAlt,
   layout = 'split',
+  customCode,
 } = section;
 
+const sectionId = `section-${_key ?? key ?? 'hero'}`;
 const parts = headlineHighlight ? headline.split(headlineHighlight) : null;
 
 const highlightClass: Record<string, string> = {
@@ -51,7 +57,7 @@ function ctaClass(cta: typeof primaryCta) {
 const isSplit = layout === 'split';
 ---
 
-<section class="py-16 px-6 bg-white">
+<section id={sectionId} class="py-16 px-6 bg-white">
   <div class={`max-w-6xl mx-auto ${isSplit ? 'grid md:grid-cols-2 gap-12 items-center' : 'flex flex-col items-center text-center'}`}>
 
     <!-- Text content -->
@@ -108,4 +114,13 @@ const isSplit = layout === 'split';
     )}
 
   </div>
+
+  {customCode?.enabled && (
+    <SectionCustomCode
+      sectionId={sectionId}
+      html={customCode.html}
+      css={customCode.css}
+      javascript={customCode.javascript}
+    />
+  )}
 </section>

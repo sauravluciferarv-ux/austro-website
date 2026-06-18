@@ -1,0 +1,31 @@
+
+> desk365-web@0.0.1 build
+> astro build && npm run check:staging-urls
+
+18:08:17 [types] Generated 62ms
+18:08:17 [build] output: "static"
+18:08:17 [build] directory: C:\Users\Saurav Desktop\Desktop\astro sanity\apps\web\dist\
+18:08:17 [build] Collecting build info...
+18:08:17 [build] ✓ Completed in 122ms.
+18:08:17 [build] Building static entrypoints...
+18:08:17 [vite] [32m✓ built in 887ms[39m
+18:08:17 [build] ✓ Completed in 918ms.
+
+ building client (vite) 
+18:08:17 [vite] transforming...
+18:08:17 [vite] [32m✓[39m 3 modules transformed.
+18:08:17 [vite] rendering chunks...
+18:08:17 [vite] [32m✓ built in 15ms[39m
+
+ generating static routes 
+18:08:18 ▶ src/pages/index.astro
+18:08:18   └─ /index.html (+684ms)
+18:08:18 ✓ Completed in 809ms.
+
+18:08:18 [WARN] [@astrojs/sitemap]  i18n  `defaultLocale` must exist in `locales` keys.
+18:08:18 [build] 1 page(s) built in 1.88s
+18:08:18 [build] Complete!
+
+> desk365-web@0.0.1 check:staging-urls
+> node -e "const {execSync}=require('child_process');try{execSync('grep -r staging.desk365.io dist/',{stdio:'pipe'});process.exit(1)}catch{process.exit(0)}"
+

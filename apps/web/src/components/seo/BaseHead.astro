@@ -22,7 +22,12 @@ const ogImageUrl = seo.ogImage
 <title>{seo.metaTitle ?? 'Desk365 — Simple Helpdesk & Ticketing Software'}</title>
 <meta name="description" content={seo.metaDescription ?? 'Desk365 is a simple, powerful helpdesk for growing teams. Manage tickets via email, Microsoft Teams, and more.'} />
 <link rel="canonical" href={canonical} />
-{seo.noIndex && <meta name="robots" content="noindex, nofollow" />}
+{(seo.noIndex || seo.noFollow) && (
+  <meta name="robots" content={[
+    seo.noIndex  ? 'noindex'  : 'index',
+    seo.noFollow ? 'nofollow' : 'follow',
+  ].join(', ')} />
+)}
 
 <!-- Open Graph -->
 <meta property="og:type" content={pageType} />
@@ -45,20 +50,9 @@ const ogImageUrl = seo.ogImage
 <link rel="icon" type="image/x-icon" href="/favicon.ico" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-<!-- Preconnect for performance -->
+<!-- Roboto loaded via global.css @import -->
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link
-  rel="preload"
-  as="style"
-  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-/>
-<link
-  rel="stylesheet"
-  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-  media="print"
-  onload="this.media='all'"
-/>
 
 <!-- Custom JSON-LD from Sanity -->
 {seo.structuredData && (

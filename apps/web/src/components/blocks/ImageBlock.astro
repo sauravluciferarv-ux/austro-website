@@ -1,0 +1,67 @@
+---
+import type { PageSectionBlock } from '../../lib/types';
+
+interface Props {
+  block: PageSectionBlock;
+  isPreview?: boolean;
+  dataSanity?: string;
+}
+
+const { block, isPreview, dataSanity } = Astro.props;
+const {
+  image,
+  caption,
+  link,
+  openInNewTab,
+  width = '100%',
+  alignment = 'left',
+  blockId,
+  blockClass,
+} = block;
+
+const id = blockId || `block-${block._key}`;
+const cls = blockClass || `image-${block._key}`;
+const alignItems =
+  alignment === 'center' ? 'items-center' : alignment === 'right' ? 'items-end' : 'items-start';
+
+const hideClasses = [
+  block.hideOnMobile && 'hidden md:block',
+  block.hideOnDesktop && 'block md:hidden',
+].filter(Boolean);
+---
+
+<figure
+  id={id}
+  class:list={[cls, 'flex flex-col', alignItems, ...hideClasses, isPreview && 'pb-outline-block']}
+  data-block-type="imageBlock"
+  data-sanity={dataSanity}
+>
+  {image?.asset?.url ? (
+    link ? (
+      <a
+        href={link}
+        target={openInNewTab ? '_blank' : '_self'}
+        rel={openInNewTab ? 'noopener noreferrer' : undefined}
+      >
+        <img
+          src={image.asset.url}
+          alt={image?.alt ?? ''}
+          style={`width:${width};`}
+          loading="lazy"
+        />
+      </a>
+    ) : (
+      <img
+        src={image.asset.url}
+        alt={image?.alt ?? ''}
+        style={`width:${width};`}
+        loading="lazy"
+      />
+    )
+  ) : isPreview ? (
+    <div style="display:flex;align-items:center;justify-content:center;border-radius:12px;background:#f1f5f9;border:2px dashed #cbd5e1;min-height:200px;width:100%;">
+      <span style="color:#94a3b8;font-size:13px;font-family:sans-serif;">📷 No image — click to add</span>
+    </div>
+  ) : null}
+  {caption && <figcaption class="text-sm text-gray-500 mt-2">{caption}</figcaption>}
+</figure>

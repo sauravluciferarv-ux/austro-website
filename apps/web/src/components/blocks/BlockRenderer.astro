@@ -1,0 +1,60 @@
+---
+import type { PageSectionBlock } from '../../lib/types';
+import HeadingBlock from './HeadingBlock.astro';
+import ImageBlock from './ImageBlock.astro';
+import RichTextBlock from './RichTextBlock.astro';
+import VideoBlock from './VideoBlock.astro';
+import ButtonBlock from './ButtonBlock.astro';
+import DividerBlock from './DividerBlock.astro';
+import SpacerBlock from './SpacerBlock.astro';
+import AccordionBlock from './AccordionBlock.astro';
+import HtmlBlock from './HtmlBlock.astro';
+import ShortcodeBlock from './ShortcodeBlock.astro';
+import ImageBoxBlock from './ImageBoxBlock.astro';
+import IconBoxBlock from './IconBoxBlock.astro';
+import ImageCarouselBlock from './ImageCarouselBlock.astro';
+import FormBlock from './FormBlock.astro';
+import LoopGridBlock from './LoopGridBlock.astro';
+import LoopCarouselBlock from './LoopCarouselBlock.astro';
+import SlidesBlock from './SlidesBlock.astro';
+import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
+
+interface Props {
+  block: PageSectionBlock;
+  isPreview?: boolean;
+  docId?: string;
+  docType?: string;
+  sectionKey?: string;
+}
+
+const { block, isPreview, docId, docType = 'page', sectionKey } = Astro.props;
+
+// Encode a data-sanity attribute pointing to this specific block inside the section
+let blockSanityAttr: string | undefined;
+if (docId && sectionKey && block._key) {
+  try {
+    const da = createDataAttribute({ id: docId, type: docType });
+    blockSanityAttr = da(`pageBuilder[_key=="${sectionKey}"].blocks[_key=="${block._key}"]`);
+  } catch {
+    // Non-critical: silently skip if encoding fails
+  }
+}
+---
+
+{block._type === 'headingBlock' && <HeadingBlock block={block} isPreview={isPreview} dataSanity={blockSanityAttr} />}
+{block._type === 'imageBlock' && <ImageBlock block={block} isPreview={isPreview} dataSanity={blockSanityAttr} />}
+{block._type === 'richTextBlock' && <RichTextBlock block={block} isPreview={isPreview} dataSanity={blockSanityAttr} />}
+{block._type === 'videoBlock' && <VideoBlock block={block} isPreview={isPreview} dataSanity={blockSanityAttr} />}
+{block._type === 'buttonBlock' && <ButtonBlock block={block} isPreview={isPreview} dataSanity={blockSanityAttr} />}
+{block._type === 'dividerBlock' && <DividerBlock block={block} isPreview={isPreview} dataSanity={blockSanityAttr} />}
+{block._type === 'spacerBlock' && <SpacerBlock block={block} isPreview={isPreview} dataSanity={blockSanityAttr} />}
+{block._type === 'accordionBlock' && <AccordionBlock block={block} isPreview={isPreview} dataSanity={blockSanityAttr} />}
+{block._type === 'htmlBlock' && <HtmlBlock block={block} isPreview={isPreview} dataSanity={blockSanityAttr} />}
+{block._type === 'shortcodeBlock' && <ShortcodeBlock block={block} isPreview={isPreview} dataSanity={blockSanityAttr} />}
+{block._type === 'imageBoxBlock' && <ImageBoxBlock block={block} isPreview={isPreview} dataSanity={blockSanityAttr} />}
+{block._type === 'iconBoxBlock' && <IconBoxBlock block={block} isPreview={isPreview} dataSanity={blockSanityAttr} />}
+{block._type === 'imageCarouselBlock' && <ImageCarouselBlock block={block} isPreview={isPreview} dataSanity={blockSanityAttr} />}
+{block._type === 'formBlock' && <FormBlock block={block} isPreview={isPreview} dataSanity={blockSanityAttr} />}
+{block._type === 'loopGridBlock' && <LoopGridBlock block={block} isPreview={isPreview} dataSanity={blockSanityAttr} />}
+{block._type === 'loopCarouselBlock' && <LoopCarouselBlock block={block} isPreview={isPreview} dataSanity={blockSanityAttr} />}
+{block._type === 'slidesBlock' && <SlidesBlock block={block} isPreview={isPreview} dataSanity={blockSanityAttr} />}

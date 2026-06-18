@@ -1,0 +1,79 @@
+---
+import type { PageSectionBlock } from '../../lib/types';
+
+interface Props {
+  block: PageSectionBlock;
+  isPreview?: boolean;
+  dataSanity?: string;
+}
+
+const { block, isPreview, dataSanity } = Astro.props;
+const { content, blockId, blockClass } = block;
+
+const id = blockId || `block-${block._key}`;
+const cls = blockClass || `richtext-${block._key}`;
+
+// Simple portable text to HTML renderer
+function renderPortableText(blocks: any[]): string {
+  if (!blocks) return '';
+  return blocks
+    .map(b => {
+      if (b._type === 'block') {
+        const tagMap: Record<string, string> = {
+          h2: 'h2',
+          h3: 'h3',
+          h4: 'h4',
+          blockquote: 'blockquote',
+          normal: 'p',
+        };
+        const tag = tagMap[b.style ?? 'normal'] ?? 'p';
+        const html = (b.children ?? [])
+          .map((span: any) => {
+            let t = span.text ?? '';
+            // Escape HTML special chars in text
+            t = t
+              .replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;');
+            if (span.marks?.includes('strong')) t = `<strong>${t}</strong>`;
+            if (span.marks?.includes('em')) t = `<em>${t}</em>`;
+            if (span.marks?.includes('underline')) t = `<u>${t}</u>`;
+            if (span.marks?.includes('code')) t = `<code>${t}</code>`;
+            // Handle link annotations
+            const linkMark = span.marks?.find((m: string) =>
+              b.markDefs?.some((md: any) => md._key === m && md._type === 'link')
+            );
+            if (linkMark) {
+              const md = b.markDefs?.find((md: any) => md._key === linkMark);
+              if (md) {
+                t = `<a href="${md.href ?? '#'}"${md.openInNewTab ? ' target="_blank" rel="noopener noreferrer"' : ''}>${t}</a>`;
+              }
+            }
+            return t;
+          })
+          .join('');
+        return `<${tag}>${html}</${tag}>`;
+      }
+      if (b._type === 'image') {
+        return `<img src="${b.asset?.url ?? ''}" alt="${b.alt ?? ''}" class="my-4 max-w-full" loading="lazy" />`;
+      }
+      return '';
+    })
+    .join('');
+}
+
+const htmlContent = content ? renderPortableText(content) : '';
+
+const hideClasses = [
+  block.hideOnMobile && 'hidden md:block',
+  block.hideOnDesktop && 'block md:hidden',
+].filter(Boolean);
+---
+
+<div
+  id={id}
+  class:list={[cls, 'prose prose-gray max-w-none', ...hideClasses, isPreview && 'pb-outline-block']}
+  data-block-type="richTextBlock"
+  data-sanity={dataSanity}
+  set:html={htmlContent}
+/>
