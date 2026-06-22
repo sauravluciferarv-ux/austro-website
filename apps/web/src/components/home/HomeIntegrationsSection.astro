@@ -1,0 +1,98 @@
+---
+import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
+import type { D365IntegrationsSection } from '../../lib/types';
+
+interface Props {
+  data?: D365IntegrationsSection;
+  isPreview?: boolean;
+  docId?: string;
+  docType?: string;
+}
+
+const { data, docId, docType = 'homepage' } = Astro.props;
+
+const heading = data?.heading ?? 'Plugs in to your current tech stack';
+const body = data?.body ?? 'Desk365 integrates seamlessly with Microsoft Teams or any other tools you already use. A helpdesk so extensive, it works to enhance collaboration and streamlines your existing workflow.';
+
+const staticCards = [
+  { title: 'Microsoft 365 Integration', description: 'From Microsoft Entra ID Single Sign On to Copilot plugin, Desk365 completely fits in to your Microsoft ecosystem. Make use of the Desk365 Power Automate connector to integrate with other Microsoft and third party applications.', iconSrc: 'https://www.desk365.io/wp-content/uploads/2026/06/Frame-21178.png', linkLabel: undefined as string|undefined, linkHref: undefined as string|undefined },
+  { title: 'APIs and Webhooks', description: 'Seamlessly integrate with Asana, Azure DevOps, Jira, Power BI and more using our Power Automate Connector. Build custom integrations with our full-featured REST API and webhooks.', iconSrc: 'https://www.desk365.io/wp-content/uploads/2026/06/Frame-20961.png', linkLabel: undefined as string|undefined, linkHref: undefined as string|undefined },
+  { title: 'Request a Plugin', description: "Don't see the integration you need? Request a custom plugin and our team will work with you to connect Desk365 to your existing tools and workflows.", iconSrc: undefined as string|undefined, linkLabel: 'Contact us', linkHref: '/contact-us/' },
+];
+
+const cards = data?.cards?.length
+  ? data.cards.map(c => ({ title: c.title, description: c.description ?? '', iconSrc: c.icon?.asset?.url, linkLabel: c.linkLabel, linkHref: c.linkHref }))
+  : staticCards;
+
+let sanityAttr: string | undefined;
+if (docId && data?._key) {
+  try {
+    const da = createDataAttribute({ id: docId, type: docType });
+    sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+  } catch {}
+}
+---
+
+<section id="d365-integrations" class="d365-integrations d365-section--gray" data-sanity={sanityAttr}>
+  <div class="d365-container">
+    <div class="d365-section-header">
+      <h2 class="d365-heading">{heading}</h2>
+      <p class="d365-body">{body}</p>
+    </div>
+
+    <div class="d365-integrations__grid">
+      {cards.map(card => (
+        <div class="d365-card d365-integrations__card">
+          {card.iconSrc ? (
+            <div class="d365-icon-box">
+              <img src={card.iconSrc} alt={card.title} loading="lazy" />
+            </div>
+          ) : (
+            <div class="d365-icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="24" height="24" style="color: var(--d365-blue)">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 2v4M12 18v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M2 12h4M18 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+              </svg>
+            </div>
+          )}
+          <h3 class="d365-integrations__card-title">{card.title}</h3>
+          <p class="d365-body d365-body--sm">{card.description}</p>
+          {card.linkHref && (
+            <a href={card.linkHref} class="d365-link">{card.linkLabel || 'Learn more'}</a>
+          )}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .d365-integrations {
+    padding: 80px 24px;
+  }
+
+  .d365-integrations__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  @media (min-width: 900px) {
+    .d365-integrations__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .d365-integrations__card {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .d365-integrations__card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--d365-blue);
+    margin: 0 0 10px;
+  }
+</style>

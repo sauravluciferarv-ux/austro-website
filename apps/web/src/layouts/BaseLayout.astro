@@ -97,7 +97,7 @@ const websiteSchema = JSON.stringify({
     })(window,document,'script','dataLayer','GTM-XXXXXXX');
   </script> -->
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col" data-sanity-preview={isPreview ? 'true' : undefined}>
 
   <!--
     GTM noscript fallback — replace GTM-XXXXXXX
@@ -117,20 +117,16 @@ const websiteSchema = JSON.stringify({
 
   {isPreview && <PreviewBar currentPath={Astro.url.pathname} />}
 
-  <!-- Sanity visual editing — establishes the PostMessage (comlink) channel
-       that the Presentation tool uses to drive the preview iframe.
-       - Activates only when the page is loaded inside the Studio iframe.
-       - studioUrl: restricts PostMessage events to the known Studio origin.
-       - refresh: no live-preview loader running (Astro SSR), so do a full page
-         reload so the server refetches the latest draft content. -->
+  <!-- Sanity visual editing — only active in preview mode (sanity-preview cookie set).
+       Guards against showing the "Open in Studio" overlay to regular visitors. -->
   <script>
     import { enableVisualEditing } from '@sanity/visual-editing';
-    // Always reload on content change — we use Astro SSR, not a live-content loader,
-    // so every draft mutation must trigger a full server refetch.
-    enableVisualEditing({
-      zIndex: 1000,
-      refresh: () => window.location.reload(),
-    });
+    if (document.body.dataset.sanityPreview === 'true') {
+      enableVisualEditing({
+        zIndex: 1000,
+        refresh: () => window.location.reload(),
+      });
+    }
   </script>
 
 </body>

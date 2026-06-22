@@ -1,0 +1,209 @@
+---
+import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
+import type { D365FinalCtaSection } from '../../lib/types';
+
+interface Props {
+  data?: D365FinalCtaSection;
+  isPreview?: boolean;
+  docId?: string;
+  docType?: string;
+}
+
+const { data, docId, docType = 'homepage' } = Astro.props;
+
+const heading = data?.heading ?? 'Empower your teams with the best helpdesk platform';
+const body = data?.body ?? 'Choose from our high-value plans that are inclusive of all the features your business needs. No credit card needed.';
+const primaryCtaLabel = data?.primaryCta?.label ?? 'Start Your Free Trial';
+const primaryCtaHref = data?.primaryCta?.href ?? '/pricing/';
+const secondaryCtaLabel = data?.secondaryCta?.label ?? 'Request Demo';
+const secondaryCtaHref = data?.secondaryCta?.href ?? '/request-demo/';
+const footnote = data?.footnote ?? '21-day free trial · No credit card required';
+const logoImageSrc = data?.logoImage?.asset?.url ?? 'https://www.desk365.io/wp-content/uploads/2026/06/desk365-cta-platform.png';
+
+let sanityAttr: string | undefined;
+if (docId && data?._key) {
+  try {
+    const da = createDataAttribute({ id: docId, type: docType });
+    sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+  } catch {}
+}
+---
+
+<section id="d365-final-cta" class="d365-final-cta" data-sanity={sanityAttr}>
+  <div class="d365-container d365-final-cta__inner">
+
+    <!-- Left: Content -->
+    <div class="d365-final-cta__content">
+      <h2 class="d365-heading d365-heading--white d365-heading--xl d365-final-cta__heading">{heading}</h2>
+      <p class="d365-final-cta__body">{body}</p>
+      <div class="d365-final-cta__btns">
+        <a href={primaryCtaHref} class="d365-btn d365-btn--green">{primaryCtaLabel}</a>
+        <a href={secondaryCtaHref} class="d365-btn d365-btn--outline-white">{secondaryCtaLabel}</a>
+      </div>
+      {footnote && <p class="d365-final-cta__footnote">{footnote}</p>}
+    </div>
+
+    <!-- Right: Logo / visual -->
+    <div class="d365-final-cta__visual" aria-hidden="true">
+      <img
+        src={logoImageSrc}
+        alt=""
+        class="d365-final-cta__logo-img"
+        loading="lazy"
+        onerror="this.style.display='none'"
+      />
+      <!-- Fallback D365 logo mark shown when image fails to load -->
+      <div class="d365-final-cta__logo-fallback" aria-hidden="true">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" width="220" height="220">
+          <circle cx="100" cy="100" r="96" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>
+          <text x="100" y="72" text-anchor="middle" fill="rgba(255,255,255,0.95)" font-family="Roboto,system-ui,sans-serif" font-weight="900" font-size="52">D365</text>
+          <text x="100" y="112" text-anchor="middle" fill="rgba(255,255,255,0.55)" font-family="Roboto,system-ui,sans-serif" font-weight="400" font-size="16" letter-spacing="3">HELPDESK</text>
+          <text x="100" y="136" text-anchor="middle" fill="rgba(255,255,255,0.55)" font-family="Roboto,system-ui,sans-serif" font-weight="400" font-size="16" letter-spacing="3">PLATFORM</text>
+          <!-- Decorative dots -->
+          <circle cx="100" cy="162" r="4" fill="rgba(130,178,18,0.8)"/>
+          <circle cx="116" cy="162" r="4" fill="rgba(255,255,255,0.2)"/>
+          <circle cx="84"  cy="162" r="4" fill="rgba(255,255,255,0.2)"/>
+        </svg>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .d365-final-cta {
+    background: var(--d365-blue);
+    padding: 80px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Subtle ambient blobs */
+  .d365-final-cta::before,
+  .d365-final-cta::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.06;
+    background: #fff;
+    pointer-events: none;
+  }
+  .d365-final-cta::before {
+    width: 480px;
+    height: 480px;
+    top: -200px;
+    left: -140px;
+  }
+  .d365-final-cta::after {
+    width: 360px;
+    height: 360px;
+    bottom: -140px;
+    right: 10%;
+  }
+
+  /* 2-column layout */
+  .d365-final-cta__inner {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 56px;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (min-width: 900px) {
+    .d365-final-cta__inner {
+      grid-template-columns: 1fr auto;
+      gap: 80px;
+    }
+  }
+
+  /* Left content */
+  .d365-final-cta__content {
+    max-width: 600px;
+  }
+
+  .d365-final-cta__heading {
+    margin-bottom: 20px;
+    line-height: 1.18;
+  }
+
+  .d365-final-cta__body {
+    font-size: 17px;
+    color: rgba(255, 255, 255, 0.78);
+    line-height: 1.7;
+    margin: 0 0 32px;
+  }
+
+  .d365-final-cta__btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .d365-final-cta__footnote {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.50);
+    margin: 0;
+  }
+
+  /* Right visual */
+  .d365-final-cta__visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .d365-final-cta__logo-img {
+    width: 260px;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    filter: drop-shadow(0 12px 40px rgba(0,0,0,0.25));
+  }
+
+  /* Show the fallback SVG by default; hide it when the real image loads */
+  .d365-final-cta__logo-img:not([src=""]) + .d365-final-cta__logo-fallback {
+    display: none;
+  }
+
+  .d365-final-cta__logo-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 260px;
+    height: 260px;
+  }
+
+  /* Hide fallback once the img element is visible (JS sets display:none on error) */
+  .d365-final-cta__logo-img[style*="display: none"] + .d365-final-cta__logo-fallback,
+  .d365-final-cta__logo-img[style*="display:none"] + .d365-final-cta__logo-fallback {
+    display: flex;
+  }
+
+  @media (max-width: 899px) {
+    .d365-final-cta__visual {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const img = document.querySelector<HTMLImageElement>('#d365-final-cta .d365-final-cta__logo-img');
+    const fallback = document.querySelector<HTMLElement>('#d365-final-cta .d365-final-cta__logo-fallback');
+    if (!img || !fallback) return;
+
+    if (img.complete && img.naturalWidth > 0) {
+      fallback.style.display = 'none';
+    } else if (img.complete) {
+      img.style.display = 'none';
+    } else {
+      img.addEventListener('load', () => { fallback.style.display = 'none'; });
+      img.addEventListener('error', () => { img.style.display = 'none'; });
+    }
+  });
+</script>

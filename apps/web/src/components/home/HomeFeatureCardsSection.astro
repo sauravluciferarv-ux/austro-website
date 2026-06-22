@@ -1,0 +1,106 @@
+---
+import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
+import type { D365FeatureCardsSection } from '../../lib/types';
+
+interface Props {
+  data?: D365FeatureCardsSection;
+  isPreview?: boolean;
+  docId?: string;
+  docType?: string;
+}
+
+const { data, docId, docType = 'homepage' } = Astro.props;
+
+const headingGradient = data?.headingGradient ?? 'Ticketing + AI';
+const headingPlain = data?.headingPlain ?? 'The only platform your agents need.';
+const body = data?.body ?? "Desk365 brings everything support and IT teams need into one reliable platform so you can move faster without juggling tools.";
+
+const staticCards = [
+  { title: 'Connect with Microsoft Teams', src: 'https://www.desk365.io/wp-content/uploads/2026/06/Frame-21169.png', alt: 'Microsoft Teams ticketing integration' },
+  { title: 'Automate repetitive tasks with AI', src: 'https://www.desk365.io/wp-content/uploads/2026/06/Frame-21167.png', alt: 'AI automation for helpdesk' },
+  { title: 'Link assets & tickets to unify IT service', src: 'https://www.desk365.io/wp-content/uploads/2026/06/Frame-21168.png', alt: 'Asset management and IT service' },
+];
+const cards = data?.cards?.length
+  ? data.cards.map(c => ({ title: c.title, src: c.image?.asset?.url ?? '', alt: c.imageAlt ?? c.title }))
+  : staticCards;
+
+let sanityAttr: string | undefined;
+if (docId && data?._key) {
+  try {
+    const da = createDataAttribute({ id: docId, type: docType });
+    sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+  } catch {}
+}
+---
+
+<section id="d365-feature-cards" class="d365-feature-cards d365-section--white" data-sanity={sanityAttr}>
+  <div class="d365-container">
+    <div class="d365-section-header">
+      <h2 class="d365-heading">
+        <span class="d365-ai-text">{headingGradient}</span><br>
+        <span>{headingPlain}</span>
+      </h2>
+      <p class="d365-body">{body}</p>
+    </div>
+
+    <div class="d365-feature-cards__grid">
+      {cards.map(card => (
+        <div class="d365-feature-cards__card">
+          <img
+            src={card.src}
+            alt={card.alt || card.title}
+            class="d365-feature-cards__img"
+            loading="lazy"
+          />
+          <h3 class="d365-feature-cards__title">{card.title}</h3>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .d365-feature-cards {
+    padding: 80px 24px;
+  }
+
+  .d365-feature-cards__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  @media (min-width: 900px) {
+    .d365-feature-cards__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .d365-feature-cards__card {
+    border-radius: var(--d365-radius-card);
+    overflow: hidden;
+    border: 1px solid var(--d365-border);
+    background: #fff;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .d365-feature-cards__card:hover {
+    box-shadow: 0 8px 32px rgba(63,81,181,0.12);
+    transform: translateY(-2px);
+  }
+
+  .d365-feature-cards__img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .d365-feature-cards__title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--d365-blue);
+    padding: 20px 24px;
+    margin: 0;
+    line-height: 1.3;
+  }
+</style>

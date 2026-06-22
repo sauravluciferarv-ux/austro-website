@@ -36,6 +36,23 @@ import loopGridBlock from './objects/blocks/loopGridBlock';
 import loopCarouselBlock from './objects/blocks/loopCarouselBlock';
 import slidesBlock from './objects/blocks/slidesBlock';
 import templateBlock from './objects/blocks/templateBlock';
+// D365 Home Sections
+import d365HeroSection from './sections/d365HeroSection';
+import d365TrustBarSection from './sections/d365TrustBarSection';
+import d365StatsSection from './sections/d365StatsSection';
+import d365FeatureCardsSection from './sections/d365FeatureCardsSection';
+import d365ChannelTabsSection from './sections/d365ChannelTabsSection';
+import d365AIFeaturesSection from './sections/d365AIFeaturesSection';
+import d365MicrosoftSection from './sections/d365MicrosoftSection';
+import d365ITSMSection from './sections/d365ITSMSection';
+import d365CapabilitiesSection from './sections/d365CapabilitiesSection';
+import d365ComparisonSection from './sections/d365ComparisonSection';
+import d365IntegrationsSection from './sections/d365IntegrationsSection';
+import d365TestimonialsSection from './sections/d365TestimonialsSection';
+import d365WhyChooseSection from './sections/d365WhyChooseSection';
+import d365SecuritySection from './sections/d365SecuritySection';
+import d365BlogSection from './sections/d365BlogSection';
+import d365FinalCtaSection from './sections/d365FinalCtaSection';
 
 export const schemaTypes = [
   // Documents
@@ -52,7 +69,7 @@ export const schemaTypes = [
   seo,
   ctaButton,
   customCode,
-  // Homepage sections (existing)
+  // Homepage sections (existing / legacy)
   heroSection,
   logosSection,
   featuresSection,
@@ -79,4 +96,21 @@ export const schemaTypes = [
   loopCarouselBlock,
   slidesBlock,
   templateBlock,
+  // D365 Home Sections
+  d365HeroSection,
+  d365TrustBarSection,
+  d365StatsSection,
+  d365FeatureCardsSection,
+  d365ChannelTabsSection,
+  d365AIFeaturesSection,
+  d365MicrosoftSection,
+  d365ITSMSection,
+  d365CapabilitiesSection,
+  d365ComparisonSection,
+  d365IntegrationsSection,
+  d365TestimonialsSection,
+  d365WhyChooseSection,
+  d365SecuritySection,
+  d365BlogSection,
+  d365FinalCtaSection,
 ];

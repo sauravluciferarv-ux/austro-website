@@ -1,0 +1,144 @@
+---
+import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
+import type { D365WhyChooseSection } from '../../lib/types';
+
+interface Props {
+  data?: D365WhyChooseSection;
+  isPreview?: boolean;
+  docId?: string;
+  docType?: string;
+}
+
+const { data, docId, docType = 'homepage' } = Astro.props;
+
+const heading = data?.heading ?? 'Why choose Desk365?';
+const body = data?.body ?? "Customers who choose Desk365 feel the difference. Built for and by customers, every feature, every detail is crafted so our users' lives are simplified.";
+const awardImageSrc = data?.awardImage?.asset?.url ?? 'https://www.desk365.io/wp-content/uploads/2025/07/users-love-us-2.png';
+const awardText = data?.awardText ?? 'Highly rated on G2 and Capterra. Trusted by industry reviewers worldwide.';
+const ctaLabel = data?.ctaLabel ?? 'Start Your Free Trial';
+const ctaHref = data?.ctaHref ?? '/pricing/';
+
+const staticCards = [
+  { title: 'Set up in minutes', description: 'Migrate, onboard, and get started with your new helpdesk almost instantly.' },
+  { title: 'Easy to use', description: 'Intuitive software your teams can pick-up in no-time. Ensure a smooth experience for both your agents and your customers.' },
+  { title: 'Support that goes the extra mile', description: 'Have questions? Need help? Desk365 is committed to real human support and providing true resolution.' },
+  { title: 'Highest ROI and product value', description: 'Reduce costs and increase agent productivity from day 1 so your business sustains growth.' },
+];
+
+const cards = data?.cards?.length
+  ? data.cards.map(c => ({ title: c.title, description: c.description ?? '' }))
+  : staticCards;
+
+let sanityAttr: string | undefined;
+if (docId && data?._key) {
+  try {
+    const da = createDataAttribute({ id: docId, type: docType });
+    sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+  } catch {}
+}
+
+const whyIcons = [
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`,
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>`,
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="22" height="22"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
+];
+---
+
+<section id="d365-why-choose" class="d365-why-choose d365-section--white" data-sanity={sanityAttr}>
+  <div class="d365-container">
+
+    <!-- Awards badge row -->
+    <div class="d365-why-choose__awards">
+      <img
+        src={awardImageSrc}
+        alt="Desk365 - Users Love Us award"
+        class="d365-why-choose__award-img"
+        loading="lazy"
+      />
+      <p class="d365-why-choose__award-text">{awardText}</p>
+    </div>
+
+    <div class="d365-section-header">
+      <h2 class="d365-heading">{heading}</h2>
+      <p class="d365-body">{body}</p>
+    </div>
+
+    <div class="d365-why-choose__grid">
+      {cards.map((card, i) => (
+        <div class="d365-card d365-why-card">
+          <div class="d365-icon-box" set:html={whyIcons[i % whyIcons.length]} style="color: var(--d365-blue);" />
+          <h3 class="d365-why-card__title">{card.title}</h3>
+          <p class="d365-why-card__desc">{card.description}</p>
+        </div>
+      ))}
+    </div>
+
+    <div class="d365-why-choose__cta">
+      <a href={ctaHref} class="d365-btn d365-btn--green">{ctaLabel}</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .d365-why-choose {
+    padding: 80px 24px;
+  }
+
+  /* Awards */
+  .d365-why-choose__awards {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 48px;
+    text-align: center;
+  }
+
+  .d365-why-choose__award-img {
+    height: 80px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  .d365-why-choose__award-text {
+    font-size: 14px;
+    color: #888;
+    max-width: 400px;
+    margin: 0;
+  }
+
+  /* Grid */
+  .d365-why-choose__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+  }
+
+  @media (min-width: 800px) {
+    .d365-why-choose__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* Cards */
+  .d365-why-card__title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--d365-blue);
+    margin: 0 0 10px;
+  }
+
+  .d365-why-card__desc {
+    font-size: 14px;
+    color: var(--d365-text-body);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  /* CTA */
+  .d365-why-choose__cta {
+    text-align: center;
+    margin-top: 48px;
+  }
+</style>

@@ -218,6 +218,288 @@ export interface Homepage {
   sections?: HomepageSection[];
 }
 
+// ── D365 Home Section Types ──────────────────────────────────────────────────
+
+export interface D365HeroSection {
+  _type: 'd365HeroSection';
+  _key?: string;
+  headlinePrefix?: string;
+  rotatingWords?: string[];
+  subheadline?: string;
+  footnote?: string;
+  heroImage?: { asset: { url: string } };
+  heroImageAlt?: string;
+  primaryCta?: CtaButton;
+  secondaryCta?: CtaButton;
+}
+
+export interface D365LogoItem {
+  _key?: string;
+  name: string;
+  logo?: { asset: { url: string } };
+  href?: string;
+  badge?: string;
+}
+
+export interface D365TrustBarSection {
+  _type: 'd365TrustBarSection';
+  _key?: string;
+  heading?: string;
+  logosRow1?: D365LogoItem[];
+  logosRow2?: D365LogoItem[];
+}
+
+export interface D365StatItem {
+  _key?: string;
+  number: string;
+  label: string;
+}
+
+export interface D365StatsSection {
+  _type: 'd365StatsSection';
+  _key?: string;
+  stats?: D365StatItem[];
+}
+
+export interface D365FeatureCard {
+  _key?: string;
+  title: string;
+  image?: { asset: { url: string } };
+  imageAlt?: string;
+}
+
+export interface D365FeatureCardsSection {
+  _type: 'd365FeatureCardsSection';
+  _key?: string;
+  headingGradient?: string;
+  headingPlain?: string;
+  body?: string;
+  cards?: D365FeatureCard[];
+}
+
+export interface D365ChannelTab {
+  _key?: string;
+  label: string;
+  description?: string;
+  image?: { asset: { url: string } };
+  imageAlt?: string;
+}
+
+export interface D365ChannelTabsSection {
+  _type: 'd365ChannelTabsSection';
+  _key?: string;
+  heading?: string;
+  body?: string;
+  tabs?: D365ChannelTab[];
+}
+
+export interface D365SubFeature {
+  _key?: string;
+  title: string;
+  description?: string;
+}
+
+export interface D365AICard {
+  _key?: string;
+  label: string;
+  description?: string;
+  readMoreHref?: string;
+  image?: { asset: { url: string } };
+  imageAlt?: string;
+  subFeatures?: D365SubFeature[];
+}
+
+export interface D365AIFeaturesSection {
+  _type: 'd365AIFeaturesSection';
+  _key?: string;
+  heading?: string;
+  body?: string;
+  cards?: D365AICard[];
+}
+
+export interface D365MicrosoftCard {
+  _key?: string;
+  title: string;
+  description?: string;
+  icon?: { asset: { url: string } };
+}
+
+export interface D365MicrosoftSection {
+  _type: 'd365MicrosoftSection';
+  _key?: string;
+  heading?: string;
+  body?: string;
+  linkLabel?: string;
+  linkHref?: string;
+  heroImage?: { asset: { url: string } };
+  heroImageAlt?: string;
+  cards?: D365MicrosoftCard[];
+}
+
+export interface D365ITSMCard {
+  _key?: string;
+  title: string;
+  description?: string;
+  linkLabel?: string;
+  linkHref?: string;
+  image?: { asset: { url: string } };
+  imageAlt?: string;
+}
+
+export interface D365ITSMSection {
+  _type: 'd365ITSMSection';
+  _key?: string;
+  heading?: string;
+  body?: string;
+  cards?: D365ITSMCard[];
+}
+
+export interface D365CapabilityItem {
+  _key?: string;
+  title: string;
+  description?: string;
+  icon?: string;
+}
+
+export interface D365CapabilitiesSection {
+  _type: 'd365CapabilitiesSection';
+  _key?: string;
+  heading?: string;
+  body?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+  capabilities?: D365CapabilityItem[];
+}
+
+export interface D365ComparisonRow {
+  _key?: string;
+  feature: string;
+  desk365?: string;
+  col2?: string;
+  col3?: string;
+}
+
+export interface D365ComparisonSection {
+  _type: 'd365ComparisonSection';
+  _key?: string;
+  heading?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+  col2Label?: string;
+  col3Label?: string;
+  rows?: D365ComparisonRow[];
+}
+
+export interface D365IntegrationCard {
+  _key?: string;
+  title: string;
+  description?: string;
+  icon?: { asset: { url: string } };
+  linkLabel?: string;
+  linkHref?: string;
+}
+
+export interface D365IntegrationsSection {
+  _type: 'd365IntegrationsSection';
+  _key?: string;
+  heading?: string;
+  body?: string;
+  cards?: D365IntegrationCard[];
+}
+
+export interface D365TestimonialItem {
+  _key?: string;
+  quote: string;
+  name: string;
+  title?: string;
+  company?: string;
+  rating?: number;
+  reviewPlatform?: string;
+}
+
+export interface D365TestimonialsSection {
+  _type: 'd365TestimonialsSection';
+  _key?: string;
+  heading?: string;
+  subtext?: string;
+  testimonials?: D365TestimonialItem[];
+}
+
+export interface D365WhyChooseCard {
+  _key?: string;
+  title: string;
+  description?: string;
+  icon?: string;
+}
+
+export interface D365WhyChooseSection {
+  _type: 'd365WhyChooseSection';
+  _key?: string;
+  heading?: string;
+  body?: string;
+  awardImage?: { asset: { url: string } };
+  awardText?: string;
+  cards?: D365WhyChooseCard[];
+  ctaLabel?: string;
+  ctaHref?: string;
+}
+
+export interface D365SecuritySection {
+  _type: 'd365SecuritySection';
+  _key?: string;
+  heading?: string;
+  bullets?: string[];
+  badgeImage?: { asset: { url: string } };
+  badgeImageAlt?: string;
+}
+
+export interface D365BlogPost {
+  _key?: string;
+  category: string;
+  title: string;
+  href: string;
+  image?: { asset: { url: string } };
+  imageAlt?: string;
+}
+
+export interface D365BlogSection {
+  _type: 'd365BlogSection';
+  _key?: string;
+  heading?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+  posts?: D365BlogPost[];
+}
+
+export interface D365FinalCtaSection {
+  _type: 'd365FinalCtaSection';
+  _key?: string;
+  heading?: string;
+  body?: string;
+  primaryCta?: CtaButton;
+  secondaryCta?: CtaButton;
+  footnote?: string;
+  logoImage?: { asset: { url: string } };
+}
+
+export type D365HomeSection =
+  | D365HeroSection
+  | D365TrustBarSection
+  | D365StatsSection
+  | D365FeatureCardsSection
+  | D365ChannelTabsSection
+  | D365AIFeaturesSection
+  | D365MicrosoftSection
+  | D365ITSMSection
+  | D365CapabilitiesSection
+  | D365ComparisonSection
+  | D365IntegrationsSection
+  | D365TestimonialsSection
+  | D365WhyChooseSection
+  | D365SecuritySection
+  | D365BlogSection
+  | D365FinalCtaSection;
+
 export interface SeoData {
   metaTitle: string;
   metaDescription: string;
@@ -429,5 +711,5 @@ export interface HomepagePageBuilder {
   _id: string;
   _type: 'homepage';
   seo?: SeoData;
-  pageBuilder?: PageSection[];
+  pageBuilder?: (PageSection | D365HomeSection)[];
 }

@@ -1,0 +1,116 @@
+---
+import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
+import type { D365ITSMSection } from '../../lib/types';
+
+interface Props {
+  data?: D365ITSMSection;
+  isPreview?: boolean;
+  docId?: string;
+  docType?: string;
+}
+
+const { data, docId, docType = 'homepage' } = Astro.props;
+
+const heading = data?.heading ?? 'Helpdesk + ITSM. Finally in one place.';
+const body = data?.body ?? "Most teams juggle separate tools for customer support and internal IT operations. Desk365 brings both together, so your agents get one inbox, one workspace, and one view of every request across the business.";
+
+const staticCards = [
+  { title: 'Asset Management', description: 'Track hardware and software assets across their full lifecycle from procurement to retirement with a clear, centralized inventory. Link assets to tickets, agents, and departments for instant context and impact visibility.', linkLabel: 'Read more', linkHref: '/asset-management/', imageSrc: 'https://www.desk365.io/wp-content/uploads/2026/06/Asset-Management-1024x588.png', imageAlt: 'Desk365 asset management' },
+  { title: 'Change Management', description: 'Standardize every IT change with structured workflows, clear ownership, and multi-stage approvals. Maintain a complete audit trail with risk assessment and rollback planning so nothing goes live without the right checks.', linkLabel: 'Read more', linkHref: '/change-approval-management/', imageSrc: 'https://www.desk365.io/wp-content/uploads/2026/06/Approval-Management-1024x606.png', imageAlt: 'Desk365 change management' },
+];
+
+const cards = data?.cards?.length
+  ? data.cards.map(c => ({ title: c.title, description: c.description ?? '', linkLabel: c.linkLabel, linkHref: c.linkHref, imageSrc: c.image?.asset?.url ?? '', imageAlt: c.imageAlt ?? c.title }))
+  : staticCards;
+
+let sanityAttr: string | undefined;
+if (docId && data?._key) {
+  try {
+    const da = createDataAttribute({ id: docId, type: docType });
+    sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+  } catch {}
+}
+---
+
+<section id="d365-itsm" class="d365-itsm d365-section--white" data-sanity={sanityAttr}>
+  <div class="d365-container">
+    <div class="d365-section-header">
+      <h2 class="d365-heading">{heading}</h2>
+      <p class="d365-body">{body}</p>
+    </div>
+
+    <div class="d365-itsm__grid">
+      {cards.map(card => (
+        <div class="d365-itsm__card">
+          <div class="d365-itsm__card-img-wrap">
+            <img
+              src={card.imageSrc}
+              alt={card.imageAlt || card.title}
+              class="d365-itsm__card-img"
+              loading="lazy"
+            />
+          </div>
+          <div class="d365-itsm__card-body">
+            <h3 class="d365-itsm__card-title">{card.title}</h3>
+            <p class="d365-body d365-body--sm">{card.description}</p>
+            {card.linkHref && (
+              <a href={card.linkHref} class="d365-link">{card.linkLabel}</a>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .d365-itsm {
+    padding: 80px 24px;
+  }
+
+  .d365-itsm__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  @media (min-width: 800px) {
+    .d365-itsm__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .d365-itsm__card {
+    border: 1px solid var(--d365-border);
+    border-radius: var(--d365-radius-card);
+    overflow: hidden;
+    background: #fff;
+    transition: box-shadow 0.2s ease;
+  }
+  .d365-itsm__card:hover {
+    box-shadow: var(--d365-shadow-card);
+  }
+
+  .d365-itsm__card-img-wrap {
+    background: var(--d365-bg-gray);
+    padding: 24px;
+  }
+
+  .d365-itsm__card-img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    display: block;
+  }
+
+  .d365-itsm__card-body {
+    padding: 24px 28px 28px;
+  }
+
+  .d365-itsm__card-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--d365-blue);
+    margin: 0 0 12px;
+  }
+</style>

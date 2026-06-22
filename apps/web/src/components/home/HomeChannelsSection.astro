@@ -1,0 +1,282 @@
+---
+import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
+import type { D365ChannelTabsSection } from '../../lib/types';
+
+interface Props {
+  data?: D365ChannelTabsSection;
+  isPreview?: boolean;
+  docId?: string;
+  docType?: string;
+}
+
+const { data, docId, docType = 'homepage' } = Astro.props;
+
+const heading = data?.heading ?? 'Meet your customers where they already are';
+const body = data?.body ?? 'From Microsoft Teams to email to a branded support portal – every channel feeds into one unified inbox. No channel-switching, no missed tickets.';
+
+const staticTabs = [
+  { id: 'teams',  label: 'Microsoft Teams', description: 'Your customers can create tickets, receive notifications, check on statuses and respond back to your agents, all without leaving Teams.', imageSrc: 'https://www.desk365.io/wp-content/uploads/2025/05/desk365-microsoft-teams-ticketing-system.webp', imageAlt: 'Desk365 Microsoft Teams ticketing system' },
+  { id: 'email',  label: 'Email',           description: 'Customer emails get converted into tickets. Agent responses are sent via email and are also visible on your customer support portal.', imageSrc: 'https://www.desk365.io/wp-content/uploads/2025/05/desk365-email-settings.webp', imageAlt: 'Desk365 email ticketing settings' },
+  { id: 'portal', label: 'Support Portal',  description: 'Provide your customers with a web portal where they can create and manage tickets, view solution articles from your Knowledge Base.', imageSrc: 'https://www.desk365.io/wp-content/uploads/2025/05/desk365-support-portal.webp', imageAlt: 'Desk365 customer support portal' },
+  { id: 'widget', label: 'Web Widget',      description: 'Web widget that can be easily configured to fit into your website or web product.', imageSrc: 'https://www.desk365.io/wp-content/uploads/2025/05/desk365-web-widget.webp', imageAlt: 'Desk365 web widget' },
+  { id: 'form',   label: 'Web Form',        description: 'Prefer an iframe form to a web widget? No worries, we got you covered with a configurable web form that you can add to your website.', imageSrc: 'https://www.desk365.io/wp-content/uploads/2025/05/desk365-web-form.webp', imageAlt: 'Desk365 web form' },
+];
+
+const tabs = data?.tabs?.length
+  ? data.tabs.map((t, i) => ({ id: t._key ?? `tab-${i}`, label: t.label, description: t.description ?? '', imageSrc: t.image?.asset?.url ?? '', imageAlt: t.imageAlt ?? t.label }))
+  : staticTabs;
+
+let sanityAttr: string | undefined;
+if (docId && data?._key) {
+  try {
+    const da = createDataAttribute({ id: docId, type: docType });
+    sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+  } catch {}
+}
+---
+
+<section id="d365-channels" class="d365-channels d365-section--gray" data-sanity={sanityAttr}>
+  <div class="d365-container">
+    <div class="d365-section-header">
+      <h2 class="d365-heading">{heading}</h2>
+      <p class="d365-body">{body}</p>
+    </div>
+
+    <div class="d365-channels__layout">
+      <!-- Tab list -->
+      <div class="d365-channels__tabs" role="tablist" aria-label="Support channels">
+        {tabs.map((tab, i) => (
+          <button
+            class={`d365-channels__tab${i === 0 ? ' d365-channels__tab--active' : ''}`}
+            role="tab"
+            aria-selected={i === 0 ? 'true' : 'false'}
+            aria-controls={`d365-channel-panel-${tab.id}`}
+            data-tab={tab.id}
+          >
+            <div class="d365-channels__tab-inner">
+              <span class="d365-channels__tab-label">{tab.label}</span>
+              <p class="d365-channels__tab-desc">{tab.description}</p>
+              <div class="d365-channels__progress">
+                <div class="d365-channels__progress-bar"></div>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      <!-- Image panel -->
+      <div class="d365-channels__panel">
+        {tabs.map((tab, i) => (
+          <div
+            id={`d365-channel-panel-${tab.id}`}
+            class={`d365-channels__image-panel${i === 0 ? ' d365-channels__image-panel--active' : ''}`}
+            role="tabpanel"
+            aria-labelledby={tab.id}
+            data-panel={tab.id}
+          >
+            <img
+              src={tab.imageSrc}
+              alt={tab.imageAlt || tab.label}
+              class="d365-channels__img"
+              loading={i === 0 ? 'eager' : 'lazy'}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .d365-channels {
+    padding: 80px 24px;
+  }
+
+  .d365-channels__layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+
+  @media (min-width: 900px) {
+    .d365-channels__layout {
+      grid-template-columns: 420px 1fr;
+      gap: 56px;
+      align-items: center;
+    }
+  }
+
+  /* Tab list */
+  .d365-channels__tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .d365-channels__tab {
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 12px;
+    padding: 0;
+    transition: background 0.18s ease;
+    width: 100%;
+  }
+  .d365-channels__tab:hover .d365-channels__tab-inner {
+    background: rgba(63,81,181,0.04);
+  }
+
+  .d365-channels__tab-inner {
+    padding: 18px 20px;
+    border-radius: 12px;
+    border-left: 3px solid transparent;
+    transition: border-color 0.18s ease, background 0.18s ease;
+  }
+
+  .d365-channels__tab--active .d365-channels__tab-inner {
+    background: #fff;
+    border-left-color: var(--d365-blue);
+    box-shadow: var(--d365-shadow-card);
+  }
+
+  .d365-channels__tab-label {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--d365-blue);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .d365-channels__tab-desc {
+    font-size: 14px;
+    color: var(--d365-text-body);
+    line-height: 1.6;
+    margin: 0 0 12px;
+
+    /* Hide description when tab is not active */
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.3s ease, opacity 0.25s ease, margin 0.25s ease;
+  }
+  .d365-channels__tab--active .d365-channels__tab-desc {
+    max-height: 120px;
+    opacity: 1;
+    margin-bottom: 12px;
+  }
+
+  /* Progress bar */
+  .d365-channels__progress {
+    height: 3px;
+    background: var(--d365-border);
+    border-radius: 2px;
+    overflow: hidden;
+    display: none;
+  }
+  .d365-channels__tab--active .d365-channels__progress {
+    display: block;
+  }
+  .d365-channels__progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--d365-blue);
+    border-radius: 2px;
+    transition: width 0.1s linear;
+  }
+  .d365-channels__tab--active .d365-channels__progress-bar {
+    animation: d365-tab-progress 5s linear forwards;
+  }
+
+  @keyframes d365-tab-progress {
+    from { width: 0%; }
+    to   { width: 100%; }
+  }
+
+  /* Image panel */
+  .d365-channels__panel {
+    position: relative;
+    min-height: 320px;
+  }
+
+  .d365-channels__image-panel {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
+  }
+  .d365-channels__image-panel--active {
+    opacity: 1;
+    pointer-events: auto;
+    position: relative;
+  }
+
+  .d365-channels__img {
+    width: 100%;
+    height: auto;
+    border-radius: 16px;
+    box-shadow: 0 8px 40px rgba(63,81,181,0.14);
+    display: block;
+  }
+</style>
+
+<script>
+  const INTERVAL = 5000;
+  let timer: ReturnType<typeof setInterval> | null = null;
+
+  function activateTab(tabEl: HTMLButtonElement) {
+    const section = tabEl.closest('#d365-channels') as HTMLElement;
+    if (!section) return;
+
+    const allTabs = section.querySelectorAll<HTMLButtonElement>('.d365-channels__tab');
+    const allPanels = section.querySelectorAll<HTMLElement>('.d365-channels__image-panel');
+    const tabId = tabEl.dataset.tab;
+
+    allTabs.forEach(t => {
+      t.classList.remove('d365-channels__tab--active');
+      t.setAttribute('aria-selected', 'false');
+      // reset progress bar animation
+      const bar = t.querySelector<HTMLElement>('.d365-channels__progress-bar');
+      if (bar) {
+        bar.style.animation = 'none';
+        bar.getBoundingClientRect(); // force reflow
+        bar.style.animation = '';
+      }
+    });
+
+    allPanels.forEach(p => p.classList.remove('d365-channels__image-panel--active'));
+
+    tabEl.classList.add('d365-channels__tab--active');
+    tabEl.setAttribute('aria-selected', 'true');
+    section.querySelector(`[data-panel="${tabId}"]`)?.classList.add('d365-channels__image-panel--active');
+  }
+
+  function startAutoplay(section: HTMLElement) {
+    const tabs = Array.from(section.querySelectorAll<HTMLButtonElement>('.d365-channels__tab'));
+    let index = 0;
+
+    if (timer) clearInterval(timer);
+    timer = setInterval(() => {
+      index = (index + 1) % tabs.length;
+      activateTab(tabs[index]);
+    }, INTERVAL);
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const section = document.getElementById('d365-channels') as HTMLElement;
+    if (!section) return;
+
+    section.querySelectorAll<HTMLButtonElement>('.d365-channels__tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        activateTab(tab);
+        // restart autoplay from this tab
+        if (timer) clearInterval(timer);
+        startAutoplay(section);
+      });
+    });
+
+    startAutoplay(section);
+  });
+</script>

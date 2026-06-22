@@ -1,0 +1,136 @@
+---
+import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
+import type { D365CapabilitiesSection } from '../../lib/types';
+
+interface Props {
+  data?: D365CapabilitiesSection;
+  isPreview?: boolean;
+  docId?: string;
+  docType?: string;
+}
+
+const { data, docId, docType = 'homepage' } = Astro.props;
+
+const heading = data?.heading ?? "Everything you'd expect. Plus what others charge extra for.";
+const body = data?.body ?? 'Every feature your support and IT teams need — in one plan, at one price.';
+const ctaLabel = data?.ctaLabel ?? 'Explore all features';
+const ctaHref = data?.ctaHref ?? '/features/';
+
+const staticCapabilities = [
+  { title: 'Unified Inbox',          description: 'Every ticket from every channel in one shared inbox. Filter, assign, and collaborate without switching tabs.', icon: 'inbox' },
+  { title: 'SLAs',                   description: 'Define SLAs by ticket type, priority, or customer segment. Get alerts before breaches happen, not after.', icon: 'clock' },
+  { title: 'Knowledge Base',         description: 'Publish solution articles internally or publicly. AI Copilot can generate drafts from resolved tickets automatically.', icon: 'book' },
+  { title: 'Ticket Notifications',   description: 'Get notified on Teams and email about tickets you should not miss. Alert agents instantly for every ticketing action via push notifications.', icon: 'bell' },
+  { title: 'Canned Responses',       description: 'Agents can create a library of canned responses to make it easy to respond to routine requests quickly.', icon: 'chat' },
+  { title: 'Automations',            description: 'Trigger automations on ticket creation, updates, or time-based events. Route tickets and update fields without manual effort.', icon: 'bolt' },
+  { title: 'Round Robin Assignment', description: 'Distribute tickets across agents automatically. Balance workloads and keep response times consistent.', icon: 'users' },
+  { title: 'Reports and Analytics',  description: 'Track resolution times, agent performance, ticket volume, and SLA compliance. Power BI integration for deeper analysis.', icon: 'chart' },
+  { title: 'Multi-Department Access',description: 'Configure departments as distinct groups with separate queues, email addresses, and permission levels – all from one account.', icon: 'building' },
+];
+
+const capabilities = data?.capabilities?.length
+  ? data.capabilities.map(c => ({ title: c.title, description: c.description ?? '', icon: c.icon ?? 'bolt' }))
+  : staticCapabilities;
+
+let sanityAttr: string | undefined;
+if (docId && data?._key) {
+  try {
+    const da = createDataAttribute({ id: docId, type: docType });
+    sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+  } catch {}
+}
+
+// SVG icons for each capability card
+const icons = [
+  // Unified Inbox
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="24" height="24"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M2 9h20M7 4v5M17 4v5"/></svg>`,
+  // SLAs
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="24" height="24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>`,
+  // Knowledge Base
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="24" height="24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`,
+  // Notifications
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="24" height="24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`,
+  // Canned Responses
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="24" height="24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
+  // Automations
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="24" height="24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`,
+  // Round Robin
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="24" height="24"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><path d="M12 8v3M5 16l5-3M19 16l-5-3"/></svg>`,
+  // Reports
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="24" height="24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+  // Multi-department
+  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="24" height="24"><rect x="2" y="7" width="6" height="14"/><rect x="9" y="2" width="6" height="19"/><rect x="16" y="11" width="6" height="10"/></svg>`,
+];
+---
+
+<section id="d365-capabilities" class="d365-capabilities d365-section--gray" data-sanity={sanityAttr}>
+  <div class="d365-container">
+    <div class="d365-section-header">
+      <h2 class="d365-heading">{heading}</h2>
+      <p class="d365-body">{body}</p>
+    </div>
+
+    <div class="d365-capabilities__grid">
+      {capabilities.map((cap, i) => (
+        <div class="d365-capabilities__card">
+          <div class="d365-icon-box" set:html={icons[i % icons.length]} style="color: var(--d365-blue);" />
+          <h3 class="d365-capabilities__card-title">{cap.title}</h3>
+          <p class="d365-capabilities__card-desc">{cap.description}</p>
+        </div>
+      ))}
+    </div>
+
+    <div class="d365-capabilities__cta">
+      <a href={ctaHref} class="d365-btn d365-btn--blue">{ctaLabel}</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .d365-capabilities {
+    padding: 80px 24px;
+  }
+
+  .d365-capabilities__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 48px;
+  }
+
+  @media (min-width: 900px) {
+    .d365-capabilities__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .d365-capabilities__card {
+    background: #fff;
+    border-radius: var(--d365-radius-card);
+    padding: 28px;
+    border: 1px solid var(--d365-border);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .d365-capabilities__card:hover {
+    box-shadow: var(--d365-shadow-card);
+    transform: translateY(-2px);
+  }
+
+  .d365-capabilities__card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--d365-blue);
+    margin: 0 0 10px;
+  }
+
+  .d365-capabilities__card-desc {
+    font-size: 14px;
+    color: var(--d365-text-body);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  .d365-capabilities__cta {
+    text-align: center;
+  }
+</style>

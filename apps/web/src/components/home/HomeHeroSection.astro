@@ -1,0 +1,176 @@
+---
+import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
+import type { D365HeroSection } from '../../lib/types';
+
+interface Props {
+  data?: D365HeroSection;
+  isPreview?: boolean;
+  docId?: string;
+  docType?: string;
+}
+
+const { data, docId, docType = 'homepage' } = Astro.props;
+
+const headlinePrefix = data?.headlinePrefix ?? 'AI-powered helpdesk for';
+const headlineSuffix = headlinePrefix.replace(/^AI/, '');
+const rotatingWords = data?.rotatingWords?.length
+  ? data.rotatingWords
+  : ['customer service', 'IT admins', 'Microsoft Teams', 'MSPs', 'teams of all sizes'];
+const subheadline = data?.subheadline ?? "One platform for both customer support and IT – tickets, assets, Microsoft Teams, and AI agents all in a single workspace. Built for teams who've outgrown basic ticketing but don't need the complexity of Zendesk or ServiceNow.";
+const primaryCtaLabel = data?.primaryCta?.label ?? 'Start Your Free Trial';
+const primaryCtaHref = data?.primaryCta?.href ?? '/pricing/';
+const secondaryCtaLabel = data?.secondaryCta?.label ?? 'Request a Demo';
+const secondaryCtaHref = data?.secondaryCta?.href ?? '/request-demo/';
+const footnote = data?.footnote ?? 'No credit card required.';
+const heroImageSrc = data?.heroImage?.asset?.url ?? 'https://www.desk365.io/wp-content/uploads/2026/06/home-page-hero.png';
+const heroImageAlt = data?.heroImageAlt ?? 'Desk365 AI-powered helpdesk interface';
+
+let sanityAttr: string | undefined;
+if (docId && data?._key) {
+  try {
+    const da = createDataAttribute({ id: docId, type: docType });
+    sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+  } catch {}
+}
+---
+
+<section id="d365-hero" class="d365-hero d365-section--white" data-sanity={sanityAttr}>
+  <div class="d365-container d365-hero__inner">
+
+    <!-- Left: Text -->
+    <div class="d365-hero__text">
+      <h1 class="d365-hero__headline">
+        <span class="d365-ai-text">AI</span>{headlineSuffix}<br>
+        <span class="d365-hero__rotate-wrap" aria-live="polite">
+          {rotatingWords.map((word, i) => (
+            <span class="d365-hero__word" style={`animation-delay: ${i * 3}s`}>{word}</span>
+          ))}
+        </span>
+      </h1>
+
+      <p class="d365-hero__sub">{subheadline}</p>
+
+      <div class="d365-hero__ctas">
+        <a href={primaryCtaHref} class="d365-btn d365-btn--green">{primaryCtaLabel}</a>
+        <a href={secondaryCtaHref} class="d365-btn d365-btn--outline-blue">{secondaryCtaLabel}</a>
+      </div>
+
+      {footnote && <p class="d365-hero__footnote">{footnote}</p>}
+    </div>
+
+    <!-- Right: Image -->
+    <div class="d365-hero__image-wrap">
+      <img
+        src={heroImageSrc}
+        alt={heroImageAlt}
+        class="d365-hero__image"
+        loading="eager"
+        fetchpriority="high"
+        width="2157"
+        height="1218"
+      />
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .d365-hero {
+    padding: 72px 24px 60px;
+    overflow: hidden;
+  }
+
+  .d365-hero__inner {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+
+  @media (min-width: 960px) {
+    .d365-hero__inner {
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+    }
+  }
+
+  /* Headline */
+  .d365-hero__headline {
+    font-family: 'Roboto', sans-serif;
+    font-size: clamp(32px, 4.5vw, 46px);
+    font-weight: 700;
+    color: var(--d365-blue);
+    line-height: 1.22;
+    margin: 0 0 24px;
+  }
+
+  /* Rotating words container */
+  .d365-hero__rotate-wrap {
+    display: block;
+    position: relative;
+    height: 1.3em;
+    overflow: hidden;
+  }
+
+  .d365-hero__word {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    color: var(--d365-blue);
+    animation: d365-rotate-word 15s linear infinite;
+  }
+
+  @keyframes d365-rotate-word {
+    0%   { opacity: 0; transform: translateY(16px); }
+    5%   { opacity: 1; transform: translateY(0); }
+    20%  { opacity: 1; transform: translateY(0); }
+    25%  { opacity: 0; transform: translateY(-16px); }
+    100% { opacity: 0; transform: translateY(-16px); }
+  }
+
+  /* Stagger each word: 5 words × 3s each = 15s total cycle */
+  .d365-hero__word:nth-child(1) { animation-delay: 0s; }
+  .d365-hero__word:nth-child(2) { animation-delay: 3s; }
+  .d365-hero__word:nth-child(3) { animation-delay: 6s; }
+  .d365-hero__word:nth-child(4) { animation-delay: 9s; }
+  .d365-hero__word:nth-child(5) { animation-delay: 12s; }
+
+  /* Subheadline */
+  .d365-hero__sub {
+    font-size: 17px;
+    line-height: 1.75;
+    color: var(--d365-text-body);
+    margin: 0 0 32px;
+    max-width: 560px;
+  }
+
+  /* CTA row */
+  .d365-hero__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  /* Footnote */
+  .d365-hero__footnote {
+    font-size: 13px;
+    color: #888;
+    margin: 0;
+  }
+
+  /* Hero image */
+  .d365-hero__image-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .d365-hero__image {
+    width: 100%;
+    max-width: 680px;
+    height: auto;
+    border-radius: 12px;
+  }
+</style>

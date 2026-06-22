@@ -1,0 +1,88 @@
+---
+import type { PageSection, D365HomeSection } from '../../lib/types';
+import PageSectionComponent from '../PageSection.astro';
+import HomeHeroSection          from './HomeHeroSection.astro';
+import HomeTrustBarSection      from './HomeTrustBarSection.astro';
+import HomeStatsSection         from './HomeStatsSection.astro';
+import HomeFeatureCardsSection  from './HomeFeatureCardsSection.astro';
+import HomeChannelsSection      from './HomeChannelsSection.astro';
+import HomeAIFeaturesSection    from './HomeAIFeaturesSection.astro';
+import HomeMicrosoftSection     from './HomeMicrosoftSection.astro';
+import HomeITSMSection          from './HomeITSMSection.astro';
+import HomeCapabilitiesSection  from './HomeCapabilitiesSection.astro';
+import HomeComparisonSection    from './HomeComparisonSection.astro';
+import HomeIntegrationsSection  from './HomeIntegrationsSection.astro';
+import HomeTestimonialsSection  from './HomeTestimonialsSection.astro';
+import HomeWhyChooseSection     from './HomeWhyChooseSection.astro';
+import HomeSecuritySection      from './HomeSecuritySection.astro';
+import HomeBlogSection          from './HomeBlogSection.astro';
+import HomeFinalCtaSection      from './HomeFinalCtaSection.astro';
+
+interface Props {
+  section: PageSection | D365HomeSection;
+  isPreview?: boolean;
+  docId?: string;
+  docType?: string;
+}
+
+const { section, isPreview, docId, docType = 'homepage' } = Astro.props;
+const type = section._type;
+---
+
+{type === 'pageSection' && (
+  <PageSectionComponent
+    section={section as PageSection}
+    isPreview={isPreview}
+    docId={docId}
+    docType={docType}
+  />
+)}
+
+{type === 'd365HeroSection' && (
+  <HomeHeroSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+)}
+{type === 'd365TrustBarSection' && (
+  <HomeTrustBarSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+)}
+{type === 'd365StatsSection' && (
+  <HomeStatsSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+)}
+{type === 'd365FeatureCardsSection' && (
+  <HomeFeatureCardsSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+)}
+{type === 'd365ChannelTabsSection' && (
+  <HomeChannelsSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+)}
+{type === 'd365AIFeaturesSection' && (
+  <HomeAIFeaturesSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+)}
+{type === 'd365MicrosoftSection' && (
+  <HomeMicrosoftSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+)}
+{type === 'd365ITSMSection' && (
+  <HomeITSMSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+)}
+{type === 'd365CapabilitiesSection' && (
+  <HomeCapabilitiesSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+)}
+{type === 'd365ComparisonSection' && (
+  <HomeComparisonSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+)}
+{type === 'd365IntegrationsSection' && (
+  <HomeIntegrationsSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+)}
+{type === 'd365TestimonialsSection' && (
+  <HomeTestimonialsSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+)}
+{type === 'd365WhyChooseSection' && (
+  <HomeWhyChooseSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+)}
+{type === 'd365SecuritySection' && (
+  <HomeSecuritySection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+)}
+{type === 'd365BlogSection' && (
+  <HomeBlogSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+)}
+{type === 'd365FinalCtaSection' && (
+  <HomeFinalCtaSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+)}

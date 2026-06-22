@@ -1,0 +1,108 @@
+---
+import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
+import type { D365StatsSection } from '../../lib/types';
+
+interface Props {
+  data?: D365StatsSection;
+  isPreview?: boolean;
+  docId?: string;
+  docType?: string;
+}
+
+const { data, docId, docType = 'homepage' } = Astro.props;
+
+const stats = data?.stats?.length
+  ? data.stats
+  : [
+      { number: '7,000+',   label: 'Businesses worldwide' },
+      { number: '65+',      label: 'Countries served' },
+      { number: '4.9',      label: 'Rating on G2' },
+      { number: '21 Days',  label: 'Free trial, no card needed' },
+    ];
+
+let sanityAttr: string | undefined;
+if (docId && data?._key) {
+  try {
+    const da = createDataAttribute({ id: docId, type: docType });
+    sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+  } catch {}
+}
+---
+
+<section id="d365-stats" class="d365-stats" data-sanity={sanityAttr}>
+  <div class="d365-container">
+    <div class="d365-stats__grid">
+      {stats.map((stat, i) => (
+        <>
+          <div class="d365-stats__item">
+            <div class="d365-stats__number">{stat.number}</div>
+            <div class="d365-stats__label">{stat.label}</div>
+          </div>
+          {i < stats.length - 1 && <div class="d365-stats__divider" aria-hidden="true" />}
+        </>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .d365-stats {
+    background: var(--d365-blue);
+    padding: 40px 24px;
+  }
+
+  .d365-stats__grid {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0;
+  }
+
+  .d365-stats__item {
+    flex: 1;
+    min-width: 160px;
+    text-align: center;
+    padding: 16px 24px;
+  }
+
+  .d365-stats__number {
+    font-family: 'Roboto', sans-serif;
+    font-size: clamp(28px, 3.5vw, 36px);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.1;
+    margin-bottom: 6px;
+  }
+
+  .d365-stats__label {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: 500;
+  }
+
+  /* Vertical divider lines between stats */
+  .d365-stats__divider {
+    width: 1px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.25);
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 600px) {
+    .d365-stats__grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .d365-stats__divider {
+      display: none;
+    }
+    .d365-stats__item {
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+    }
+    .d365-stats__item:last-child,
+    .d365-stats__item:nth-child(3):not(.d365-stats__divider) {
+      border-bottom: none;
+    }
+  }
+</style>

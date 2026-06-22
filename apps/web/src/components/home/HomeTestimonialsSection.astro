@@ -1,0 +1,309 @@
+---
+import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
+import type { D365TestimonialsSection } from '../../lib/types';
+
+interface Props {
+  data?: D365TestimonialsSection;
+  isPreview?: boolean;
+  docId?: string;
+  docType?: string;
+}
+
+const { data, docId, docType = 'homepage' } = Astro.props;
+
+const heading = data?.heading ?? "Don't just take our word for it";
+const subtext = data?.subtext ?? 'See why our customers choose us. Hear from real people who have experienced the difference.';
+
+const staticTestimonials = [
+  { quote: "Desk365 has got all the right ingredients that a Helpdesk solution needs under its belt.", name: 'Jugal Piplani', title: 'Technical Solutions Manager', company: 'Gapcloud', rating: 5, reviewPlatform: 'G2' },
+  { quote: "Highly Recommend. The onboarding was smooth and the support team was incredibly helpful throughout.", name: 'Jessica Harrison', title: 'Sr. Associate', company: 'Christopher Consultants, Ltd.', rating: 5, reviewPlatform: 'G2' },
+  { quote: "They really make you feel they are part of your team. The response times are incredible.", name: 'Jeroen H', title: 'Scientist Sensortechnologies', company: 'Biotechnology', rating: 5, reviewPlatform: 'G2' },
+  { quote: "A very good system all round. Simple to use, powerful features, and great value for money.", name: 'Andy Roberts', title: 'Network & Communications Support Specialist', company: 'CSG', rating: 5, reviewPlatform: 'G2' },
+  { quote: "Truly an outstanding product with a knowledgeable, prompt and courteous staff.", name: 'Ryan Geiler', title: 'IT Director', company: 'Community Medical Center', rating: 5, reviewPlatform: 'G2' },
+  { quote: "The Helpdesk system everyone should know about. Desk365 has everything you need and more.", name: 'Mirko B', title: 'System & Network Administrator', company: 'Oil and Energy', rating: 5, reviewPlatform: 'Capterra' },
+  { quote: "Desk365 has plenty of features which we love to use. The Microsoft Teams integration is a game-changer.", name: 'Jan Schwärzel', title: 'CTO', company: 'ComSet AG', rating: 5, reviewPlatform: 'G2' },
+  { quote: "Teams integration is fantastic! Our staff love being able to submit and track tickets right from Teams.", name: 'Lonny L', title: 'IT Manager', company: 'Farming', rating: 5, reviewPlatform: 'G2' },
+];
+
+const testimonials = data?.testimonials?.length
+  ? data.testimonials.map(t => ({ quote: t.quote, name: t.name, title: t.title ?? '', company: t.company, rating: t.rating ?? 5, reviewPlatform: t.reviewPlatform }))
+  : staticTestimonials;
+
+let sanityAttr: string | undefined;
+if (docId && data?._key) {
+  try {
+    const da = createDataAttribute({ id: docId, type: docType });
+    sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+  } catch {}
+}
+---
+
+<section id="d365-testimonials" class="d365-testimonials d365-section--gray" data-sanity={sanityAttr}>
+  <div class="d365-container">
+    <div class="d365-section-header">
+      <h2 class="d365-heading">{heading}</h2>
+      <p class="d365-body">{subtext}</p>
+    </div>
+
+    <div class="d365-testimonials__slider" aria-label="Customer testimonials">
+      <div class="d365-testimonials__track" id="d365-testi-track">
+        {testimonials.map((t, i) => (
+          <article class="d365-testimonial-card" aria-label={`Testimonial from ${t.name}`}>
+            <!-- Stars -->
+            <div class="d365-testimonial-card__stars" aria-label={`${t.rating} out of 5 stars`}>
+              {Array.from({ length: t.rating ?? 5 }).map(() => (
+                <span aria-hidden="true">★</span>
+              ))}
+            </div>
+
+            <!-- Quote -->
+            <blockquote class="d365-testimonial-card__quote">
+              <p>"{t.quote}"</p>
+            </blockquote>
+
+            <!-- Author -->
+            <footer class="d365-testimonial-card__footer">
+              <div class="d365-testimonial-card__avatar" aria-hidden="true">
+                {t.name.charAt(0)}
+              </div>
+              <div>
+                <div class="d365-testimonial-card__name">{t.name}</div>
+                <div class="d365-testimonial-card__role">{t.title}{t.company ? `, ${t.company}` : ''}</div>
+              </div>
+              {t.reviewPlatform && (
+                <span class="d365-testimonial-card__platform">{t.reviewPlatform}</span>
+              )}
+            </footer>
+          </article>
+        ))}
+      </div>
+    </div>
+
+    <!-- Carousel navigation -->
+    <div class="d365-testimonials__nav">
+      <button class="d365-testimonials__btn" id="d365-testi-prev" aria-label="Previous testimonials">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+
+      <!-- Progress dots rendered by JS -->
+      <div class="d365-testimonials__dots" id="d365-testi-dots"></div>
+
+      <button class="d365-testimonials__btn" id="d365-testi-next" aria-label="Next testimonials">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+          <path d="M9 18l6-6-6-6"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .d365-testimonials {
+    padding: 80px 24px;
+  }
+
+  /* Slider wrapper */
+  .d365-testimonials__slider {
+    overflow: hidden;
+    border-radius: var(--d365-radius-card);
+  }
+
+  .d365-testimonials__track {
+    display: flex;
+    gap: 24px;
+    transition: transform 0.4s ease;
+  }
+
+  /* Individual card */
+  .d365-testimonial-card {
+    flex: 0 0 calc(50% - 12px);
+    min-width: 0;
+    background: #fff;
+    border-radius: var(--d365-radius-card);
+    padding: 28px 32px;
+    border: 1px solid var(--d365-border);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  @media (max-width: 720px) {
+    .d365-testimonial-card {
+      flex: 0 0 100%;
+    }
+  }
+
+  /* Stars */
+  .d365-testimonial-card__stars {
+    color: #f5a623;
+    font-size: 18px;
+    letter-spacing: 2px;
+  }
+
+  /* Quote */
+  .d365-testimonial-card__quote {
+    margin: 0;
+    flex: 1;
+  }
+  .d365-testimonial-card__quote p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--d365-text-body);
+    margin: 0;
+    font-style: italic;
+  }
+
+  /* Footer */
+  .d365-testimonial-card__footer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .d365-testimonial-card__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--d365-icon-bg);
+    color: var(--d365-blue);
+    font-weight: 700;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .d365-testimonial-card__name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--d365-text-dark);
+  }
+
+  .d365-testimonial-card__role {
+    font-size: 12px;
+    color: #888;
+  }
+
+  .d365-testimonial-card__platform {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--d365-blue);
+    background: var(--d365-icon-bg);
+    border-radius: 20px;
+    padding: 3px 10px;
+  }
+
+  /* Navigation */
+  .d365-testimonials__nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 32px;
+  }
+
+  .d365-testimonials__btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--d365-border);
+    background: #fff;
+    color: var(--d365-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .d365-testimonials__btn:hover {
+    background: var(--d365-blue);
+    border-color: var(--d365-blue);
+    color: #fff;
+  }
+
+  .d365-testimonials__dots {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  /* Dots injected by JS */
+  :global(.d365-testimonials__dot) {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--d365-border);
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.15s ease, width 0.15s ease;
+  }
+  :global(.d365-testimonials__dot--active) {
+    background: var(--d365-blue);
+    width: 20px;
+    border-radius: 4px;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const track = document.getElementById('d365-testi-track') as HTMLElement;
+    const dotsContainer = document.getElementById('d365-testi-dots') as HTMLElement;
+    const prevBtn = document.getElementById('d365-testi-prev') as HTMLButtonElement;
+    const nextBtn = document.getElementById('d365-testi-next') as HTMLButtonElement;
+    if (!track) return;
+
+    const cards = track.querySelectorAll<HTMLElement>('.d365-testimonial-card');
+    const total = cards.length;
+    // Show 2 at a time on desktop, 1 on mobile
+    const perPage = () => window.innerWidth < 720 ? 1 : 2;
+    let current = 0;
+    let autoTimer: ReturnType<typeof setInterval>;
+
+    function maxIndex() { return Math.ceil(total / perPage()) - 1; }
+
+    function buildDots() {
+      dotsContainer.innerHTML = '';
+      const pages = maxIndex() + 1;
+      for (let i = 0; i < pages; i++) {
+        const dot = document.createElement('button');
+        dot.className = 'd365-testimonials__dot' + (i === current ? ' d365-testimonials__dot--active' : '');
+        dot.setAttribute('aria-label', `Go to page ${i + 1}`);
+        dot.addEventListener('click', () => { goTo(i); resetAuto(); });
+        dotsContainer.appendChild(dot);
+      }
+    }
+
+    function updateDots() {
+      dotsContainer.querySelectorAll<HTMLElement>('.d365-testimonials__dot').forEach((d, i) => {
+        d.classList.toggle('d365-testimonials__dot--active', i === current);
+      });
+    }
+
+    function goTo(index: number) {
+      current = Math.max(0, Math.min(index, maxIndex()));
+      const pp = perPage();
+      const cardWidth = cards[0]?.offsetWidth ?? 0;
+      const gap = 24;
+      track.style.transform = `translateX(-${current * pp * (cardWidth + gap)}px)`;
+      updateDots();
+    }
+
+    function resetAuto() {
+      clearInterval(autoTimer);
+      autoTimer = setInterval(() => goTo(current === maxIndex() ? 0 : current + 1), 5000);
+    }
+
+    prevBtn?.addEventListener('click', () => { goTo(current - 1); resetAuto(); });
+    nextBtn?.addEventListener('click', () => { goTo(current + 1); resetAuto(); });
+
+    window.addEventListener('resize', () => { buildDots(); goTo(Math.min(current, maxIndex())); });
+
+    buildDots();
+    resetAuto();
+  });
+</script>

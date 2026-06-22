@@ -1,0 +1,176 @@
+---
+import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
+import type { D365BlogSection } from '../../lib/types';
+
+interface Props {
+  data?: D365BlogSection;
+  isPreview?: boolean;
+  docId?: string;
+  docType?: string;
+}
+
+const { data, docId, docType = 'homepage' } = Astro.props;
+
+const heading = data?.heading ?? 'Featured blog posts';
+const ctaLabel = data?.ctaLabel ?? 'Read more';
+const ctaHref = data?.ctaHref ?? '/blog/';
+
+const staticPosts = [
+  { category: 'Helpdesk', title: 'Thinking of Moving Away from Zendesk? 8 Alternatives to Consider', href: '/blog/zendesk-alternatives/', imageSrc: undefined as string|undefined, imageAlt: undefined as string|undefined },
+  { category: 'Microsoft Teams', title: 'How to Use Microsoft Teams as a Help Desk?', href: '/blog/how-to-use-microsoft-teams-as-a-help-desk/', imageSrc: undefined as string|undefined, imageAlt: undefined as string|undefined },
+  { category: 'Case Study', title: 'How Concurrent used Desk365 to streamline operations', href: '/customers/concurrent/', imageSrc: undefined as string|undefined, imageAlt: undefined as string|undefined },
+];
+
+const posts = data?.posts?.length
+  ? data.posts.map(p => ({ category: p.category, title: p.title, href: p.href, imageSrc: p.image?.asset?.url, imageAlt: p.imageAlt }))
+  : staticPosts;
+
+let sanityAttr: string | undefined;
+if (docId && data?._key) {
+  try {
+    const da = createDataAttribute({ id: docId, type: docType });
+    sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+  } catch {}
+}
+---
+
+<section id="d365-blog" class="d365-blog d365-section--white" data-sanity={sanityAttr}>
+  <div class="d365-container">
+    <div class="d365-blog__header">
+      <h2 class="d365-heading">{heading}</h2>
+      <a href={ctaHref} class="d365-btn d365-btn--outline-blue">{ctaLabel}</a>
+    </div>
+
+    <div class="d365-blog__grid">
+      {posts.map(post => (
+        <a href={post.href} class="d365-blog-card" aria-label={post.title}>
+          {post.imageSrc && (
+            <div class="d365-blog-card__img-wrap">
+              <img
+                src={post.imageSrc}
+                alt={post.imageAlt || post.title}
+                class="d365-blog-card__img"
+                loading="lazy"
+              />
+            </div>
+          )}
+          {!post.imageSrc && (
+            <div class="d365-blog-card__placeholder" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40" style="color: var(--d365-blue); opacity:0.3">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+            </div>
+          )}
+          <div class="d365-blog-card__body">
+            <span class="d365-blog-card__category">
+              {post.category}
+            </span>
+            <h3 class="d365-blog-card__title">{post.title}</h3>
+            <span class="d365-link d365-blog-card__read-more">Read article</span>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .d365-blog {
+    padding: 80px 24px;
+  }
+
+  .d365-blog__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .d365-blog__header .d365-heading {
+    margin: 0;
+  }
+
+  .d365-blog__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  @media (min-width: 900px) {
+    .d365-blog__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* Blog card */
+  .d365-blog-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--d365-radius-card);
+    border: 1px solid var(--d365-border);
+    overflow: hidden;
+    background: #fff;
+    text-decoration: none;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .d365-blog-card:hover {
+    box-shadow: 0 8px 32px rgba(63,81,181,0.12);
+    transform: translateY(-2px);
+  }
+
+  .d365-blog-card__img-wrap {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+  }
+
+  .d365-blog-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  .d365-blog-card:hover .d365-blog-card__img {
+    transform: scale(1.03);
+  }
+
+  /* Placeholder when no image */
+  .d365-blog-card__placeholder {
+    aspect-ratio: 16 / 9;
+    background: var(--d365-bg-gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .d365-blog-card__body {
+    padding: 20px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .d365-blog-card__category {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--d365-blue);
+  }
+
+  .d365-blog-card__title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--d365-text-dark);
+    line-height: 1.4;
+    margin: 0;
+    flex: 1;
+  }
+
+  .d365-blog-card__read-more {
+    margin-top: 8px;
+    font-size: 14px;
+  }
+  /* Remove auto ::after from parent .d365-link so it's just an arrow span here */
+</style>

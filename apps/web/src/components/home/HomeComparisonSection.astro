@@ -1,0 +1,205 @@
+---
+import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
+import type { D365ComparisonSection } from '../../lib/types';
+
+interface Props {
+  data?: D365ComparisonSection;
+  isPreview?: boolean;
+  docId?: string;
+  docType?: string;
+}
+
+const { data, docId, docType = 'homepage' } = Astro.props;
+
+const heading = data?.heading ?? 'The cleaner alternative to Freshdesk & Zendesk';
+const ctaLabel = data?.ctaLabel ?? 'Start Your Free Trial';
+const ctaHref = data?.ctaHref ?? '/pricing/';
+const col2Label = data?.col2Label ?? 'Freshdesk';
+const col3Label = data?.col3Label ?? 'Zendesk';
+
+const staticRows = [
+  { feature: 'Omni-channel ticketing',               desk365: 'true',  col2: 'true',  col3: 'true' },
+  { feature: 'Microsoft Teams native integration',   desk365: 'true',  col2: 'Add-on', col3: '3rd party only' },
+  { feature: 'AI Agent (no-code)',                   desk365: 'true',  col2: 'Higher plans only', col3: 'Add-on, costly' },
+  { feature: 'AI Copilot for agents',                desk365: 'true',  col2: 'Add-on', col3: 'Add-on' },
+  { feature: 'IT Asset Management',                  desk365: 'true',  col2: 'Separate product', col3: 'false' },
+  { feature: 'Change Management',                    desk365: 'true',  col2: 'Separate product', col3: 'false' },
+  { feature: 'Knowledge Base',                       desk365: 'true',  col2: 'true',  col3: 'true' },
+  { feature: 'SLA Management',                       desk365: 'true',  col2: 'true',  col3: 'Higher plans only' },
+  { feature: 'Power Automate Connector',             desk365: 'true',  col2: 'false', col3: 'false' },
+  { feature: 'Microsoft Entra SSO',                  desk365: 'true',  col2: 'Add-on', col3: 'Add-on' },
+  { feature: 'Round Robin Assignment',               desk365: 'true',  col2: 'true',  col3: 'true' },
+  { feature: 'Transparent pricing',                  desk365: 'true',  col2: 'false', col3: 'false' },
+];
+
+const rows = data?.rows?.length
+  ? data.rows.map(r => ({ feature: r.feature, desk365: r.desk365 ?? 'true', col2: r.col2 ?? 'false', col3: r.col3 ?? 'false' }))
+  : staticRows;
+
+function cellValue(val: string) {
+  if (val === 'true') return { type: 'check', label: 'Included' };
+  if (val === 'false') return { type: 'cross', label: 'Not available' };
+  return { type: 'text', label: val };
+}
+
+let sanityAttr: string | undefined;
+if (docId && data?._key) {
+  try {
+    const da = createDataAttribute({ id: docId, type: docType });
+    sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+  } catch {}
+}
+---
+
+<section id="d365-compare" class="d365-compare d365-section--white" data-sanity={sanityAttr}>
+  <div class="d365-container">
+    <div class="d365-section-header">
+      <h2 class="d365-heading">{heading}</h2>
+    </div>
+
+    <div class="d365-compare__wrap">
+      <table class="d365-compare__table" role="table">
+        <thead>
+          <tr>
+            <th class="d365-compare__th d365-compare__th--feature" scope="col">Features</th>
+            <th class="d365-compare__th d365-compare__th--desk365" scope="col">
+              <span class="d365-compare__brand-tag">Desk365</span>
+            </th>
+            <th class="d365-compare__th" scope="col">{col2Label}</th>
+            <th class="d365-compare__th" scope="col">{col3Label}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, i) => {
+            const d = cellValue(row.desk365);
+            const f = cellValue(row.col2);
+            const z = cellValue(row.col3);
+            return (
+              <tr class={i % 2 === 0 ? 'd365-compare__row--even' : ''}>
+                <td class="d365-compare__td d365-compare__td--feature">{row.feature}</td>
+                <td class="d365-compare__td d365-compare__td--desk365">
+                  {d.type === 'check'
+                    ? <span class="d365-compare__check" aria-label="Included">✓</span>
+                    : d.type === 'cross'
+                      ? <span class="d365-compare__cross" aria-label="Not available">✗</span>
+                      : <span class="d365-compare__partial">{d.label}</span>
+                  }
+                </td>
+                <td class="d365-compare__td">
+                  {f.type === 'check'
+                    ? <span class="d365-compare__check" aria-label="Included">✓</span>
+                    : f.type === 'cross'
+                      ? <span class="d365-compare__cross" aria-label="Not available">✗</span>
+                      : <span class="d365-compare__partial">{f.label}</span>
+                  }
+                </td>
+                <td class="d365-compare__td">
+                  {z.type === 'check'
+                    ? <span class="d365-compare__check" aria-label="Included">✓</span>
+                    : z.type === 'cross'
+                      ? <span class="d365-compare__cross" aria-label="Not available">✗</span>
+                      : <span class="d365-compare__partial">{z.label}</span>
+                  }
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="d365-compare__cta">
+      <a href={ctaHref} class="d365-btn d365-btn--green">{ctaLabel}</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .d365-compare {
+    padding: 80px 24px;
+  }
+
+  .d365-compare__wrap {
+    overflow-x: auto;
+    border-radius: var(--d365-radius-card);
+    border: 1px solid var(--d365-border);
+    margin-bottom: 40px;
+  }
+
+  .d365-compare__table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+  }
+
+  /* Header */
+  .d365-compare__th {
+    padding: 16px 20px;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--d365-text-body);
+    background: var(--d365-bg-gray);
+    border-bottom: 2px solid var(--d365-border);
+  }
+  .d365-compare__th--feature {
+    text-align: left;
+    width: 40%;
+    color: var(--d365-text-dark);
+  }
+  .d365-compare__th--desk365 {
+    background: var(--d365-blue);
+    color: #fff;
+  }
+
+  .d365-compare__brand-tag {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  /* Rows */
+  .d365-compare__td {
+    padding: 14px 20px;
+    font-size: 14px;
+    text-align: center;
+    color: var(--d365-text-body);
+    border-bottom: 1px solid var(--d365-border);
+    vertical-align: middle;
+  }
+  .d365-compare__td--feature {
+    text-align: left;
+    font-weight: 500;
+    color: var(--d365-text-dark);
+  }
+  .d365-compare__td--desk365 {
+    background: rgba(63,81,181,0.04);
+  }
+
+  .d365-compare__row--even {
+    background: #fafbff;
+  }
+  .d365-compare__row--even .d365-compare__td--desk365 {
+    background: rgba(63,81,181,0.06);
+  }
+
+  /* Cell values */
+  .d365-compare__check {
+    color: var(--d365-green);
+    font-weight: 700;
+    font-size: 18px;
+  }
+  .d365-compare__cross {
+    color: #c9c9d3;
+    font-size: 18px;
+  }
+  .d365-compare__partial {
+    font-size: 12px;
+    color: #888;
+    font-style: italic;
+  }
+
+  .d365-compare__cta {
+    text-align: center;
+  }
+</style>

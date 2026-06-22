@@ -4,10 +4,28 @@
 export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PageSection from '../components/PageSection.astro';
+import HomeSectionRenderer from '../components/home/HomeSectionRenderer.astro';
 import { sanityClient, getDraftClient } from '../lib/sanity';
 import { homepagePageBuilderQuery } from '../lib/queries';
-import type { HomepagePageBuilder, PageSection as PageSectionType } from '../lib/types';
+import type { HomepagePageBuilder } from '../lib/types';
+
+// Static home sections — used as fallback when Sanity pageBuilder is empty
+import HomeHeroSection          from '../components/home/HomeHeroSection.astro';
+import HomeTrustBarSection      from '../components/home/HomeTrustBarSection.astro';
+import HomeStatsSection         from '../components/home/HomeStatsSection.astro';
+import HomeFeatureCardsSection  from '../components/home/HomeFeatureCardsSection.astro';
+import HomeChannelsSection      from '../components/home/HomeChannelsSection.astro';
+import HomeAIFeaturesSection    from '../components/home/HomeAIFeaturesSection.astro';
+import HomeMicrosoftSection     from '../components/home/HomeMicrosoftSection.astro';
+import HomeITSMSection          from '../components/home/HomeITSMSection.astro';
+import HomeCapabilitiesSection  from '../components/home/HomeCapabilitiesSection.astro';
+import HomeComparisonSection    from '../components/home/HomeComparisonSection.astro';
+import HomeIntegrationsSection  from '../components/home/HomeIntegrationsSection.astro';
+import HomeTestimonialsSection  from '../components/home/HomeTestimonialsSection.astro';
+import HomeWhyChooseSection     from '../components/home/HomeWhyChooseSection.astro';
+import HomeSecuritySection      from '../components/home/HomeSecuritySection.astro';
+import HomeBlogSection          from '../components/home/HomeBlogSection.astro';
+import HomeFinalCtaSection      from '../components/home/HomeFinalCtaSection.astro';
 
 const isPreview = Astro.locals.isPreview;
 
@@ -23,48 +41,45 @@ if (!isPreview) {
   );
 }
 
-const pageBuilder: PageSectionType[] = homepage?.pageBuilder ?? [];
+const pageBuilder = homepage?.pageBuilder ?? [];
 ---
 
 <BaseLayout
   seo={{
-    metaTitle: seo.metaTitle || 'Desk365 — Simple Helpdesk & Ticketing Software',
-    metaDescription: seo.metaDescription || 'Scale your support with a simple yet feature-packed helpdesk. Automate workflows, enable self-service, and give your team the tools they need.',
+    metaTitle: seo.metaTitle || 'AI-powered helpdesk software for teams of all sizes | Desk365',
+    metaDescription: seo.metaDescription || 'A seamless AI-powered helpdesk solution built for businesses of all sizes. Simplify customer support with integrated ticketing, automation and a knowledge base.',
     ogImage: seo.ogImage,
   }}
 >
-  {pageBuilder.map((section) => (
-    <PageSection
-      section={section}
+  {/* Sanity page-builder content (d365* sections + generic pageSections) */}
+  {pageBuilder.length > 0 && pageBuilder.map((section) => (
+    <HomeSectionRenderer
+      section={section as any}
       isPreview={isPreview}
       docId={docId}
       docType="homepage"
     />
   ))}
 
+  {/* Static fallback — shown when Sanity pageBuilder is empty */}
   {pageBuilder.length === 0 && (
-    <section class="flex flex-col items-center justify-center py-32 px-4 text-center bg-gradient-to-b from-blue-50 to-white">
-      <span class="inline-flex items-center gap-1.5 bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-6">
-        🚀 Now with AI Agent
-      </span>
-      <h1 class="text-5xl font-extrabold text-gray-900 tracking-tight max-w-3xl leading-tight">
-        The helpdesk your team will actually <span class="text-blue-600">love using</span>
-      </h1>
-      <p class="mt-5 text-xl text-gray-500 max-w-2xl leading-relaxed">
-        Scale your support with a simple yet powerful helpdesk. Automate workflows, enable self-service, and resolve issues faster.
-      </p>
-      <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-        <a href="/pricing/" class="inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors shadow-sm">
-          Start Free Trial
-        </a>
-        <a href="/request-demo/" class="inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">
-          Book a Demo
-        </a>
-      </div>
-      <p class="mt-4 text-sm text-gray-400">No credit card required · 21-day free trial</p>
-      <p class="mt-8 text-sm text-gray-400 border border-dashed border-gray-300 rounded-lg px-4 py-3 max-w-md">
-        Open <strong>Sanity Studio → Homepage → Page Builder</strong> to add sections and content to this page.
-      </p>
-    </section>
+    <>
+      <HomeHeroSection />
+      <HomeTrustBarSection />
+      <HomeStatsSection />
+      <HomeFeatureCardsSection />
+      <HomeChannelsSection />
+      <HomeAIFeaturesSection />
+      <HomeMicrosoftSection />
+      <HomeITSMSection />
+      <HomeCapabilitiesSection />
+      <HomeComparisonSection />
+      <HomeIntegrationsSection />
+      <HomeTestimonialsSection />
+      <HomeWhyChooseSection />
+      <HomeSecuritySection />
+      <HomeBlogSection />
+      <HomeFinalCtaSection />
+    </>
   )}
 </BaseLayout>

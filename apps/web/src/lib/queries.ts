@@ -267,7 +267,121 @@ export const homepagePageBuilderQuery = groq`
       canonicalUrl,
       structuredData
     },
-    pageBuilder[] { ${sectionFields_pb} }
+    pageBuilder[] {
+      _type,
+      _key,
+      _type == "pageSection" => { ${sectionFields_pb} },
+      _type == "d365HeroSection" => {
+        headlinePrefix,
+        rotatingWords,
+        subheadline,
+        footnote,
+        heroImage { asset->{ url } },
+        heroImageAlt,
+        primaryCta { label, href, style, color },
+        secondaryCta { label, href, style, color },
+      },
+      _type == "d365TrustBarSection" => {
+        heading,
+        logosRow1[] { _key, name, logo { asset->{ url } }, href, badge },
+        logosRow2[] { _key, name, logo { asset->{ url } }, href, badge },
+      },
+      _type == "d365StatsSection" => {
+        stats[] { _key, number, label },
+      },
+      _type == "d365FeatureCardsSection" => {
+        headingGradient,
+        headingPlain,
+        body,
+        cards[] { _key, title, image { asset->{ url } }, imageAlt },
+      },
+      _type == "d365ChannelTabsSection" => {
+        heading,
+        body,
+        tabs[] { _key, label, description, image { asset->{ url } }, imageAlt },
+      },
+      _type == "d365AIFeaturesSection" => {
+        heading,
+        body,
+        cards[] {
+          _key,
+          label,
+          description,
+          readMoreHref,
+          image { asset->{ url } },
+          imageAlt,
+          subFeatures[] { _key, title, description },
+        },
+      },
+      _type == "d365MicrosoftSection" => {
+        heading,
+        body,
+        linkLabel,
+        linkHref,
+        heroImage { asset->{ url } },
+        heroImageAlt,
+        cards[] { _key, title, description, icon { asset->{ url } } },
+      },
+      _type == "d365ITSMSection" => {
+        heading,
+        body,
+        cards[] { _key, title, description, linkLabel, linkHref, image { asset->{ url } }, imageAlt },
+      },
+      _type == "d365CapabilitiesSection" => {
+        heading,
+        body,
+        ctaLabel,
+        ctaHref,
+        capabilities[] { _key, title, description, icon },
+      },
+      _type == "d365ComparisonSection" => {
+        heading,
+        ctaLabel,
+        ctaHref,
+        col2Label,
+        col3Label,
+        rows[] { _key, feature, desk365, col2, col3 },
+      },
+      _type == "d365IntegrationsSection" => {
+        heading,
+        body,
+        cards[] { _key, title, description, icon { asset->{ url } }, linkLabel, linkHref },
+      },
+      _type == "d365TestimonialsSection" => {
+        heading,
+        subtext,
+        testimonials[] { _key, quote, name, title, company, rating, reviewPlatform },
+      },
+      _type == "d365WhyChooseSection" => {
+        heading,
+        body,
+        awardImage { asset->{ url } },
+        awardText,
+        ctaLabel,
+        ctaHref,
+        cards[] { _key, title, description, icon },
+      },
+      _type == "d365SecuritySection" => {
+        heading,
+        bullets,
+        badgeImage { asset->{ url } },
+        badgeImageAlt,
+      },
+      _type == "d365BlogSection" => {
+        heading,
+        ctaLabel,
+        ctaHref,
+        posts[] { _key, category, title, href, image { asset->{ url } }, imageAlt },
+      },
+      _type == "d365FinalCtaSection" => {
+        heading,
+        body,
+        primaryCta { label, href, style, color },
+        secondaryCta { label, href, style, color },
+        footnote,
+        logoImage { asset->{ url } },
+      },
+    }
   }
 `;
 

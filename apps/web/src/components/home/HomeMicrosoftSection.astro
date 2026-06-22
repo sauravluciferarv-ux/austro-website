@@ -1,0 +1,136 @@
+---
+import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
+import type { D365MicrosoftSection } from '../../lib/types';
+
+interface Props {
+  data?: D365MicrosoftSection;
+  isPreview?: boolean;
+  docId?: string;
+  docType?: string;
+}
+
+const { data, docId, docType = 'homepage' } = Astro.props;
+
+const heading = data?.heading ?? "We're committed to your Microsoft investment";
+const body = data?.body ?? "Desk365 doesn't just plug into Teams – it's built to live inside the Microsoft ecosystem. From SSO to Entra ID Sync, you can do it all within Desk365 out-of-the-box.";
+const linkLabel = data?.linkLabel ?? 'Explore Teams integration';
+const linkHref = data?.linkHref ?? '/microsoft-teams-ticketing-system/';
+const imageSrc = data?.heroImage?.asset?.url ?? 'https://www.desk365.io/wp-content/uploads/2026/06/Frame-21064-1024x386.png';
+const imageAlt = data?.heroImageAlt ?? 'Desk365 Microsoft ecosystem integration';
+
+const staticCards = [
+  { title: 'Microsoft Teams Ticketing System', description: 'Manage support within Microsoft Teams. Let users raise tickets and agents resolve them without leaving Teams.', iconSrc: 'https://www.desk365.io/wp-content/uploads/2026/06/Frame-21178.png' },
+  { title: 'Microsoft Entra ID Sync', description: 'Automatically syncs your user directory – no manual imports, always up to date.', iconSrc: 'https://www.desk365.io/wp-content/uploads/2026/06/Frame-21179.png' },
+  { title: 'Microsoft Entra SSO', description: 'Single sign-on for agents and end-users. Seamless M365 authentication, one less password.', iconSrc: 'https://www.desk365.io/wp-content/uploads/2026/06/Frame-20960.png' },
+  { title: 'Power Automate Connector', description: 'Connect Desk365 to hundreds of Microsoft and third-party apps via native Power Automate.', iconSrc: 'https://www.desk365.io/wp-content/uploads/2026/06/Frame-20961.png' },
+  { title: 'Microsoft 365 Copilot Plugin', description: 'Interact with Desk365 from Word, Excel, PowerPoint, Outlook, and Teams via M365 Copilot.', iconSrc: 'https://www.desk365.io/wp-content/uploads/2026/06/Frame-20302.png' },
+];
+
+const cards = data?.cards?.length
+  ? data.cards.map(c => ({ title: c.title, description: c.description ?? '', iconSrc: c.icon?.asset?.url ?? '' }))
+  : staticCards;
+
+let sanityAttr: string | undefined;
+if (docId && data?._key) {
+  try {
+    const da = createDataAttribute({ id: docId, type: docType });
+    sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+  } catch {}
+}
+---
+
+<section id="d365-microsoft" class="d365-microsoft d365-section--blue-light" data-sanity={sanityAttr}>
+  <div class="d365-container">
+
+    <!-- Top: text + image -->
+    <div class="d365-microsoft__top">
+      <div class="d365-microsoft__text">
+        <h2 class="d365-heading">{heading}</h2>
+        <p class="d365-body">{body}</p>
+        <a href={linkHref} class="d365-link">{linkLabel}</a>
+      </div>
+      <div class="d365-microsoft__hero-img-wrap">
+        <img
+          src={imageSrc}
+          alt={imageAlt}
+          class="d365-microsoft__hero-img"
+          loading="lazy"
+        />
+      </div>
+    </div>
+
+    <!-- Bottom: 5 cards -->
+    <div class="d365-microsoft__cards">
+      {cards.map(card => (
+        <div class="d365-card d365-card--flat d365-microsoft__card">
+          <div class="d365-icon-box">
+            <img src={card.iconSrc} alt={card.title} loading="lazy" />
+          </div>
+          <h3 class="d365-microsoft__card-title">{card.title}</h3>
+          <p class="d365-body d365-body--sm" style="margin:0">{card.description}</p>
+        </div>
+      ))}
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .d365-microsoft {
+    padding: 80px 24px;
+  }
+
+  /* Top layout: text + image */
+  .d365-microsoft__top {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+    align-items: center;
+    margin-bottom: 56px;
+  }
+
+  @media (min-width: 900px) {
+    .d365-microsoft__top {
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+    }
+  }
+
+  .d365-microsoft__hero-img-wrap {
+    display: flex;
+    justify-content: center;
+  }
+
+  .d365-microsoft__hero-img {
+    width: 100%;
+    max-width: 560px;
+    height: auto;
+    border-radius: 12px;
+  }
+
+  /* Cards grid */
+  .d365-microsoft__cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+
+  @media (min-width: 900px) {
+    .d365-microsoft__cards {
+      grid-template-columns: repeat(5, 1fr);
+    }
+  }
+
+  .d365-microsoft__card {
+    background: #fff;
+    padding: 24px;
+  }
+
+  .d365-microsoft__card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--d365-blue);
+    margin: 0 0 8px;
+    line-height: 1.3;
+  }
+</style>

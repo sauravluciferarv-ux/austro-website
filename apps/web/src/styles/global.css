@@ -4,6 +4,237 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── D365 Design Tokens ─────────────────────────────────────────────────────── */
+:root {
+  --d365-blue:        #3F51B5;
+  --d365-blue-dark:   #2c3e8c;
+  --d365-blue-light:  #f0f2fb;
+  --d365-green:       #82B212;
+  --d365-green-dark:  #6a9210;
+  --d365-pink:        #ff48c9;
+  --d365-purple:      #9b23ea;
+  --d365-icon-bg:     #EBEDF8;
+  --d365-icon-bg-ai:  #FEEBFF;
+  --d365-bg-gray:     #f5f7ff;
+  --d365-text-dark:   #1a1a2e;
+  --d365-text-body:   #4a4a68;
+  --d365-border:      #e2e5f1;
+  --d365-radius-card: 16px;
+  --d365-radius-btn:  8px;
+  --d365-shadow-card: 0 2px 16px rgba(63,81,181,0.08);
+}
+
+/* ── D365 Shared Layout ─────────────────────────────────────────────────────── */
+.d365-section {
+  padding: 80px 24px;
+}
+.d365-section--sm {
+  padding: 48px 24px;
+}
+.d365-section--gray {
+  background-color: var(--d365-bg-gray);
+}
+.d365-section--blue-light {
+  background-color: var(--d365-blue-light);
+}
+.d365-section--white {
+  background-color: #fff;
+}
+
+.d365-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+.d365-container--wide {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ── D365 Section Headers ───────────────────────────────────────────────────── */
+.d365-section-header {
+  text-align: center;
+  max-width: 780px;
+  margin: 0 auto 56px;
+}
+.d365-section-header--left {
+  text-align: left;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.d365-eyebrow {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--d365-blue);
+  margin-bottom: 14px;
+}
+
+/* ── D365 Typography ────────────────────────────────────────────────────────── */
+.d365-heading {
+  font-size: clamp(28px, 3.5vw, 40px);
+  font-weight: 700;
+  color: var(--d365-blue);
+  line-height: 1.2;
+  margin: 0 0 20px;
+  font-family: 'Roboto', sans-serif;
+}
+.d365-heading--xl {
+  font-size: clamp(34px, 4.5vw, 46px);
+  line-height: 1.18;
+}
+.d365-heading--white { color: #fff; }
+
+/* Gradient "AI" text (pink → purple) */
+.d365-ai-text {
+  background: conic-gradient(from 0deg, #ff48c9 6%, #9b23ea 54%, #ff48c9 100%);
+  background-position: 40% 40%;
+  background-size: 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline;
+}
+
+.d365-body {
+  font-size: 17px;
+  line-height: 1.75;
+  color: var(--d365-text-body);
+  margin: 0 0 24px;
+}
+.d365-body--sm {
+  font-size: 15px;
+}
+
+/* ── D365 Buttons ───────────────────────────────────────────────────────────── */
+.d365-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 28px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  border-radius: var(--d365-radius-btn);
+  text-decoration: none;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+  white-space: nowrap;
+  font-family: 'Roboto', sans-serif;
+}
+.d365-btn--green {
+  background: var(--d365-green);
+  color: #fff;
+  border-color: var(--d365-green);
+}
+.d365-btn--green:hover {
+  background: var(--d365-green-dark);
+  border-color: var(--d365-green-dark);
+  color: #fff;
+}
+.d365-btn--blue {
+  background: var(--d365-blue);
+  color: #fff;
+  border-color: var(--d365-blue);
+}
+.d365-btn--blue:hover {
+  background: var(--d365-blue-dark);
+  border-color: var(--d365-blue-dark);
+  color: #fff;
+}
+.d365-btn--outline-blue {
+  background: transparent;
+  border-color: var(--d365-blue);
+  color: var(--d365-blue);
+}
+.d365-btn--outline-blue:hover {
+  background: var(--d365-blue);
+  color: #fff;
+}
+.d365-btn--outline-white {
+  background: transparent;
+  border-color: #fff;
+  color: #fff;
+}
+.d365-btn--outline-white:hover {
+  background: rgba(255,255,255,0.12);
+}
+
+/* ── D365 Cards ─────────────────────────────────────────────────────────────── */
+.d365-card {
+  background: #fff;
+  border-radius: var(--d365-radius-card);
+  padding: 28px;
+  box-shadow: var(--d365-shadow-card);
+  border: 1px solid var(--d365-border);
+}
+.d365-card--flat {
+  box-shadow: none;
+}
+
+/* ── D365 Icon Box ──────────────────────────────────────────────────────────── */
+.d365-icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: var(--d365-icon-bg);
+  margin-bottom: 16px;
+}
+.d365-icon-box--ai {
+  background: var(--d365-icon-bg-ai);
+}
+.d365-icon-box img,
+.d365-icon-box svg {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+/* ── D365 Grids ─────────────────────────────────────────────────────────────── */
+.d365-grid {
+  display: grid;
+  gap: 24px;
+}
+.d365-grid--2 {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+.d365-grid--3 {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+.d365-grid--4 {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+@media (min-width: 768px) {
+  .d365-grid--2 { grid-template-columns: repeat(2, 1fr); }
+  .d365-grid--3 { grid-template-columns: repeat(3, 1fr); }
+  .d365-grid--4 { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ── D365 Link Arrow ────────────────────────────────────────────────────────── */
+.d365-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--d365-blue);
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  transition: gap 0.15s ease;
+}
+.d365-link:hover { gap: 10px; }
+.d365-link::after { content: '→'; }
+
 @layer base {
   html {
     scroll-behavior: smooth;
