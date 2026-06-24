@@ -1,6 +1,5 @@
 {
   "buildCommand": "turbo run build --filter=desk365-web",
-  "outputDirectory": "apps/web/dist",
   "framework": "astro",
   "redirects": [
     {
