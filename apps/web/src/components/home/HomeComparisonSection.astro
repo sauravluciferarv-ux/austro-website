@@ -1,15 +1,16 @@
 ---
 import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
-import type { D365ComparisonSection } from '../../lib/types';
+import type { D365ComparisonSection, D365SectionStyleProps } from '../../lib/types';
 
 interface Props {
   data?: D365ComparisonSection;
   isPreview?: boolean;
   docId?: string;
   docType?: string;
+  styleProps?: D365SectionStyleProps;
 }
 
-const { data, docId, docType = 'homepage' } = Astro.props;
+const { data, docId, docType = 'homepage', styleProps } = Astro.props;
 
 const heading = data?.heading ?? 'The cleaner alternative to Freshdesk & Zendesk';
 const ctaLabel = data?.ctaLabel ?? 'Start Your Free Trial';
@@ -51,7 +52,13 @@ if (docId && data?._key) {
 }
 ---
 
-<section id="d365-compare" class="d365-compare d365-section--white" data-sanity={sanityAttr}>
+{styleProps?.css && <style is:inline set:html={styleProps.css} />}
+<section
+  id={styleProps?.sectionId ?? 'd365-compare'}
+  class:list={['d365-compare', 'd365-section--white', styleProps?.extraClass]}
+  style={styleProps?.inlineStyle || undefined}
+  data-sanity={sanityAttr}
+>
   <div class="d365-container">
     <div class="d365-section-header">
       <h2 class="d365-heading">{heading}</h2>

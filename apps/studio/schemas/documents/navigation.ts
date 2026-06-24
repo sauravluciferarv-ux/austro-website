@@ -68,8 +68,10 @@ export default defineType({
   __experimental_actions: ['update', 'publish'],
   groups: [
     { name: 'header', title: 'Header' },
+    { name: 'headerStyle', title: 'Header Style' },
     { name: 'solutions', title: 'Solutions Mega Menu' },
     { name: 'footer', title: 'Footer' },
+    { name: 'footerStyle', title: 'Footer Style' },
   ],
   fields: [
     // ─── HEADER ────────────────────────────────────────────────────────
@@ -123,6 +125,83 @@ export default defineType({
           title: 'Secondary CTA URL',
           type: 'string',
           initialValue: '/request-demo/',
+        }),
+      ],
+    }),
+
+    // ─── HEADER STYLE ────────────────────────────────────────────────
+    defineField({
+      name: 'headerStyle',
+      title: 'Header Style & Behavior',
+      type: 'object',
+      group: 'headerStyle',
+      options: { collapsible: true, collapsed: false },
+      fields: [
+        defineField({
+          name: 'sticky',
+          title: 'Sticky Header',
+          type: 'string',
+          options: {
+            list: [
+              { title: 'Always visible (sticky)', value: 'always' },
+              { title: 'Hidden on scroll down, shown on scroll up', value: 'smart' },
+              { title: 'Static (not sticky)', value: 'static' },
+            ],
+            layout: 'radio',
+          },
+          initialValue: 'always',
+        }),
+        defineField({
+          name: 'transparentOnHero',
+          title: 'Transparent on Hero',
+          type: 'boolean',
+          description: 'Start transparent over the hero section, become solid on scroll',
+          initialValue: false,
+        }),
+        defineField({
+          name: 'backgroundColor',
+          title: 'Background Color',
+          type: 'string',
+          placeholder: '#ffffff or var(--d365-blue)',
+          description: 'Leave empty to use the default white background',
+        }),
+        defineField({
+          name: 'textColor',
+          title: 'Navigation Link Color',
+          type: 'string',
+          placeholder: '#1a1a2e',
+        }),
+        defineField({
+          name: 'borderBottom',
+          title: 'Show Bottom Border',
+          type: 'boolean',
+          initialValue: true,
+        }),
+        defineField({
+          name: 'shadowOnScroll',
+          title: 'Drop Shadow on Scroll',
+          type: 'boolean',
+          initialValue: true,
+        }),
+        defineField({
+          name: 'height',
+          title: 'Header Height',
+          type: 'string',
+          placeholder: 'e.g. 72px',
+          description: 'Leave empty for the default height',
+        }),
+        defineField({
+          name: 'logoWidth',
+          title: 'Logo Max Width',
+          type: 'string',
+          placeholder: 'e.g. 140px',
+        }),
+        defineField({
+          name: 'customCss',
+          title: 'Custom CSS (Header)',
+          type: 'text',
+          rows: 6,
+          description: 'Scoped to the <header> element. Example: header { border-bottom: 2px solid #3F51B5; }',
         }),
       ],
     }),
@@ -252,6 +331,67 @@ export default defineType({
             ],
             preview: { select: { title: 'label', subtitle: 'code' } },
           }],
+        }),
+      ],
+    }),
+
+    // ─── FOOTER STYLE ────────────────────────────────────────────────
+    defineField({
+      name: 'footerStyle',
+      title: 'Footer Style',
+      type: 'object',
+      group: 'footerStyle',
+      options: { collapsible: true, collapsed: true },
+      fields: [
+        defineField({
+          name: 'backgroundColor',
+          title: 'Background Color',
+          type: 'string',
+          placeholder: '#282c81 (default navy)',
+          description: 'Leave empty to use the default dark navy background',
+        }),
+        defineField({
+          name: 'textColor',
+          title: 'Text Color',
+          type: 'string',
+          placeholder: '#ffffff',
+        }),
+        defineField({
+          name: 'linkColor',
+          title: 'Link Color',
+          type: 'string',
+          placeholder: '#c5cae9',
+        }),
+        defineField({
+          name: 'linkHoverColor',
+          title: 'Link Hover Color',
+          type: 'string',
+          placeholder: '#ffffff',
+        }),
+        defineField({
+          name: 'borderTopColor',
+          title: 'Top Border Color',
+          type: 'string',
+          placeholder: 'e.g. rgba(255,255,255,0.1)',
+        }),
+        defineField({
+          name: 'paddingTop',
+          title: 'Padding Top',
+          type: 'string',
+          placeholder: 'e.g. 64px',
+        }),
+        defineField({
+          name: 'paddingBottom',
+          title: 'Padding Bottom',
+          type: 'string',
+          placeholder: 'e.g. 32px',
+        }),
+        defineField({
+          name: 'customCss',
+          title: 'Custom CSS (Footer)',
+          type: 'text',
+          rows: 6,
+          description: 'Scoped to the <footer> element.',
         }),
       ],
     }),

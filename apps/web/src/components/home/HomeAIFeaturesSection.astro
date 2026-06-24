@@ -1,15 +1,16 @@
 ---
 import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
-import type { D365AIFeaturesSection } from '../../lib/types';
+import type { D365AIFeaturesSection, D365SectionStyleProps } from '../../lib/types';
 
 interface Props {
   data?: D365AIFeaturesSection;
   isPreview?: boolean;
   docId?: string;
   docType?: string;
+  styleProps?: D365SectionStyleProps;
 }
 
-const { data, docId, docType = 'homepage' } = Astro.props;
+const { data, docId, docType = 'homepage', styleProps } = Astro.props;
 
 const heading = data?.heading ?? 'Less busywork. More human support.';
 const body = data?.body ?? "Desk365's AI is different. It works in the background to reduce workload and stand-in to automate repetitive tasks so agents can do what they do best – be human.";
@@ -20,19 +21,32 @@ const staticCards = [
 ];
 
 const cards = data?.cards?.length
-  ? data.cards.map((c, i) => ({ id: c._key ?? `ai-${i}`, label: c.label, description: c.description ?? '', readMoreHref: c.readMoreHref, imageSrc: c.image?.asset?.url ?? '', imageAlt: c.imageAlt ?? c.label, subFeatures: c.subFeatures ?? [] }))
+  ? data.cards.map((c, i) => ({ id: c._key ?? `ai-${i}`, _key: c._key, label: c.label, description: c.description ?? '', readMoreHref: c.readMoreHref, imageSrc: c.image?.asset?.url ?? '', imageAlt: c.imageAlt ?? c.label, subFeatures: c.subFeatures ?? [] }))
   : staticCards;
 
 let sanityAttr: string | undefined;
+let daFn: ((path: string) => string) | undefined;
 if (docId && data?._key) {
   try {
     const da = createDataAttribute({ id: docId, type: docType });
     sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+    daFn = (path: string) => da(path);
   } catch {}
+}
+
+function cardImgAttr(cardKey: string | undefined) {
+  if (!daFn || !data?._key || !cardKey) return undefined;
+  return daFn(`pageBuilder[_key=="${data._key}"].cards[_key=="${cardKey}"].image`);
 }
 ---
 
-<section id="d365-ai-features" class="d365-ai-features d365-section--white" data-sanity={sanityAttr}>
+{styleProps?.css && <style is:inline set:html={styleProps.css} />}
+<section
+  id={styleProps?.sectionId ?? 'd365-ai-features'}
+  class:list={['d365-ai-features', 'd365-section--white', styleProps?.extraClass]}
+  style={styleProps?.inlineStyle || undefined}
+  data-sanity={sanityAttr}
+>
   <div class="d365-container">
     <div class="d365-section-header">
       <h2 class="d365-heading">{heading}</h2>
@@ -95,10 +109,11 @@ if (docId && data?._key) {
         {cards.map((card, i) => (
           <img
             src={card.imageSrc}
-            alt={card.imageAlt || card.heading}
+            alt={card.imageAlt || card.label}
             class={`d365-ai-features__img${i === 0 ? ' d365-ai-features__img--active' : ''}`}
             data-img={card.id}
             loading={i === 0 ? 'eager' : 'lazy'}
+            data-sanity={cardImgAttr((card as any)._key)}
           />
         ))}
       </div>

@@ -1,15 +1,16 @@
 ---
 import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
-import type { D365FinalCtaSection } from '../../lib/types';
+import type { D365FinalCtaSection, D365SectionStyleProps } from '../../lib/types';
 
 interface Props {
   data?: D365FinalCtaSection;
   isPreview?: boolean;
   docId?: string;
   docType?: string;
+  styleProps?: D365SectionStyleProps;
 }
 
-const { data, docId, docType = 'homepage' } = Astro.props;
+const { data, docId, docType = 'homepage', styleProps } = Astro.props;
 
 const heading = data?.heading ?? 'Empower your teams with the best helpdesk platform';
 const body = data?.body ?? 'Choose from our high-value plans that are inclusive of all the features your business needs. No credit card needed.';
@@ -21,15 +22,23 @@ const footnote = data?.footnote ?? '21-day free trial · No credit card required
 const logoImageSrc = data?.logoImage?.asset?.url ?? 'https://www.desk365.io/wp-content/uploads/2026/06/desk365-cta-platform.png';
 
 let sanityAttr: string | undefined;
+let logoImgAttr: string | undefined;
 if (docId && data?._key) {
   try {
     const da = createDataAttribute({ id: docId, type: docType });
     sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+    logoImgAttr = da(`pageBuilder[_key=="${data._key}"].logoImage`);
   } catch {}
 }
 ---
 
-<section id="d365-final-cta" class="d365-final-cta" data-sanity={sanityAttr}>
+{styleProps?.css && <style is:inline set:html={styleProps.css} />}
+<section
+  id={styleProps?.sectionId ?? 'd365-final-cta'}
+  class:list={['d365-final-cta', styleProps?.extraClass]}
+  style={styleProps?.inlineStyle || undefined}
+  data-sanity={sanityAttr}
+>
   <div class="d365-container d365-final-cta__inner">
 
     <!-- Left: Content -->
@@ -47,10 +56,11 @@ if (docId && data?._key) {
     <div class="d365-final-cta__visual" aria-hidden="true">
       <img
         src={logoImageSrc}
-        alt=""
+        alt="Desk365 platform visual"
         class="d365-final-cta__logo-img"
         loading="lazy"
         onerror="this.style.display='none'"
+        data-sanity={logoImgAttr}
       />
       <!-- Fallback D365 logo mark shown when image fails to load -->
       <div class="d365-final-cta__logo-fallback" aria-hidden="true">

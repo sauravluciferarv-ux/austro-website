@@ -4,26 +4,54 @@ export default defineType({
   name: 'headingBlock',
   title: 'Heading',
   type: 'object',
+  groups: [
+    { name: 'content',    title: 'Content',    default: true },
+    { name: 'style',      title: 'Style'       },
+    { name: 'responsive', title: 'Responsive'  },
+    { name: 'advanced',   title: 'Advanced'    },
+  ],
   fields: [
-    defineField({ name: 'blockId', title: 'Block ID', type: 'string', description: 'Unique ID for this block (auto-generated if empty)' }),
-    defineField({ name: 'blockClass', title: 'CSS Class', type: 'string', description: 'Unique class name for custom CSS targeting' }),
+    // ── Content ─────────────────────────────────────────────────────────
     defineField({
-      name: 'level', title: 'Heading Level', type: 'string',
+      name: 'level',
+      title: 'Heading Level',
+      type: 'string',
       options: { list: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'], layout: 'radio', direction: 'horizontal' },
       initialValue: 'h2',
+      group: 'content',
     }),
-    defineField({ name: 'text', title: 'Text', type: 'string', validation: R => R.required() }),
     defineField({
-      name: 'alignment', title: 'Alignment', type: 'string',
-      options: { list: ['left', 'center', 'right'], layout: 'radio', direction: 'horizontal' },
-      initialValue: 'left',
+      name: 'text',
+      title: 'Text',
+      type: 'string',
+      validation: R => R.required(),
+      group: 'content',
     }),
-    defineField({ name: 'customCss', title: 'Custom CSS', type: 'text', rows: 4, description: "CSS scoped to this block's class" }),
-    defineField({ name: 'hideOnMobile', title: 'Hide on Mobile', type: 'boolean', initialValue: false }),
-    defineField({ name: 'hideOnDesktop', title: 'Hide on Desktop', type: 'boolean', initialValue: false }),
+
+    // ── Style ────────────────────────────────────────────────────────────
+    defineField({ name: 'typography', title: 'Typography', type: 'styleTypography', group: 'style' }),
+    defineField({ name: 'spacing',    title: 'Spacing',    type: 'styleSpacing',    group: 'style' }),
+
+    // ── Responsive ───────────────────────────────────────────────────────
+    defineField({ name: 'responsive', title: 'Responsive Controls', type: 'styleResponsive', group: 'responsive' }),
+
+    // ── Advanced ─────────────────────────────────────────────────────────
+    defineField({ name: 'blockId',    title: 'HTML ID',    type: 'string', group: 'advanced' }),
+    defineField({ name: 'blockClass', title: 'CSS Class',  type: 'string', group: 'advanced' }),
+    defineField({
+      name: 'customCss',
+      title: 'Custom CSS',
+      type: 'text',
+      rows: 6,
+      description: "Scoped to this block's CSS class. Example: font-style: italic; text-decoration: underline;",
+      group: 'advanced',
+    }),
   ],
   preview: {
     select: { title: 'text', level: 'level' },
-    prepare: ({ title, level }: { title?: string; level?: string }) => ({ title: title ?? 'Heading', subtitle: level ?? 'h2' }),
+    prepare: ({ title, level }: { title?: string; level?: string }) => ({
+      title: title ?? 'Heading',
+      subtitle: level ?? 'h2',
+    }),
   },
 });

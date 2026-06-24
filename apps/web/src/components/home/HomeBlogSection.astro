@@ -1,15 +1,16 @@
 ---
 import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
-import type { D365BlogSection } from '../../lib/types';
+import type { D365BlogSection, D365SectionStyleProps } from '../../lib/types';
 
 interface Props {
   data?: D365BlogSection;
   isPreview?: boolean;
   docId?: string;
   docType?: string;
+  styleProps?: D365SectionStyleProps;
 }
 
-const { data, docId, docType = 'homepage' } = Astro.props;
+const { data, docId, docType = 'homepage', styleProps } = Astro.props;
 
 const heading = data?.heading ?? 'Featured blog posts';
 const ctaLabel = data?.ctaLabel ?? 'Read more';
@@ -22,19 +23,32 @@ const staticPosts = [
 ];
 
 const posts = data?.posts?.length
-  ? data.posts.map(p => ({ category: p.category, title: p.title, href: p.href, imageSrc: p.image?.asset?.url, imageAlt: p.imageAlt }))
+  ? data.posts.map(p => ({ _key: p._key, category: p.category, title: p.title, href: p.href, imageSrc: p.image?.asset?.url, imageAlt: p.imageAlt }))
   : staticPosts;
 
 let sanityAttr: string | undefined;
+let daFn: ((path: string) => string) | undefined;
 if (docId && data?._key) {
   try {
     const da = createDataAttribute({ id: docId, type: docType });
     sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+    daFn = (path: string) => da(path);
   } catch {}
+}
+
+function postImgAttr(postKey: string | undefined) {
+  if (!daFn || !data?._key || !postKey) return undefined;
+  return daFn(`pageBuilder[_key=="${data._key}"].posts[_key=="${postKey}"].image`);
 }
 ---
 
-<section id="d365-blog" class="d365-blog d365-section--white" data-sanity={sanityAttr}>
+{styleProps?.css && <style is:inline set:html={styleProps.css} />}
+<section
+  id={styleProps?.sectionId ?? 'd365-blog'}
+  class:list={['d365-blog', 'd365-section--white', styleProps?.extraClass]}
+  style={styleProps?.inlineStyle || undefined}
+  data-sanity={sanityAttr}
+>
   <div class="d365-container">
     <div class="d365-blog__header">
       <h2 class="d365-heading">{heading}</h2>
@@ -51,6 +65,7 @@ if (docId && data?._key) {
                 alt={post.imageAlt || post.title}
                 class="d365-blog-card__img"
                 loading="lazy"
+                data-sanity={postImgAttr((post as any)._key)}
               />
             </div>
           )}

@@ -1,0 +1,911 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import HomeSectionRenderer from '../../components/home/HomeSectionRenderer.astro';
+import { sanityClient, getDraftClient } from '../../lib/sanity';
+import { pricingPageQuery } from '../../lib/queries';
+import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
+import {
+  PRICING_DEFAULTS, DEFAULT_PLANS, DEFAULT_COMPETITORS, DEFAULT_FAQS, FEATURE_ROWS, DEFAULT_AI_CREDIT_CARDS,
+} from '../../lib/page-defaults';
+
+const isPreview = Astro.locals.isPreview ?? false;
+const client = isPreview ? getDraftClient() : sanityClient;
+const cmsData = await client.fetch(pricingPageQuery).catch(() => null);
+
+if (!isPreview) {
+  Astro.response.headers.set('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
+}
+
+// All content from Sanity; page-defaults used as fallback until seed:all is run
+const plans       = (cmsData?.plans?.length       ? cmsData.plans       : DEFAULT_PLANS) as typeof DEFAULT_PLANS;
+const competitors = (cmsData?.competitors?.length  ? cmsData.competitors  : DEFAULT_COMPETITORS) as typeof DEFAULT_COMPETITORS;
+const faqs        = (cmsData?.faqs?.length
+  ? cmsData.faqs.map((f: any) => ({ question: f.question, answer: f.answer }))
+  : DEFAULT_FAQS) as typeof DEFAULT_FAQS;
+const featureRows = FEATURE_ROWS;
+
+const heroEyebrow    = cmsData?.heroEyebrow    || PRICING_DEFAULTS.heroEyebrow;
+const heroHeading    = cmsData?.heroHeading    || PRICING_DEFAULTS.heroHeading;
+const heroSubheading = cmsData?.heroSubheading || PRICING_DEFAULTS.heroSubheading;
+
+const billingMonthlyLabel  = cmsData?.billingConfig?.monthlyLabel  || PRICING_DEFAULTS.billingConfig.monthlyLabel;
+const billingYearlyLabel   = cmsData?.billingConfig?.yearlyLabel   || PRICING_DEFAULTS.billingConfig.yearlyLabel;
+const billingYearlySaveBadge = cmsData?.billingConfig?.yearlySaveBadge || PRICING_DEFAULTS.billingConfig.yearlySaveBadge;
+const billingYearlyNote  = cmsData?.billingConfig?.billingYearlyNote  || PRICING_DEFAULTS.billingConfig.billingYearlyNote;
+const billingMonthlyNote = cmsData?.billingConfig?.billingMonthlyNote || PRICING_DEFAULTS.billingConfig.billingMonthlyNote;
+const priceUnit      = cmsData?.priceUnit      || PRICING_DEFAULTS.priceUnit;
+const freePriceLabel = cmsData?.freePriceLabel || PRICING_DEFAULTS.freePriceLabel;
+
+const plansFootnote             = cmsData?.plansFootnote             || PRICING_DEFAULTS.plansFootnote;
+const plansFootnoteContactLabel = cmsData?.plansFootnoteContactLabel || PRICING_DEFAULTS.plansFootnoteContactLabel;
+const plansFootnoteContactHref  = cmsData?.plansFootnoteContactHref  || PRICING_DEFAULTS.plansFootnoteContactHref;
+
+const comparisonEyebrow    = cmsData?.comparisonEyebrow    || PRICING_DEFAULTS.comparisonEyebrow;
+const comparisonHeading    = cmsData?.comparisonHeading    || PRICING_DEFAULTS.comparisonHeading;
+const comparisonSubheading = cmsData?.comparisonSubheading || PRICING_DEFAULTS.comparisonSubheading;
+const comparisonFootnote   = cmsData?.comparisonFootnote   || PRICING_DEFAULTS.comparisonFootnote;
+
+const featureTableEyebrow = cmsData?.featureTableEyebrow || PRICING_DEFAULTS.featureTableEyebrow;
+const featureTableHeading = cmsData?.featureTableHeading || PRICING_DEFAULTS.featureTableHeading;
+const ftCols = cmsData?.featureTableColumnLabels ?? PRICING_DEFAULTS.featureTableColumnLabels;
+const ftFeatureCol  = ftCols?.featureCol  || PRICING_DEFAULTS.featureTableColumnLabels.featureCol;
+const ftFreeCol     = ftCols?.freeCol     || PRICING_DEFAULTS.featureTableColumnLabels.freeCol;
+const ftStandardCol = ftCols?.standardCol || PRICING_DEFAULTS.featureTableColumnLabels.standardCol;
+const ftPlusCol     = ftCols?.plusCol     || PRICING_DEFAULTS.featureTableColumnLabels.plusCol;
+const ftPremiumCol  = ftCols?.premiumCol  || PRICING_DEFAULTS.featureTableColumnLabels.premiumCol;
+
+const aiAddonEyebrow = cmsData?.aiAddonEyebrow || PRICING_DEFAULTS.aiAddonEyebrow;
+const aiAddonHeading = cmsData?.aiAddonHeading || 'Autonomous AI that resolves tickets on its own';
+const aiAddonBody    = cmsData?.aiAddonBody    || 'Deploy AI agents that understand context, search your knowledge base, and resolve repetitive queries without human intervention — escalating only when truly needed.';
+const aiAddonBullets: string[] = cmsData?.aiAddonBullets?.length ? cmsData.aiAddonBullets : PRICING_DEFAULTS.aiAddonBullets;
+const aiAddonCtaLabel = cmsData?.aiAddonCtaLabel || PRICING_DEFAULTS.aiAddonCtaLabel;
+const aiAddonCtaHref  = cmsData?.aiAddonCtaHref  || PRICING_DEFAULTS.aiAddonCtaHref;
+const aiAddonCreditCards: { planName: string; credits: string }[] = cmsData?.aiAddonCreditCards?.length ? cmsData.aiAddonCreditCards : DEFAULT_AI_CREDIT_CARDS;
+const aiAddonCardGradient = cmsData?.aiAddonCardGradient || PRICING_DEFAULTS.aiAddonCardGradient;
+const aiAddonCardSmallBg  = cmsData?.aiAddonCardSmallBg  || PRICING_DEFAULTS.aiAddonCardSmallBg;
+const aiAddonStats: { stat: string; label: string }[] = cmsData?.aiAddonStats?.length ? cmsData.aiAddonStats : PRICING_DEFAULTS.aiAddonStats;
+
+const trustBarLabel = cmsData?.trustBarLabel || PRICING_DEFAULTS.trustBarLabel;
+const trustBarCustomers: string[] = cmsData?.trustBarCustomers?.length ? cmsData.trustBarCustomers : PRICING_DEFAULTS.trustBarCustomers;
+const trustBarStats: { number: string; label: string }[] = cmsData?.trustBarStats?.length ? cmsData.trustBarStats : PRICING_DEFAULTS.trustBarStats;
+
+const faqEyebrow = cmsData?.faqEyebrow || PRICING_DEFAULTS.faqEyebrow;
+const faqHeading = cmsData?.faqHeading || PRICING_DEFAULTS.faqHeading;
+
+const finalCtaHeading        = cmsData?.finalCtaHeading        || PRICING_DEFAULTS.finalCtaHeading;
+const finalCtaSubheading     = cmsData?.finalCtaSubheading     || PRICING_DEFAULTS.finalCtaSubheading;
+const finalCtaPrimaryLabel   = cmsData?.finalCtaPrimaryLabel   || PRICING_DEFAULTS.finalCtaPrimaryLabel;
+const finalCtaPrimaryHref    = cmsData?.finalCtaPrimaryHref    || PRICING_DEFAULTS.finalCtaPrimaryHref;
+const finalCtaSecondaryLabel = cmsData?.finalCtaSecondaryLabel || PRICING_DEFAULTS.finalCtaSecondaryLabel;
+const finalCtaSecondaryHref  = cmsData?.finalCtaSecondaryHref  || PRICING_DEFAULTS.finalCtaSecondaryHref;
+const finalCtaFootnote           = cmsData?.finalCtaFootnote           || PRICING_DEFAULTS.finalCtaFootnote;
+const finalCtaGradientAccent     = cmsData?.finalCtaGradientAccent     || PRICING_DEFAULTS.finalCtaGradientAccent;
+
+const pageBuilder    = cmsData?.pageBuilder ?? [];
+const docId          = cmsData?._id ?? 'pricingPage';
+const seo            = cmsData?.seo ?? {};
+
+const da = createDataAttribute({ id: docId, type: 'pricingPage' });
+let heroSectionAttr: string | undefined;
+let plansSectionAttr: string | undefined;
+let competitorsSectionAttr: string | undefined;
+let faqSectionAttr: string | undefined;
+try {
+  heroSectionAttr        = da('heroHeading');
+  plansSectionAttr       = da('plans');
+  competitorsSectionAttr = da('competitors');
+  faqSectionAttr         = da('faqs');
+} catch {}
+---
+
+<BaseLayout seo={{
+  metaTitle: seo.metaTitle || 'Pricing — Desk365 | AI-Powered Helpdesk for Teams of All Sizes',
+  metaDescription: seo.metaDescription || 'Simple, transparent pricing. Start free, scale as you grow. Desk365 plans start at $12/agent/month. 21-day free trial, no credit card required.',
+  ogImage: seo.ogImage,
+}}>
+
+<!-- ─── Hero ────────────────────────────────────────────────────────────────── -->
+<section class="pricing-hero d365-section--white" data-sanity={heroSectionAttr}>
+  <div class="d365-container text-center">
+    <p class="d365-eyebrow">{heroEyebrow}</p>
+    <h1 class="d365-heading d365-heading--xl">{heroHeading}</h1>
+    <p class="pricing-hero__sub">{heroSubheading}</p>
+
+    <!-- Billing toggle -->
+    <div class="billing-toggle" role="group" aria-label="Billing cycle">
+      <button id="btn-monthly" class="billing-toggle__btn billing-toggle__btn--active" data-period="monthly">
+        {billingMonthlyLabel}
+      </button>
+      <button id="btn-yearly" class="billing-toggle__btn" data-period="yearly">
+        {billingYearlyLabel}
+        <span class="billing-toggle__badge">{billingYearlySaveBadge}</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Pricing Cards ────────────────────────────────────────────────────────── -->
+<section class="d365-section--white" style="padding: 0 24px 80px;" data-sanity={plansSectionAttr}>
+  <div class="d365-container">
+    <div class="pricing-cards">
+      {plans.map(plan => (
+        <div class={`pricing-card pricing-card--${plan.id}${plan.highlight ? ' pricing-card--highlight' : ''}`}>
+          {plan.badge && <div class="pricing-card__badge">{plan.badge}</div>}
+          <div class="pricing-card__header">
+            <p class="pricing-card__name">{plan.name}</p>
+            <p class="pricing-card__tagline">{plan.tagline}</p>
+          </div>
+          <div class="pricing-card__price">
+            {plan.monthlyPrice === 0 ? (
+              <span class="pricing-card__amount">{freePriceLabel}</span>
+            ) : (
+              <>
+                <span class="pricing-card__currency">$</span>
+                <span class="pricing-card__amount price-amount" data-monthly={plan.monthlyPrice} data-yearly={plan.yearlyPrice}>
+                  {plan.yearlyPrice}
+                </span>
+                <span class="pricing-card__per">{priceUnit}</span>
+              </>
+            )}
+          </div>
+          {plan.monthlyPrice > 0 && (
+            <p class="pricing-card__billing-note">
+              <span class="note-yearly">{billingYearlyNote}</span>
+              <span class="note-monthly" style="display:none">{billingMonthlyNote}</span>
+            </p>
+          )}
+          <a
+            href={plan.ctaHref}
+            class={`pricing-card__cta pricing-card__cta--${plan.ctaStyle}`}
+          >
+            {plan.ctaLabel}
+          </a>
+          <ul class="pricing-card__features">
+            {plan.features.map(f => (
+              <li class="pricing-card__feature">
+                <svg class="pricing-card__check" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <path d="M5 10l3.5 3.5L15 6.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                {f}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+
+    <p class="pricing-footnote">
+      {plansFootnote} <a href={plansFootnoteContactHref}>{plansFootnoteContactLabel}</a>.
+    </p>
+  </div>
+</section>
+
+<!-- ─── Competitor Comparison ─────────────────────────────────────────────── -->
+<section class="d365-section d365-section--gray" data-sanity={competitorsSectionAttr}>
+  <div class="d365-container">
+    <div class="d365-section-header">
+      <p class="d365-eyebrow">{comparisonEyebrow}</p>
+      <h2 class="d365-heading">{comparisonHeading}</h2>
+      <p class="d365-body">{comparisonSubheading}</p>
+    </div>
+    <div class="comp-bars">
+      {competitors.map(c => (
+        <div class={`comp-bar-row${c.highlight ? ' comp-bar-row--highlight' : ''}`}>
+          <span class="comp-bar-label">{c.name}</span>
+          <div class="comp-bar-track">
+            <div
+              class="comp-bar-fill"
+              style={`width: ${Math.round((c.price / 1150) * 100)}%`}
+            ></div>
+          </div>
+          <span class="comp-bar-value">${c.price}/mo</span>
+        </div>
+      ))}
+    </div>
+    <p class="comp-note">{comparisonFootnote}</p>
+  </div>
+</section>
+
+<!-- ─── Feature Comparison Table ─────────────────────────────────────────── -->
+<section class="d365-section d365-section--white">
+  <div class="d365-container">
+    <div class="d365-section-header">
+      <p class="d365-eyebrow">{featureTableEyebrow}</p>
+      <h2 class="d365-heading">{featureTableHeading}</h2>
+    </div>
+
+    <div class="feat-table-wrap">
+      <table class="feat-table">
+        <thead>
+          <tr>
+            <th class="feat-table__col-feature">{ftFeatureCol}</th>
+            <th class="feat-table__col-plan">{ftFreeCol}</th>
+            <th class="feat-table__col-plan">{ftStandardCol}</th>
+            <th class="feat-table__col-plan feat-table__col-plan--highlight">{ftPlusCol}</th>
+            <th class="feat-table__col-plan">{ftPremiumCol}</th>
+          </tr>
+        </thead>
+        {featureRows.map(section => (
+          <>
+            <tbody>
+              <tr class="feat-table__category-row">
+                <td colspan="5" class="feat-table__category">{section.category}</td>
+              </tr>
+              {section.items.map(row => (
+                <tr class="feat-table__row">
+                  <td class="feat-table__feature">{row.feature}</td>
+                  {(['free', 'standard', 'plus', 'premium'] as const).map(plan => (
+                    <td class={`feat-table__cell${plan === 'plus' ? ' feat-table__cell--highlight' : ''}`}>
+                      {row[plan] === true ? (
+                        <svg class="feat-check" viewBox="0 0 20 20" fill="none" aria-label="Included">
+                          <circle cx="10" cy="10" r="9" fill="#e8f5e9"/>
+                          <path d="M6.5 10l2.5 2.5 4.5-5" stroke="#2e7d32" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      ) : row[plan] === false ? (
+                        <svg class="feat-cross" viewBox="0 0 20 20" fill="none" aria-label="Not included">
+                          <path d="M7 7l6 6M13 7l-6 6" stroke="#ccc" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                      ) : (
+                        <span class="feat-text">{row[plan]}</span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </>
+        ))}
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ─── AI Agent Add-on ───────────────────────────────────────────────────── -->
+<section class="d365-section d365-section--blue-light">
+  <div class="d365-container">
+    <div class="ai-addon">
+      <div class="ai-addon__text">
+        <span class="ai-addon__eyebrow">
+          <span class="d365-ai-text">AI</span> {aiAddonEyebrow.replace(/^AI\s*/i, '')}
+        </span>
+        <h2 class="d365-heading">{aiAddonHeading}</h2>
+        <p class="d365-body">
+          {aiAddonBody}
+        </p>
+        <ul class="ai-addon__bullets">
+          {aiAddonBullets.map(bullet => (
+            <li>{bullet}</li>
+          ))}
+        </ul>
+        <div class="ai-addon__credits">
+          {aiAddonCreditCards.map(card => (
+            <div class="ai-addon__credit-card">
+              <strong>{card.planName}</strong>
+              <span>{card.credits}</span>
+            </div>
+          ))}
+        </div>
+        <a href={aiAddonCtaHref} class="d365-btn d365-btn--blue" style="margin-top:8px">
+          {aiAddonCtaLabel}
+        </a>
+      </div>
+      <div class="ai-addon__visual" aria-hidden="true">
+        {aiAddonStats.map((s, i) => (
+          <div
+            class={`ai-visual-card${i > 0 ? ' ai-visual-card--sm' : ''}`}
+            style={i === 0 ? `background: ${aiAddonCardGradient}` : `background: ${aiAddonCardSmallBg}`}
+          >
+            {i === 0 && (
+              <div class="ai-visual-card__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
+                </svg>
+              </div>
+            )}
+            <p class="ai-visual-card__stat" style={i > 0 ? 'font-size:20px' : ''}>{s.stat}</p>
+            <p class="ai-visual-card__label">{s.label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Trust Bar ─────────────────────────────────────────────────────────── -->
+<section class="d365-section--sm d365-section--white" style="border-top:1px solid var(--d365-border); border-bottom:1px solid var(--d365-border);">
+  <div class="d365-container text-center">
+    <p class="trust-label">{trustBarLabel}</p>
+    <div class="trust-logos">
+      {trustBarCustomers.map(name => (
+        <span class="trust-logo-pill">{name}</span>
+      ))}
+    </div>
+    <div class="trust-stats">
+      {trustBarStats.map(s => (
+        <div class="trust-stat">
+          <strong>{s.number}</strong>
+          <span>{s.label}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- ─── FAQ ───────────────────────────────────────────────────────────────── -->
+<section class="d365-section d365-section--gray" data-sanity={faqSectionAttr}>
+  <div class="d365-container">
+    <div class="d365-section-header">
+      <p class="d365-eyebrow">{faqEyebrow}</p>
+      <h2 class="d365-heading">{faqHeading}</h2>
+    </div>
+    <div class="faq-list">
+      {faqs.map((faq, i) => (
+        <details class="faq-item" open={i === 0}>
+          <summary class="faq-item__q">
+            {faq.question}
+            <svg class="faq-item__chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M5 7.5l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </summary>
+          <div class="faq-item__a">{faq.answer}</div>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- ─── Final CTA ──────────────────────────────────────────────────────────── -->
+<section class="pricing-final-cta" id="start" style={`background: linear-gradient(135deg, var(--d365-blue) 0%, ${finalCtaGradientAccent} 100%)`}>
+  <div class="d365-container text-center">
+    <h2 class="d365-heading d365-heading--white">
+      {finalCtaHeading}
+    </h2>
+    <p style="color:rgba(255,255,255,0.8); font-size:17px; margin-bottom:32px; line-height:1.65">
+      {finalCtaSubheading}
+    </p>
+    <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center">
+      <a href={finalCtaPrimaryHref} class="d365-btn d365-btn--green">
+        {finalCtaPrimaryLabel}
+      </a>
+      <a href={finalCtaSecondaryHref} class="d365-btn d365-btn--outline-white">
+        {finalCtaSecondaryLabel}
+      </a>
+    </div>
+    <p style="color:rgba(255,255,255,0.5); font-size:13px; margin-top:16px">
+      {finalCtaFootnote}
+    </p>
+  </div>
+</section>
+
+{/* Sanity Page Builder sections — additional sections below the pricing content */}
+{pageBuilder.map((section: any) => (
+  <HomeSectionRenderer section={section} isPreview={isPreview} docId={docId} docType="pricingPage" />
+))}
+
+</BaseLayout>
+
+<script>
+  // Billing toggle
+  const btnMonthly = document.getElementById('btn-monthly');
+  const btnYearly  = document.getElementById('btn-yearly');
+  const amounts    = document.querySelectorAll<HTMLElement>('.price-amount');
+  const noteYearly = document.querySelectorAll<HTMLElement>('.note-yearly');
+  const noteMonthly = document.querySelectorAll<HTMLElement>('.note-monthly');
+
+  function setMode(mode: 'monthly' | 'yearly') {
+    btnMonthly?.classList.toggle('billing-toggle__btn--active', mode === 'monthly');
+    btnYearly?.classList.toggle('billing-toggle__btn--active', mode === 'yearly');
+    amounts.forEach(el => {
+      el.textContent = mode === 'monthly' ? el.dataset.monthly! : el.dataset.yearly!;
+    });
+    noteYearly.forEach(el => { el.style.display = mode === 'yearly' ? '' : 'none'; });
+    noteMonthly.forEach(el => { el.style.display = mode === 'monthly' ? '' : 'none'; });
+  }
+
+  btnMonthly?.addEventListener('click', () => setMode('monthly'));
+  btnYearly?.addEventListener('click', () => setMode('yearly'));
+</script>
+
+<style>
+  /* ── Hero ── */
+  .pricing-hero {
+    padding: 72px 24px 40px;
+  }
+  .pricing-hero__sub {
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--d365-text-body);
+    max-width: 580px;
+    margin: 0 auto 32px;
+  }
+
+  /* ── Billing Toggle ── */
+  .billing-toggle {
+    display: inline-flex;
+    background: var(--d365-bg-gray);
+    border-radius: 12px;
+    padding: 4px;
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .billing-toggle__btn {
+    padding: 9px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 9px;
+    border: none;
+    cursor: pointer;
+    background: transparent;
+    color: var(--d365-text-body);
+    transition: background var(--transition-base), color var(--transition-base);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .billing-toggle__btn--active {
+    background: #fff;
+    color: var(--d365-blue);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .billing-toggle__badge {
+    background: var(--d365-green);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Pricing Cards ── */
+  .pricing-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    align-items: start;
+  }
+  @media (min-width: 900px) {
+    .pricing-cards { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  .pricing-card {
+    border-radius: var(--pricing-card-radius);
+    border: 1.5px solid var(--d365-border);
+    padding: 28px 24px;
+    background: #fff;
+    position: relative;
+    transition: box-shadow var(--transition-base), transform var(--transition-base);
+  }
+  .pricing-card:hover {
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-3px);
+  }
+
+  .pricing-card--highlight {
+    border-color: var(--d365-blue);
+    box-shadow: 0 8px 32px rgba(63,81,181,0.18);
+  }
+  .pricing-card--premium { background: #1a1a2e; color: #fff; }
+  .pricing-card--premium .pricing-card__tagline,
+  .pricing-card--premium .pricing-card__per,
+  .pricing-card--premium .pricing-card__billing-note { color: rgba(255,255,255,0.6); }
+  .pricing-card--premium .pricing-card__feature { color: rgba(255,255,255,0.85); }
+  .pricing-card--premium .pricing-card__check { color: #82b212; }
+
+  .pricing-card__badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--d365-blue);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 16px;
+    border-radius: 20px;
+  }
+
+  .pricing-card__name {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--d365-blue);
+    margin: 0 0 6px;
+  }
+  .pricing-card--premium .pricing-card__name { color: #9b7fe8; }
+
+  .pricing-card__tagline {
+    font-size: 13px;
+    color: var(--d365-text-body);
+    margin: 0 0 20px;
+    line-height: 1.45;
+  }
+
+  .pricing-card__price {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+    margin-bottom: 4px;
+  }
+  .pricing-card__currency {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--d365-text-dark);
+    line-height: 1;
+  }
+  .pricing-card--premium .pricing-card__currency { color: #fff; }
+  .pricing-card__amount {
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--d365-text-dark);
+    line-height: 1;
+  }
+  .pricing-card--premium .pricing-card__amount { color: #fff; }
+  .pricing-card--free .pricing-card__amount { font-size: 32px; color: var(--d365-text-dark); }
+  .pricing-card__per {
+    font-size: 13px;
+    color: var(--d365-text-body);
+    margin-left: 4px;
+  }
+
+  .pricing-card__billing-note {
+    font-size: 12px;
+    color: var(--d365-text-body);
+    margin: 0 0 20px;
+    min-height: 18px;
+  }
+
+  .pricing-card__cta {
+    display: block;
+    text-align: center;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition: background var(--transition-base), color var(--transition-base), border-color var(--transition-base);
+    margin-bottom: 24px;
+  }
+  .pricing-card__cta--outline {
+    border: 2px solid var(--d365-border);
+    color: var(--d365-text-dark);
+  }
+  .pricing-card__cta--outline:hover { border-color: var(--d365-blue); color: var(--d365-blue); }
+  .pricing-card__cta--outline-blue {
+    border: 2px solid var(--d365-blue);
+    color: var(--d365-blue);
+  }
+  .pricing-card__cta--outline-blue:hover { background: var(--d365-blue); color: #fff; }
+  .pricing-card__cta--green-solid {
+    background: var(--d365-green);
+    color: #fff;
+    border: 2px solid var(--d365-green);
+  }
+  .pricing-card__cta--green-solid:hover { background: var(--d365-green-dark); border-color: var(--d365-green-dark); }
+  .pricing-card__cta--blue-solid {
+    background: #4a47c4;
+    color: #fff;
+    border: 2px solid transparent;
+  }
+  .pricing-card__cta--blue-solid:hover { background: #3c3ab5; }
+
+  .pricing-card__features { list-style: none; padding: 0; margin: 0; }
+  .pricing-card__feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--d365-text-body);
+    padding: 6px 0;
+    line-height: 1.45;
+  }
+  .pricing-card__check {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: var(--d365-green);
+    margin-top: 1px;
+  }
+
+  .pricing-footnote {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 14px;
+    color: var(--d365-text-body);
+  }
+  .pricing-footnote a { color: var(--d365-blue); text-decoration: underline; }
+  .pricing-footnote strong { color: var(--d365-text-dark); }
+
+  /* ── Competitor Bars ── */
+  .comp-bars {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  .comp-bar-row {
+    display: grid;
+    grid-template-columns: 130px 1fr 90px;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--d365-border);
+  }
+  .comp-bar-row:last-child { border-bottom: none; }
+  .comp-bar-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--d365-text-dark);
+  }
+  .comp-bar-row--highlight .comp-bar-label { color: var(--d365-blue); }
+  .comp-bar-track {
+    background: #e8eaf6;
+    border-radius: 6px;
+    height: 10px;
+    overflow: hidden;
+  }
+  .comp-bar-fill {
+    height: 100%;
+    background: var(--d365-border);
+    border-radius: 6px;
+    transition: width 0.5s ease;
+  }
+  .comp-bar-row--highlight .comp-bar-fill { background: var(--d365-blue); }
+  .comp-bar-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--d365-text-dark);
+    text-align: right;
+  }
+  .comp-bar-row--highlight .comp-bar-value { color: var(--d365-blue); }
+  .comp-note { text-align: center; font-size: 12px; color: #aaa; margin-top: 16px; }
+
+  /* ── Feature Table ── */
+  .feat-table-wrap {
+    overflow-x: auto;
+    border-radius: 16px;
+    border: 1px solid var(--d365-border);
+    box-shadow: var(--shadow-md);
+  }
+  .feat-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+  }
+  .feat-table th {
+    background: var(--d365-bg-gray);
+    padding: 14px 16px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--d365-text-dark);
+    border-bottom: 2px solid var(--d365-border);
+  }
+  .feat-table__col-feature { width: 38%; text-align: left; }
+  .feat-table__col-plan { width: 15.5%; text-align: center; }
+  .feat-table__col-plan--highlight { background: var(--d365-blue-light); color: var(--d365-blue) !important; }
+
+  .feat-table__category-row td {
+    background: var(--d365-bg-gray);
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--d365-blue);
+    border-top: 1px solid var(--d365-border);
+  }
+  .feat-table__row:hover td { background: #fafbff; }
+  .feat-table__feature {
+    padding: 12px 16px;
+    font-size: 14px;
+    color: var(--d365-text-dark);
+    border-bottom: 1px solid #f0f0f5;
+  }
+  .feat-table__cell {
+    text-align: center;
+    padding: 12px 8px;
+    border-bottom: 1px solid #f0f0f5;
+  }
+  .feat-table__cell--highlight { background: rgba(63,81,181,0.03); }
+  .feat-check, .feat-cross { width: 20px; height: 20px; margin: 0 auto; display: block; }
+  .feat-text {
+    font-size: 12px;
+    color: var(--d365-text-body);
+    font-weight: 500;
+  }
+
+  /* ── AI Add-on ── */
+  .ai-addon {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+  @media (min-width: 900px) {
+    .ai-addon { grid-template-columns: 1fr 1fr; }
+  }
+  .ai-addon__eyebrow {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .ai-addon__bullets {
+    list-style: none;
+    padding: 0;
+    margin: 16px 0 24px;
+  }
+  .ai-addon__bullets li {
+    padding: 6px 0;
+    font-size: 15px;
+    color: var(--d365-text-body);
+    padding-left: 24px;
+    position: relative;
+  }
+  .ai-addon__bullets li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--d365-blue);
+    font-weight: 700;
+  }
+  .ai-addon__credits { display: flex; gap: 16px; }
+  .ai-addon__credit-card {
+    background: #fff;
+    border: 1px solid var(--d365-border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    text-align: center;
+    min-width: 120px;
+  }
+  .ai-addon__credit-card strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--d365-blue);
+    margin-bottom: 4px;
+  }
+  .ai-addon__credit-card span { font-size: 12px; color: var(--d365-text-body); }
+  .ai-addon__visual {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+  }
+  .ai-visual-card {
+    color: #fff;
+    border-radius: 20px;
+    padding: 32px 40px;
+    text-align: center;
+    min-width: 200px;
+  }
+  .ai-visual-card--sm {
+    padding: 20px 32px;
+  }
+  .ai-visual-card__icon svg {
+    width: 36px;
+    height: 36px;
+    color: rgba(255,255,255,0.7);
+    margin: 0 auto 12px;
+    display: block;
+  }
+  .ai-visual-card__stat {
+    font-size: 52px;
+    font-weight: 900;
+    color: #fff;
+    margin: 0;
+    line-height: 1;
+  }
+  .ai-visual-card__label {
+    font-size: 14px;
+    color: rgba(255,255,255,0.75);
+    margin: 8px 0 0;
+  }
+
+  /* ── Trust Bar ── */
+  .trust-label {
+    font-size: 14px;
+    color: var(--d365-text-body);
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .trust-logos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 32px;
+  }
+  .trust-logo-pill {
+    background: var(--d365-bg-gray);
+    border: 1px solid var(--d365-border);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--d365-text-dark);
+  }
+  .trust-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    justify-content: center;
+  }
+  .trust-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .trust-stat strong {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--d365-blue);
+  }
+  .trust-stat span {
+    font-size: 13px;
+    color: var(--d365-text-body);
+  }
+
+  /* ── FAQ ── */
+  .faq-list {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .faq-item {
+    border: 1px solid var(--d365-border);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    background: #fff;
+    overflow: hidden;
+  }
+  .faq-item[open] {
+    box-shadow: 0 4px 16px rgba(63,81,181,0.07);
+  }
+  .faq-item__q {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 20px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--d365-text-dark);
+    list-style: none;
+    user-select: none;
+  }
+  .faq-item__q::-webkit-details-marker { display: none; }
+  .faq-item__chevron {
+    width: 20px;
+    height: 20px;
+    color: var(--d365-blue);
+    flex-shrink: 0;
+    transition: transform var(--transition-base);
+  }
+  .faq-item[open] .faq-item__chevron { transform: rotate(180deg); }
+  .faq-item__a {
+    padding: 0 20px 18px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--d365-text-body);
+    border-top: 1px solid var(--d365-border);
+    padding-top: 16px;
+  }
+
+  /* ── Final CTA ── */
+  .pricing-final-cta {
+    padding: 88px 24px;
+  }
+</style>

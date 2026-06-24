@@ -1,46 +1,57 @@
 ---
 import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
-import type { D365HeroSection } from '../../lib/types';
+import type { D365HeroSection, D365SectionStyleProps } from '../../lib/types';
 
 interface Props {
   data?: D365HeroSection;
   isPreview?: boolean;
   docId?: string;
   docType?: string;
+  styleProps?: D365SectionStyleProps;
 }
 
-const { data, docId, docType = 'homepage' } = Astro.props;
+const { data, docId, docType = 'homepage', styleProps } = Astro.props;
 
-const headlinePrefix = data?.headlinePrefix ?? 'AI-powered helpdesk for';
+const headlinePrefix = data?.headlinePrefix ?? 'AI-powered helpdesk';
 const headlineSuffix = headlinePrefix.replace(/^AI/, '');
+const headlineConnector = data?.headlineConnector ?? 'for';
 const rotatingWords = data?.rotatingWords?.length
   ? data.rotatingWords
   : ['customer service', 'IT admins', 'Microsoft Teams', 'MSPs', 'teams of all sizes'];
 const subheadline = data?.subheadline ?? "One platform for both customer support and IT – tickets, assets, Microsoft Teams, and AI agents all in a single workspace. Built for teams who've outgrown basic ticketing but don't need the complexity of Zendesk or ServiceNow.";
 const primaryCtaLabel = data?.primaryCta?.label ?? 'Start Your Free Trial';
 const primaryCtaHref = data?.primaryCta?.href ?? '/pricing/';
-const secondaryCtaLabel = data?.secondaryCta?.label ?? 'Request a Demo';
+const secondaryCtaLabel = data?.secondaryCta?.label ?? '';
 const secondaryCtaHref = data?.secondaryCta?.href ?? '/request-demo/';
 const footnote = data?.footnote ?? 'No credit card required.';
 const heroImageSrc = data?.heroImage?.asset?.url ?? 'https://www.desk365.io/wp-content/uploads/2026/06/home-page-hero.png';
 const heroImageAlt = data?.heroImageAlt ?? 'Desk365 AI-powered helpdesk interface';
 
 let sanityAttr: string | undefined;
+let heroImgAttr: string | undefined;
 if (docId && data?._key) {
   try {
     const da = createDataAttribute({ id: docId, type: docType });
     sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+    heroImgAttr = da(`pageBuilder[_key=="${data._key}"].heroImage`);
   } catch {}
 }
 ---
 
-<section id="d365-hero" class="d365-hero d365-section--white" data-sanity={sanityAttr}>
+{styleProps?.css && <style is:inline set:html={styleProps.css} />}
+<section
+  id={styleProps?.sectionId ?? 'd365-hero'}
+  class:list={['d365-hero', 'd365-section--white', styleProps?.extraClass]}
+  style={styleProps?.inlineStyle || undefined}
+  data-sanity={sanityAttr}
+>
   <div class="d365-container d365-hero__inner">
 
     <!-- Left: Text -->
     <div class="d365-hero__text">
       <h1 class="d365-hero__headline">
-        <span class="d365-ai-text">AI</span>{headlineSuffix}<br>
+        <span class="d365-ai-text">AI</span>{headlineSuffix}<br class="d365-desktop-br">
+        {headlineConnector && <span class="d365-hero__connector">{headlineConnector} </span>}
         <span class="d365-hero__rotate-wrap" aria-live="polite">
           {rotatingWords.map((word, i) => (
             <span class="d365-hero__word" style={`animation-delay: ${i * 3}s`}>{word}</span>
@@ -52,7 +63,9 @@ if (docId && data?._key) {
 
       <div class="d365-hero__ctas">
         <a href={primaryCtaHref} class="d365-btn d365-btn--green">{primaryCtaLabel}</a>
-        <a href={secondaryCtaHref} class="d365-btn d365-btn--outline-blue">{secondaryCtaLabel}</a>
+        {secondaryCtaLabel && (
+          <a href={secondaryCtaHref} class="d365-btn d365-btn--outline-blue">{secondaryCtaLabel}</a>
+        )}
       </div>
 
       {footnote && <p class="d365-hero__footnote">{footnote}</p>}
@@ -68,6 +81,7 @@ if (docId && data?._key) {
         fetchpriority="high"
         width="2157"
         height="1218"
+        data-sanity={heroImgAttr}
       />
     </div>
 
@@ -94,14 +108,34 @@ if (docId && data?._key) {
     }
   }
 
+  /* Desktop-only line break inside the headline */
+  .d365-desktop-br {
+    display: none;
+  }
+  @media (min-width: 600px) {
+    .d365-desktop-br {
+      display: inline;
+    }
+  }
+
+  /* Connector word (e.g. "for") before the rotating text */
+  .d365-hero__connector {
+    white-space: nowrap;
+  }
+
   /* Headline */
   .d365-hero__headline {
     font-family: 'Roboto', sans-serif;
     font-size: clamp(32px, 4.5vw, 46px);
     font-weight: 700;
     color: var(--d365-blue);
-    line-height: 1.22;
+    line-height: 1.35;
     margin: 0 0 24px;
+  }
+  @media (min-width: 600px) {
+    .d365-hero__headline {
+      line-height: 62px;
+    }
   }
 
   /* Rotating words container */

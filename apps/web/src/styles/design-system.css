@@ -1,0 +1,187 @@
+/*
+ * Desk365 Design System
+ * Single source of truth for all design tokens used across the site.
+ * This file is imported by global.css — do not import it separately.
+ */
+
+/* ── Color Palette ──────────────────────────────────────────────────────────── */
+:root {
+  /* Primary blues */
+  --color-blue-900: #1a237e;
+  --color-blue-800: #283593;
+  --color-blue-700: #3949ab;
+  --color-blue-600: #3f51b5;     /* --d365-blue */
+  --color-blue-500: #5c6bc0;
+  --color-blue-400: #7986cb;
+  --color-blue-300: #9fa8da;
+  --color-blue-200: #c5cae9;
+  --color-blue-100: #e8eaf6;
+  --color-blue-50:  #f0f2fb;     /* --d365-bg-gray / --d365-blue-light */
+
+  /* Brand greens */
+  --color-green-700: #558b2f;
+  --color-green-600: #82b212;    /* --d365-green */
+  --color-green-500: #9ccc40;
+  --color-green-dark: #6a9210;   /* --d365-green-dark */
+
+  /* Footer navy */
+  --color-navy-900: #282c81;     /* footer background */
+  --color-navy-800: #1e2266;
+
+  /* Semantic accent */
+  --color-pink:   #ff48c9;       /* --d365-pink */
+  --color-purple: #9b23ea;       /* --d365-purple */
+
+  /* Neutrals */
+  --color-gray-900: #111827;
+  --color-gray-800: #1f2937;
+  --color-gray-700: #374151;
+  --color-gray-600: #4b5563;
+  --color-gray-500: #6b7280;
+  --color-gray-400: #9ca3af;
+  --color-gray-300: #d1d5db;
+  --color-gray-200: #e5e7eb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-50:  #f9fafb;
+  --color-white:    #ffffff;
+
+  /* Semantic feedback */
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-error:   #dc2626;
+  --color-info:    var(--color-blue-600);
+}
+
+/* ── Typography Scale ───────────────────────────────────────────────────────── */
+:root {
+  /* Font families */
+  --font-sans: 'Roboto', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* Display / Heading sizes */
+  --text-display:    clamp(40px, 5vw, 60px);
+  --text-heading-xl: clamp(34px, 4.5vw, 46px);  /* hero h1 */
+  --text-heading-lg: clamp(28px, 3.5vw, 40px);  /* section h2 */
+  --text-heading-md: clamp(22px, 2.5vw, 30px);  /* section h3 */
+  --text-heading-sm: clamp(18px, 2vw, 22px);    /* card h3 */
+  --text-heading-xs: 16px;                       /* small card h4 */
+
+  /* Body sizes */
+  --text-body-xl:  19px;
+  --text-body-lg:  17px;   /* primary body text */
+  --text-body-md:  15px;
+  --text-body-sm:  14px;
+  --text-body-xs:  13px;
+
+  /* Caption / Label sizes */
+  --text-label:    12px;
+  --text-caption:  11px;
+
+  /* Line heights */
+  --leading-tight:   1.2;
+  --leading-snug:    1.35;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.65;
+  --leading-loose:   1.8;
+
+  /* Font weights */
+  --weight-normal:    400;
+  --weight-medium:    500;
+  --weight-semibold:  600;
+  --weight-bold:      700;
+  --weight-extrabold: 800;
+  --weight-black:     900;
+
+  /* Letter spacing */
+  --tracking-tight:  -0.02em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.05em;
+  --tracking-wider:   0.1em;
+  --tracking-widest:  0.14em;
+}
+
+/* ── Spacing Scale ──────────────────────────────────────────────────────────── */
+:root {
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+  --space-28: 112px;
+  --space-32: 128px;
+}
+
+/* ── Border Radius System ───────────────────────────────────────────────────── */
+:root {
+  --radius-sm:   4px;
+  --radius-md:   8px;   /* buttons */
+  --radius-lg:  12px;   /* images */
+  --radius-xl:  16px;   /* cards */
+  --radius-2xl: 20px;   /* large cards */
+  --radius-3xl: 24px;
+  --radius-full: 9999px; /* pills / avatars */
+}
+
+/* ── Shadow System ──────────────────────────────────────────────────────────── */
+:root {
+  --shadow-xs:   0 1px 2px rgba(0,0,0,0.05);
+  --shadow-sm:   0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:   0 4px 6px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg:   0 10px 20px rgba(63,81,181,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  --shadow-xl:   0 20px 40px rgba(63,81,181,0.1), 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-2xl:  0 30px 60px rgba(63,81,181,0.14), 0 6px 20px rgba(0,0,0,0.08);
+  --shadow-card: 0 2px 16px rgba(63,81,181,0.08);
+  --shadow-nav:  0 1px 0 rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+}
+
+/* ── Transition Tokens ──────────────────────────────────────────────────────── */
+:root {
+  --transition-fast:   0.12s ease;
+  --transition-base:   0.18s ease;
+  --transition-slow:   0.28s ease;
+  --transition-spring: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Container Widths ───────────────────────────────────────────────────────── */
+:root {
+  --container-sm:   640px;
+  --container-md:   768px;
+  --container-lg:   1024px;
+  --container-xl:   1200px;   /* --d365-container */
+  --container-2xl:  1400px;   /* --d365-container--wide */
+  --container-3xl:  1320px;   /* footer */
+}
+
+/* ── Section Padding Scale ──────────────────────────────────────────────────── */
+:root {
+  --section-padding-y:     80px;
+  --section-padding-y-sm:  48px;
+  --section-padding-y-lg:  120px;
+  --section-padding-x:     24px;
+}
+
+@media (max-width: 768px) {
+  :root {
+    --section-padding-y:    56px;
+    --section-padding-y-sm: 36px;
+    --section-padding-y-lg: 80px;
+  }
+}
+
+/* ── Pricing-specific tokens ────────────────────────────────────────────────── */
+:root {
+  --pricing-standard-bg: #f8faff;
+  --pricing-plus-bg:     #3f51b5;    /* blue — "Most Popular" */
+  --pricing-premium-bg:  #1a1a2e;
+  --pricing-free-bg:     #ffffff;
+
+  --pricing-card-radius: 20px;
+  --pricing-card-border: 1px solid var(--color-blue-200);
+}

@@ -3,6 +3,7 @@ import { createClient } from '@sanity/client';
 const projectId = import.meta.env.PUBLIC_SANITY_PROJECT_ID ?? 'placeholder';
 const dataset   = import.meta.env.PUBLIC_SANITY_DATASET   ?? 'production';
 const token     = import.meta.env.SANITY_API_READ_TOKEN;
+const studioUrl = import.meta.env.PUBLIC_SANITY_STUDIO_URL ?? 'http://localhost:3333';
 
 export const sanityClient = createClient({
   projectId,
@@ -13,8 +14,10 @@ export const sanityClient = createClient({
   perspective: 'published',
 });
 
-// Returns a client that reads draft (unpublished) content.
-// Use this only during preview mode — never in production page rendering.
+// Returns a stega-enabled draft client for preview mode.
+// Stega encodes invisible field-path metadata into fetched strings so
+// enableVisualEditing() can auto-detect clickable elements without
+// requiring manual data-sanity attributes on every element.
 export function getDraftClient() {
   return createClient({
     projectId,
@@ -23,5 +26,9 @@ export function getDraftClient() {
     useCdn: false,
     token,
     perspective: 'previewDrafts',
+    stega: {
+      enabled: true,
+      studioUrl,
+    },
   });
 }

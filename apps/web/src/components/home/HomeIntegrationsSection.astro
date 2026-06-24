@@ -1,15 +1,16 @@
 ---
 import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
-import type { D365IntegrationsSection } from '../../lib/types';
+import type { D365IntegrationsSection, D365SectionStyleProps } from '../../lib/types';
 
 interface Props {
   data?: D365IntegrationsSection;
   isPreview?: boolean;
   docId?: string;
   docType?: string;
+  styleProps?: D365SectionStyleProps;
 }
 
-const { data, docId, docType = 'homepage' } = Astro.props;
+const { data, docId, docType = 'homepage', styleProps } = Astro.props;
 
 const heading = data?.heading ?? 'Plugs in to your current tech stack';
 const body = data?.body ?? 'Desk365 integrates seamlessly with Microsoft Teams or any other tools you already use. A helpdesk so extensive, it works to enhance collaboration and streamlines your existing workflow.';
@@ -21,19 +22,32 @@ const staticCards = [
 ];
 
 const cards = data?.cards?.length
-  ? data.cards.map(c => ({ title: c.title, description: c.description ?? '', iconSrc: c.icon?.asset?.url, linkLabel: c.linkLabel, linkHref: c.linkHref }))
+  ? data.cards.map(c => ({ _key: c._key, title: c.title, description: c.description ?? '', iconSrc: c.icon?.asset?.url, linkLabel: c.linkLabel, linkHref: c.linkHref }))
   : staticCards;
 
 let sanityAttr: string | undefined;
+let daFn: ((path: string) => string) | undefined;
 if (docId && data?._key) {
   try {
     const da = createDataAttribute({ id: docId, type: docType });
     sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+    daFn = (path: string) => da(path);
   } catch {}
+}
+
+function cardIconAttr(cardKey: string | undefined) {
+  if (!daFn || !data?._key || !cardKey) return undefined;
+  return daFn(`pageBuilder[_key=="${data._key}"].cards[_key=="${cardKey}"].icon`);
 }
 ---
 
-<section id="d365-integrations" class="d365-integrations d365-section--gray" data-sanity={sanityAttr}>
+{styleProps?.css && <style is:inline set:html={styleProps.css} />}
+<section
+  id={styleProps?.sectionId ?? 'd365-integrations'}
+  class:list={['d365-integrations', 'd365-section--gray', styleProps?.extraClass]}
+  style={styleProps?.inlineStyle || undefined}
+  data-sanity={sanityAttr}
+>
   <div class="d365-container">
     <div class="d365-section-header">
       <h2 class="d365-heading">{heading}</h2>
@@ -45,7 +59,7 @@ if (docId && data?._key) {
         <div class="d365-card d365-integrations__card">
           {card.iconSrc ? (
             <div class="d365-icon-box">
-              <img src={card.iconSrc} alt={card.title} loading="lazy" />
+              <img src={card.iconSrc} alt={card.title} loading="lazy" data-sanity={cardIconAttr((card as any)._key)} />
             </div>
           ) : (
             <div class="d365-icon-box">

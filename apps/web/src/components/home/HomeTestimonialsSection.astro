@@ -1,15 +1,16 @@
 ---
 import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
-import type { D365TestimonialsSection } from '../../lib/types';
+import type { D365TestimonialsSection, D365SectionStyleProps } from '../../lib/types';
 
 interface Props {
   data?: D365TestimonialsSection;
   isPreview?: boolean;
   docId?: string;
   docType?: string;
+  styleProps?: D365SectionStyleProps;
 }
 
-const { data, docId, docType = 'homepage' } = Astro.props;
+const { data, docId, docType = 'homepage', styleProps } = Astro.props;
 
 const heading = data?.heading ?? "Don't just take our word for it";
 const subtext = data?.subtext ?? 'See why our customers choose us. Hear from real people who have experienced the difference.';
@@ -26,19 +27,32 @@ const staticTestimonials = [
 ];
 
 const testimonials = data?.testimonials?.length
-  ? data.testimonials.map(t => ({ quote: t.quote, name: t.name, title: t.title ?? '', company: t.company, rating: t.rating ?? 5, reviewPlatform: t.reviewPlatform }))
+  ? data.testimonials.map(t => ({ _key: t._key, quote: t.quote, name: t.name, title: t.title ?? '', company: t.company, rating: t.rating ?? 5, reviewPlatform: t.reviewPlatform, avatarSrc: t.avatarImage?.asset?.url }))
   : staticTestimonials;
 
 let sanityAttr: string | undefined;
+let daFn: ((path: string) => string) | undefined;
 if (docId && data?._key) {
   try {
     const da = createDataAttribute({ id: docId, type: docType });
     sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+    daFn = (path: string) => da(path);
   } catch {}
+}
+
+function avatarImgAttr(tKey: string | undefined) {
+  if (!daFn || !data?._key || !tKey) return undefined;
+  return daFn(`pageBuilder[_key=="${data._key}"].testimonials[_key=="${tKey}"].avatarImage`);
 }
 ---
 
-<section id="d365-testimonials" class="d365-testimonials d365-section--gray" data-sanity={sanityAttr}>
+{styleProps?.css && <style is:inline set:html={styleProps.css} />}
+<section
+  id={styleProps?.sectionId ?? 'd365-testimonials'}
+  class:list={['d365-testimonials', 'd365-section--gray', styleProps?.extraClass]}
+  style={styleProps?.inlineStyle || undefined}
+  data-sanity={sanityAttr}
+>
   <div class="d365-container">
     <div class="d365-section-header">
       <h2 class="d365-heading">{heading}</h2>
@@ -63,9 +77,21 @@ if (docId && data?._key) {
 
             <!-- Author -->
             <footer class="d365-testimonial-card__footer">
-              <div class="d365-testimonial-card__avatar" aria-hidden="true">
-                {t.name.charAt(0)}
-              </div>
+              {t.avatarSrc ? (
+                <img
+                  src={t.avatarSrc}
+                  alt={t.name}
+                  class="d365-testimonial-card__avatar-img"
+                  loading="lazy"
+                  width="40"
+                  height="40"
+                  data-sanity={avatarImgAttr(t._key)}
+                />
+              ) : (
+                <div class="d365-testimonial-card__avatar" aria-hidden="true">
+                  {t.name.charAt(0)}
+                </div>
+              )}
               <div>
                 <div class="d365-testimonial-card__name">{t.name}</div>
                 <div class="d365-testimonial-card__role">{t.title}{t.company ? `, ${t.company}` : ''}</div>
@@ -173,6 +199,14 @@ if (docId && data?._key) {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .d365-testimonial-card__avatar-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
     flex-shrink: 0;
   }
 

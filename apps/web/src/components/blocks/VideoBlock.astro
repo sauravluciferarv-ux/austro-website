@@ -1,5 +1,9 @@
 ---
 import type { PageSectionBlock } from '../../lib/types';
+import {
+  resolveSpacing, resolveBorder, resolveSize, mergeStyles,
+  resolveResponsiveCss, resolveScopedCss,
+} from '../../lib/styleResolver';
 
 interface Props {
   block: PageSectionBlock;
@@ -18,16 +22,15 @@ const {
   blockClass,
 } = block;
 
-const id = blockId || `block-${block._key}`;
+const id  = blockId  || `block-${block._key}`;
 const cls = blockClass || `video-${block._key}`;
 
-// Detect YouTube / Vimeo and build embed URL
 function getEmbedUrl(raw: string): string {
   const ytMatch = raw.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
   if (ytMatch) {
     const params = new URLSearchParams();
     if (autoplay) params.set('autoplay', '1');
-    if (muted) params.set('mute', '1');
+    if (muted)    params.set('mute', '1');
     if (!controls) params.set('controls', '0');
     const qs = params.toString();
     return `https://www.youtube.com/embed/${ytMatch[1]}${qs ? `?${qs}` : ''}`;
@@ -36,7 +39,7 @@ function getEmbedUrl(raw: string): string {
   if (vmMatch) {
     const params = new URLSearchParams();
     if (autoplay) params.set('autoplay', '1');
-    if (muted) params.set('muted', '1');
+    if (muted)    params.set('muted', '1');
     const qs = params.toString();
     return `https://player.vimeo.com/video/${vmMatch[1]}${qs ? `?${qs}` : ''}`;
   }
@@ -44,21 +47,29 @@ function getEmbedUrl(raw: string): string {
 }
 
 const embedUrl = getEmbedUrl(url);
-const isEmbed =
-  embedUrl.includes('youtube.com/embed') || embedUrl.includes('player.vimeo.com');
+const isEmbed  = embedUrl.includes('youtube.com/embed') || embedUrl.includes('player.vimeo.com');
 
-const hideClasses = [
-  block.hideOnMobile && 'hidden md:block',
-  block.hideOnDesktop && 'block md:hidden',
-].filter(Boolean);
+const wrapStyle = mergeStyles(
+  `aspect-ratio:${aspectRatio}`,
+  resolveSpacing(block.spacing),
+  resolveSize(block.size),
+  resolveBorder(block.border),
+);
+
+const responsiveCss = resolveResponsiveCss(cls, block.responsive);
+const scopedCss     = resolveScopedCss(cls, block.customCss);
 ---
+
+{(responsiveCss || scopedCss) && (
+  <style is:inline set:html={responsiveCss + scopedCss} />
+)}
 
 <div
   id={id}
-  class:list={[cls, 'w-full', ...hideClasses, isPreview && 'pb-outline-block']}
+  class:list={[cls, 'w-full', isPreview && 'pb-outline-block']}
+  style={wrapStyle || undefined}
   data-block-type="videoBlock"
   data-sanity={dataSanity}
-  style={`aspect-ratio:${aspectRatio};`}
 >
   {isEmbed ? (
     <iframe

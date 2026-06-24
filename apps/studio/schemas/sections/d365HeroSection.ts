@@ -2,21 +2,32 @@ import { defineType, defineField } from 'sanity';
 
 export default defineType({
   name: 'd365HeroSection',
-  title: '🦸 Hero Section',
+  title: 'Hero Section',
   type: 'object',
   groups: [
-    { name: 'content', title: 'Content', default: true },
-    { name: 'media', title: 'Media' },
-    { name: 'cta', title: 'CTAs' },
+    { name: 'content',    title: 'Content',    default: true },
+    { name: 'media',      title: 'Media'       },
+    { name: 'cta',        title: 'CTAs'        },
+    { name: 'style',      title: 'Style'       },
+    { name: 'responsive', title: 'Responsive'  },
+    { name: 'advanced',   title: 'Advanced'    },
   ],
   fields: [
     defineField({
       name: 'headlinePrefix',
-      title: 'Headline Prefix',
+      title: 'Headline Line 1',
       type: 'string',
       group: 'content',
-      description: 'Text before the gradient "AI" word. e.g. "AI-powered helpdesk for"',
-      initialValue: 'AI-powered helpdesk for',
+      description: 'First line of the headline (starts with "AI"). e.g. "AI-powered helpdesk"',
+      initialValue: 'AI-powered helpdesk',
+    }),
+    defineField({
+      name: 'headlineConnector',
+      title: 'Headline Connector',
+      type: 'string',
+      group: 'content',
+      description: 'Word displayed on line 2 before the rotating text. e.g. "for"',
+      initialValue: 'for',
     }),
     defineField({
       name: 'rotatingWords',
@@ -52,9 +63,20 @@ export default defineType({
     defineField({ name: 'heroImageAlt', title: 'Hero Image Alt Text', type: 'string', group: 'media' }),
     defineField({ name: 'primaryCta', title: 'Primary CTA', type: 'ctaButton', group: 'cta' }),
     defineField({ name: 'secondaryCta', title: 'Secondary CTA', type: 'ctaButton', group: 'cta' }),
+    // ── Visual Editor Style Controls ──────────────────────────────────────────
+    defineField({ name: 'background', title: 'Background',      type: 'styleBackground', group: 'style' }),
+    defineField({ name: 'border',     title: 'Border & Shadow', type: 'styleBorder',     group: 'style' }),
+    defineField({ name: 'spacing',    title: 'Spacing',         type: 'styleSpacing',    group: 'style' }),
+    defineField({ name: 'size',       title: 'Height / Size',   type: 'styleSize',       group: 'style' }),
+    defineField({ name: 'sectionResponsive', title: 'Responsive Controls', type: 'styleResponsive', group: 'responsive' }),
+    defineField({ name: 'sectionId',    title: 'Section HTML ID',  type: 'string', group: 'advanced' }),
+    defineField({ name: 'sectionClass', title: 'Extra CSS Class',  type: 'string', group: 'advanced',
+      description: 'Added alongside the built-in section class for custom CSS targeting.' }),
+    defineField({ name: 'customCss',    title: 'Custom CSS',       type: 'text', rows: 8, group: 'advanced',
+      description: 'Write full selectors like .d365-hero__headline { color: red; } or bare CSS properties.' }),
   ],
   preview: {
     select: { title: 'headlinePrefix', sub: 'subheadline' },
-    prepare: ({ title, sub }) => ({ title: '🦸 Hero', subtitle: title ?? sub }),
+    prepare: ({ title, sub }) => ({ title: 'Hero', subtitle: title ?? sub }),
   },
 });

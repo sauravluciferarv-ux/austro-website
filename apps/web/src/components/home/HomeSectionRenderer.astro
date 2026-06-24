@@ -1,5 +1,6 @@
 ---
 import type { PageSection, D365HomeSection } from '../../lib/types';
+import { resolveSectionStyleProps } from '../../lib/styleResolver';
 import PageSectionComponent from '../PageSection.astro';
 import HomeHeroSection          from './HomeHeroSection.astro';
 import HomeTrustBarSection      from './HomeTrustBarSection.astro';
@@ -27,6 +28,31 @@ interface Props {
 
 const { section, isPreview, docId, docType = 'homepage' } = Astro.props;
 const type = section._type;
+
+// Default IDs keyed by _type — match the hardcoded id on each component's <section>
+const DEFAULT_IDS: Record<string, string> = {
+  d365HeroSection:          'd365-hero',
+  d365TrustBarSection:      'd365-trust',
+  d365StatsSection:         'd365-stats',
+  d365FeatureCardsSection:  'd365-feature-cards',
+  d365ChannelTabsSection:   'd365-channels',
+  d365AIFeaturesSection:    'd365-ai-features',
+  d365MicrosoftSection:     'd365-microsoft',
+  d365ITSMSection:          'd365-itsm',
+  d365CapabilitiesSection:  'd365-capabilities',
+  d365ComparisonSection:    'd365-compare',
+  d365IntegrationsSection:  'd365-integrations',
+  d365TestimonialsSection:  'd365-testimonials',
+  d365WhyChooseSection:     'd365-why-choose',
+  d365SecuritySection:      'd365-security',
+  d365BlogSection:          'd365-blog',
+  d365FinalCtaSection:      'd365-final-cta',
+};
+
+const defaultId = DEFAULT_IDS[type ?? ''];
+const styleProps = defaultId
+  ? resolveSectionStyleProps(section as any, defaultId)
+  : undefined;
 ---
 
 {type === 'pageSection' && (
@@ -39,50 +65,50 @@ const type = section._type;
 )}
 
 {type === 'd365HeroSection' && (
-  <HomeHeroSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+  <HomeHeroSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} styleProps={styleProps} />
 )}
 {type === 'd365TrustBarSection' && (
-  <HomeTrustBarSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+  <HomeTrustBarSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} styleProps={styleProps} />
 )}
 {type === 'd365StatsSection' && (
-  <HomeStatsSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+  <HomeStatsSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} styleProps={styleProps} />
 )}
 {type === 'd365FeatureCardsSection' && (
-  <HomeFeatureCardsSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+  <HomeFeatureCardsSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} styleProps={styleProps} />
 )}
 {type === 'd365ChannelTabsSection' && (
-  <HomeChannelsSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+  <HomeChannelsSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} styleProps={styleProps} />
 )}
 {type === 'd365AIFeaturesSection' && (
-  <HomeAIFeaturesSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+  <HomeAIFeaturesSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} styleProps={styleProps} />
 )}
 {type === 'd365MicrosoftSection' && (
-  <HomeMicrosoftSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+  <HomeMicrosoftSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} styleProps={styleProps} />
 )}
 {type === 'd365ITSMSection' && (
-  <HomeITSMSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+  <HomeITSMSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} styleProps={styleProps} />
 )}
 {type === 'd365CapabilitiesSection' && (
-  <HomeCapabilitiesSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+  <HomeCapabilitiesSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} styleProps={styleProps} />
 )}
 {type === 'd365ComparisonSection' && (
-  <HomeComparisonSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+  <HomeComparisonSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} styleProps={styleProps} />
 )}
 {type === 'd365IntegrationsSection' && (
-  <HomeIntegrationsSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+  <HomeIntegrationsSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} styleProps={styleProps} />
 )}
 {type === 'd365TestimonialsSection' && (
-  <HomeTestimonialsSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+  <HomeTestimonialsSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} styleProps={styleProps} />
 )}
 {type === 'd365WhyChooseSection' && (
-  <HomeWhyChooseSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+  <HomeWhyChooseSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} styleProps={styleProps} />
 )}
 {type === 'd365SecuritySection' && (
-  <HomeSecuritySection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+  <HomeSecuritySection data={section as any} isPreview={isPreview} docId={docId} docType={docType} styleProps={styleProps} />
 )}
 {type === 'd365BlogSection' && (
-  <HomeBlogSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+  <HomeBlogSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} styleProps={styleProps} />
 )}
 {type === 'd365FinalCtaSection' && (
-  <HomeFinalCtaSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} />
+  <HomeFinalCtaSection data={section as any} isPreview={isPreview} docId={docId} docType={docType} styleProps={styleProps} />
 )}

@@ -1,55 +1,58 @@
 ---
 import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
-import type { D365TrustBarSection } from '../../lib/types';
+import type { D365TrustBarSection, D365SectionStyleProps } from '../../lib/types';
 
 interface Props {
   data?: D365TrustBarSection;
   isPreview?: boolean;
   docId?: string;
   docType?: string;
+  styleProps?: D365SectionStyleProps;
 }
 
-const { data, docId, docType = 'homepage' } = Astro.props;
+const { data, docId, docType = 'homepage', styleProps } = Astro.props;
 
 const heading = data?.heading ?? 'Trusted by 7,000+ businesses around the world';
 
 const baseUrl = 'https://www.desk365.io/wp-content/uploads';
 
-const staticRow1 = [
-  { name: 'CBRE',          src: `${baseUrl}/2025/12/CBRE.png.webp` },
-  { name: 'LAPD',          src: `${baseUrl}/2025/12/LAPD.png.webp` },
-  { name: 'Panasonic',     src: `${baseUrl}/2025/12/Panasonic.png.webp` },
-  { name: 'MMRO',          src: `${baseUrl}/2025/12/MMRO.png.webp`,   href: '/customers/mmro/', badge: 'Switched from Zendesk' },
-  { name: 'BBC',           src: `${baseUrl}/2025/12/BBC.png.webp` },
-  { name: 'CCKeys',        src: `${baseUrl}/2025/12/CCKeys.png.webp`,  href: '/customers/cckeys/', badge: 'Case study' },
-  { name: 'Pioneer',       src: `${baseUrl}/2025/12/Pioneer.png.webp` },
-  { name: 'SMC',           src: `${baseUrl}/2025/12/SMC.png.webp` },
-  { name: 'Concurrent',    src: `${baseUrl}/2025/12/Concurrent.png.webp`, href: '/customers/concurrent/', badge: 'Case study' },
-  { name: 'Capra Bank',    src: `${baseUrl}/2025/12/Capra-Bank.png.webp` },
-  { name: 'Yamaha',        src: `${baseUrl}/2025/12/Yamaha.png.webp` },
+const staticLogos = [
+  { name: 'CBRE',                         src: `${baseUrl}/2025/12/cbre_group-logo_brandlogos.net_eyfmh-512x512-1-1.png`, imgStyle: 'padding-top:18px;width:85px' },
+  { name: 'LAPD',                          src: `${baseUrl}/2025/12/LAPD.png` },
+  { name: 'Panasonic',                     src: `${baseUrl}/2025/12/Panasonic.png` },
+  { name: 'MMRO',                          src: `${baseUrl}/2025/12/MMRO.png`,              href: '/customers/mmro/',        badge: 'Switched from Zendesk' },
+  { name: 'BBC',                           src: `${baseUrl}/2026/03/BBC_logo.png` },
+  { name: 'CCKeys',                        src: `${baseUrl}/2025/12/CCKeys.png`,             href: '/customers/cckeys',       badge: 'Case study' },
+  { name: 'Pioneer',                       src: `${baseUrl}/2025/12/Pioneer.png` },
+  { name: 'SMC',                           src: `${baseUrl}/2025/12/SMC.png` },
+  { name: 'Concurrent',                    src: `${baseUrl}/2025/12/Concurrent.png`,         href: '/customers/concurrent/',  badge: 'Case study' },
+  { name: 'Capra Bank',                    src: `${baseUrl}/2025/12/Capra-Bank.png` },
+  { name: 'Yamaha',                        src: `${baseUrl}/2025/12/Yamaha.png` },
+  { name: 'CMCFC',                         src: `${baseUrl}/2025/12/CMC.png`,                href: '/customers/cmcfc',        badge: 'Case study' },
+  { name: 'University of Kentucky',        src: `${baseUrl}/2025/12/univerisity_of_kentucky.png` },
+  { name: 'Class Technology',              src: `${baseUrl}/2026/06/Classtechnology-logo-2.png`, href: '/customers/cts-uk/',  badge: 'Case study' },
+  { name: 'Konica Minolta',               src: `${baseUrl}/2025/12/Konica-minolta.png` },
+  { name: 'Tuttnauer',                     src: `${baseUrl}/2025/12/Tuttnauer.png`,           href: '/customers/tuttnauer/',   badge: 'Chosen over Zendesk' },
+  { name: 'Standard Bank',                 src: `${baseUrl}/2026/06/standard-bank.png` },
+  { name: 'The Philadelphia Contributionship', src: `${baseUrl}/2025/12/PC.png` },
+  { name: 'Intec',                         src: `${baseUrl}/2025/12/Intec.png`,               href: '/customers/intech/',      badge: 'Case study' },
+  { name: 'LeMoyne Owen College',          src: `${baseUrl}/2025/12/LeMoyne.png` },
+  { name: 'El Cronista',                   src: `${baseUrl}/2025/12/El-Cronista.png` },
+  { name: "Nation's Best",                 src: `${baseUrl}/2025/12/Nations-best.png` },
+  { name: 'acgov',                         src: `${baseUrl}/2025/12/acgov.org_.png` },
+  { name: 'HPSC',                          src: `${baseUrl}/2025/12/hpsc.png`,                href: '/customers/hpsc/',        badge: 'Case study' },
+  { name: 'Edgewater',                     src: `${baseUrl}/2025/12/Edge-water.png` },
+  { name: 'Leedstone',                     src: `${baseUrl}/2025/12/Leedstone.png` },
+  { name: 'Nexus',                         src: `${baseUrl}/2025/12/Nexus-2.png` },
+  { name: 'LDF',                           src: `${baseUrl}/2025/12/LDF.png` },
 ];
 
-const staticRow2 = [
-  { name: 'Konica Minolta',              src: `${baseUrl}/2025/12/Konica-Minolta.png.webp` },
-  { name: 'Tuttnauer',                   src: `${baseUrl}/2025/12/Tuttnauer.png.webp`, href: '/customers/tuttnauer/', badge: 'Chosen over Zendesk' },
-  { name: 'Standard Bank',               src: `${baseUrl}/2025/12/Standard-Bank.png.webp` },
-  { name: 'The Philadelphia Contributionship', src: `${baseUrl}/2025/12/Philadelphia.png.webp` },
-  { name: 'University of Kentucky',      src: `${baseUrl}/2025/12/University-of-Kentucky.png.webp` },
-  { name: 'Class Technology',            src: `${baseUrl}/2025/12/Class-Technology.png.webp`, href: '/customers/cts-uk/', badge: 'Case study' },
-  { name: 'El Cronista',                 src: `${baseUrl}/2025/12/El-Cronista.png.webp` },
-  { name: "Nation's Best",               src: `${baseUrl}/2025/12/Nations-Best.png.webp` },
-  { name: 'HPSC',                        src: `${baseUrl}/2025/12/HPSC.png.webp`, href: '/customers/hpsc/', badge: 'Case study' },
-  { name: 'Edgewater',                   src: `${baseUrl}/2025/12/Edgewater.png.webp` },
-  { name: 'Leedstone',                   src: `${baseUrl}/2025/12/Leedstone.png.webp` },
-];
-
-const logosRow1 = data?.logosRow1?.length
-  ? data.logosRow1.map(l => ({ name: l.name, src: l.logo?.asset?.url ?? '', href: l.href, badge: l.badge }))
-  : staticRow1;
-
-const logosRow2 = data?.logosRow2?.length
-  ? data.logosRow2.map(l => ({ name: l.name, src: l.logo?.asset?.url ?? '', href: l.href, badge: l.badge }))
-  : staticRow2;
+const logos = (data?.logosRow1?.length || data?.logosRow2?.length)
+  ? [
+      ...(data?.logosRow1 ?? []).map(l => ({ name: l.name, src: l.logo?.asset?.url ?? '', href: l.href, badge: l.badge })),
+      ...(data?.logosRow2 ?? []).map(l => ({ name: l.name, src: l.logo?.asset?.url ?? '', href: l.href, badge: l.badge })),
+    ]
+  : staticLogos;
 
 let sanityAttr: string | undefined;
 if (docId && data?._key) {
@@ -60,51 +63,50 @@ if (docId && data?._key) {
 }
 ---
 
-<section id="d365-trust" class="d365-trust d365-section--white" data-sanity={sanityAttr}>
+{styleProps?.css && <style is:inline set:html={styleProps.css} />}
+<section
+  id={styleProps?.sectionId ?? 'd365-trust'}
+  class:list={['d365-trust', 'd365-section--white', styleProps?.extraClass]}
+  style={styleProps?.inlineStyle || undefined}
+  data-sanity={sanityAttr}
+>
   <div class="d365-container">
     <p class="d365-trust__heading">{heading}</p>
   </div>
 
-  <!-- Row 1 marquee -->
-  <div class="d365-trust__marquee-wrap" aria-hidden="true">
-    <div class="d365-trust__track">
-      {[...logosRow1, ...logosRow1].map(logo => (
-        <div class="d365-trust__logo-item">
-          {logo.href ? (
-            <a href={logo.href} class="d365-trust__logo-link" title={logo.name}>
-              <img src={logo.src} alt={logo.name} class="d365-trust__logo-img" loading="lazy" />
-              {logo.badge && <span class="d365-trust__badge">{logo.badge}</span>}
-            </a>
-          ) : (
-            <img src={logo.src} alt={logo.name} class="d365-trust__logo-img" loading="lazy" />
-          )}
-        </div>
-      ))}
+  <section class="L5pQ7_wrap L5pQ7_is-loading" aria-label="Partner logos">
+    <div class="L5pQ7_viewport">
+      <div class="L5pQ7_track">
+        {logos.map((logo) => (
+          <figure class="L5pQ7_item">
+            <img
+              class="L5pQ7_img"
+              src={logo.src}
+              alt={logo.name}
+              style={(logo as any).imgStyle || undefined}
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
+            />
+            {logo.href && logo.badge && (
+              <figcaption class="L5pQ7_cap">
+                <a class="L5pQ7_pill" href={logo.href} target="_blank" rel="noopener">
+                  {logo.badge}
+                  <span class="L5pQ7_arrow" aria-hidden="true">➔</span>
+                </a>
+              </figcaption>
+            )}
+          </figure>
+        ))}
+      </div>
     </div>
-  </div>
-
-  <!-- Row 2 marquee (reverse direction) -->
-  <div class="d365-trust__marquee-wrap" aria-hidden="true">
-    <div class="d365-trust__track d365-trust__track--reverse">
-      {[...logosRow2, ...logosRow2].map(logo => (
-        <div class="d365-trust__logo-item">
-          {logo.href ? (
-            <a href={logo.href} class="d365-trust__logo-link" title={logo.name}>
-              <img src={logo.src} alt={logo.name} class="d365-trust__logo-img" loading="lazy" />
-              {logo.badge && <span class="d365-trust__badge">{logo.badge}</span>}
-            </a>
-          ) : (
-            <img src={logo.src} alt={logo.name} class="d365-trust__logo-img" loading="lazy" />
-          )}
-        </div>
-      ))}
-    </div>
-  </div>
+    <div class="L5pQ7_dots" role="tablist" aria-label="Logo slider pagination"></div>
+  </section>
 </section>
 
 <style>
   .d365-trust {
-    padding: 48px 0;
+    padding: 48px 0 32px;
     overflow: hidden;
   }
 
@@ -117,93 +119,279 @@ if (docId && data?._key) {
     margin: 0 0 32px;
   }
 
-  /* Marquee wrapper: fades edges */
-  .d365-trust__marquee-wrap {
+  /* ── Slider shell ── */
+  .L5pQ7_wrap {
     position: relative;
+    user-select: none;
+  }
+
+  .L5pQ7_viewport {
     overflow: hidden;
-    margin-bottom: 16px;
+    cursor: grab;
+    padding: 0 16px;
   }
-  .d365-trust__marquee-wrap::before,
-  .d365-trust__marquee-wrap::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 120px;
-    z-index: 2;
-    pointer-events: none;
-  }
-  .d365-trust__marquee-wrap::before {
-    left: 0;
-    background: linear-gradient(to right, #fff 0%, transparent 100%);
-  }
-  .d365-trust__marquee-wrap::after {
-    right: 0;
-    background: linear-gradient(to left, #fff 0%, transparent 100%);
+  .L5pQ7_grabbing {
+    cursor: grabbing !important;
   }
 
-  /* Scrolling track */
-  .d365-trust__track {
+  /* Hidden until images loaded */
+  .L5pQ7_is-loading .L5pQ7_viewport {
+    visibility: hidden;
+  }
+
+  /* Slides container */
+  .L5pQ7_track {
     display: flex;
-    width: max-content;
-    animation: d365-marquee-left 35s linear infinite;
-    gap: 40px;
-    align-items: center;
-  }
-  .d365-trust__track--reverse {
-    animation: d365-marquee-right 38s linear infinite;
+    will-change: transform;
   }
 
-  @keyframes d365-marquee-left {
-    from { transform: translateX(0); }
-    to   { transform: translateX(-50%); }
-  }
-  @keyframes d365-marquee-right {
-    from { transform: translateX(-50%); }
-    to   { transform: translateX(0); }
-  }
-
-  /* Pause on hover */
-  .d365-trust__marquee-wrap:hover .d365-trust__track {
-    animation-play-state: paused;
-  }
-
-  /* Individual logo item */
-  .d365-trust__logo-item {
-    position: relative;
+  /* Each paginated slide */
+  :global(.L5pQ7_slide) {
+    min-width: 100%;
     flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    height: 56px;
   }
 
-  .d365-trust__logo-link {
+  /* Logo grid: 7 cols × 2 rows on desktop */
+  :global(.L5pQ7_grid) {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 24px 32px;
+    padding: 8px 0;
+  }
+  @media (max-width: 640px) {
+    :global(.L5pQ7_grid) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+  }
+
+  /* Individual logo cell */
+  .L5pQ7_item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 4px;
-    text-decoration: none;
+    justify-content: center;
+    gap: 6px;
+    min-height: 72px;
   }
 
-  .d365-trust__logo-img {
-    height: 36px;
+  .L5pQ7_img {
+    max-height: 48px;
     width: auto;
     max-width: 120px;
     object-fit: contain;
-    filter: grayscale(1) opacity(0.6);
+    filter: grayscale(1) opacity(0.55);
     transition: filter 0.2s ease;
+    display: block;
   }
-  .d365-trust__logo-item:hover .d365-trust__logo-img {
+  .L5pQ7_item:hover .L5pQ7_img {
     filter: grayscale(0) opacity(1);
   }
 
-  .d365-trust__badge {
+  /* Case-study / switch badge */
+  .L5pQ7_cap {
+    display: flex;
+    justify-content: center;
+  }
+  .L5pQ7_pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     font-size: 10px;
     font-weight: 700;
-    color: var(--d365-blue);
-    background: var(--d365-icon-bg);
+    color: var(--d365-blue, #0052cc);
+    background: #eff4ff;
     border-radius: 20px;
     padding: 2px 8px;
+    text-decoration: none;
     white-space: nowrap;
   }
+  .L5pQ7_pill:hover {
+    background: #ddeaff;
+  }
+  .L5pQ7_arrow {
+    font-size: 10px;
+  }
+
+  /* Dot pagination */
+  .L5pQ7_dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+    padding-bottom: 8px;
+  }
+  :global(.L5pQ7_dot) {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #d0d3e0;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  :global(.L5pQ7_dot--active) {
+    background: var(--d365-blue, #0052cc);
+  }
 </style>
+
+<script is:inline>
+  (function () {
+    const wrap = document.querySelector('.L5pQ7_wrap');
+    if (!wrap) return;
+
+    const viewport = wrap.querySelector('.L5pQ7_viewport');
+    const track = wrap.querySelector('.L5pQ7_track');
+    const dotsWrap = wrap.querySelector('.L5pQ7_dots');
+    const allItems = Array.from(wrap.querySelectorAll('.L5pQ7_item'));
+    const allImages = Array.from(wrap.querySelectorAll('.L5pQ7_img'));
+
+    let slides = [];
+    let dots = [];
+    let SLIDE_COUNT = 0;
+    let currentIndex = 0;
+    let isDragging = false;
+    let startPos = 0;
+    let currentTranslate = 0;
+    let prevTranslate = 0;
+
+    function getMode() {
+      return window.matchMedia('(max-width: 640px)').matches ? 'mobile' : 'desktop';
+    }
+
+    let currentMode = getMode();
+
+    function preloadAllImages(images) {
+      const urls = images.map(img => img.getAttribute('src')).filter(Boolean);
+      const uniqueUrls = [...new Set(urls)];
+      return Promise.all(
+        uniqueUrls.map((url) => new Promise((resolve) => {
+          const preImg = new Image();
+          preImg.onload = resolve;
+          preImg.onerror = resolve;
+          preImg.src = url;
+          if (preImg.complete) resolve();
+        }))
+      );
+    }
+
+    function buildSlides(mode) {
+      currentIndex = 0;
+      track.innerHTML = '';
+      dotsWrap.innerHTML = '';
+
+      const itemsPerSlide = (mode === 'mobile') ? 4 : 14;
+      const totalItems = allItems.length;
+      const slideCount = Math.ceil(totalItems / itemsPerSlide);
+
+      for (let s = 0; s < slideCount; s++) {
+        const slide = document.createElement('div');
+        slide.className = 'L5pQ7_slide' + (s === 0 ? ' L5pQ7_slide--active' : '');
+
+        const grid = document.createElement('div');
+        grid.className = 'L5pQ7_grid';
+
+        for (let i = 0; i < itemsPerSlide; i++) {
+          const item = allItems[s * itemsPerSlide + i];
+          if (item) grid.appendChild(item);
+        }
+
+        slide.appendChild(grid);
+        track.appendChild(slide);
+
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'L5pQ7_dot' + (s === 0 ? ' L5pQ7_dot--active' : '');
+        dot.setAttribute('aria-label', 'Show slide ' + (s + 1));
+        dotsWrap.appendChild(dot);
+      }
+
+      slides = Array.from(track.querySelectorAll('.L5pQ7_slide'));
+      dots = Array.from(dotsWrap.querySelectorAll('.L5pQ7_dot'));
+      SLIDE_COUNT = slideCount;
+
+      attachDotHandlers();
+      setPositionByIndex();
+    }
+
+    function getSlideWidth() {
+      return viewport.clientWidth;
+    }
+
+    function setPositionByIndex() {
+      currentTranslate = -currentIndex * getSlideWidth();
+      prevTranslate = currentTranslate;
+      track.style.transition = 'transform 0.6s ease-in-out';
+      track.style.transform = 'translateX(' + currentTranslate + 'px)';
+      updateDotsAndSlides();
+    }
+
+    function updateDotsAndSlides() {
+      slides.forEach((slide, i) => slide.classList.toggle('L5pQ7_slide--active', i === currentIndex));
+      dots.forEach((dot, i) => dot.classList.toggle('L5pQ7_dot--active', i === currentIndex));
+    }
+
+    function attachDotHandlers() {
+      dots.forEach((dot, i) => {
+        dot.onclick = function () { currentIndex = i; setPositionByIndex(); };
+      });
+    }
+
+    function getPositionX(e) {
+      return e.type.includes('mouse') ? e.pageX : e.touches[0].clientX;
+    }
+
+    function handleDragStart(e) {
+      if (wrap.classList.contains('L5pQ7_is-loading')) return;
+      isDragging = true;
+      startPos = getPositionX(e);
+      track.style.transition = 'none';
+      viewport.classList.add('L5pQ7_grabbing');
+    }
+
+    function handleDragMove(e) {
+      if (!isDragging) return;
+      currentTranslate = prevTranslate + (getPositionX(e) - startPos);
+      track.style.transform = 'translateX(' + currentTranslate + 'px)';
+    }
+
+    function handleDragEnd() {
+      if (!isDragging) return;
+      isDragging = false;
+      viewport.classList.remove('L5pQ7_grabbing');
+
+      const movedBy = currentTranslate - prevTranslate;
+      const threshold = getSlideWidth() * 0.2;
+
+      if (movedBy < -threshold && currentIndex < SLIDE_COUNT - 1) currentIndex++;
+      else if (movedBy > threshold && currentIndex > 0) currentIndex--;
+
+      setPositionByIndex();
+    }
+
+    viewport.addEventListener('mousedown', handleDragStart);
+    window.addEventListener('mousemove', handleDragMove);
+    window.addEventListener('mouseup', handleDragEnd);
+    viewport.addEventListener('touchstart', handleDragStart, { passive: true });
+    viewport.addEventListener('touchmove', handleDragMove, { passive: true });
+    viewport.addEventListener('touchend', handleDragEnd);
+
+    window.addEventListener('resize', function () {
+      if (wrap.classList.contains('L5pQ7_is-loading')) return;
+      const newMode = getMode();
+      if (newMode !== currentMode) {
+        currentMode = newMode;
+        buildSlides(currentMode);
+      } else {
+        setPositionByIndex();
+      }
+    });
+
+    preloadAllImages(allImages).finally(function () {
+      buildSlides(currentMode);
+      wrap.classList.remove('L5pQ7_is-loading');
+      wrap.classList.add('L5pQ7_is-ready');
+    });
+  })();
+</script>

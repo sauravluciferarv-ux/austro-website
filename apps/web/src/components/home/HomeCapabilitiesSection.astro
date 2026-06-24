@@ -1,15 +1,16 @@
 ---
 import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
-import type { D365CapabilitiesSection } from '../../lib/types';
+import type { D365CapabilitiesSection, D365SectionStyleProps } from '../../lib/types';
 
 interface Props {
   data?: D365CapabilitiesSection;
   isPreview?: boolean;
   docId?: string;
   docType?: string;
+  styleProps?: D365SectionStyleProps;
 }
 
-const { data, docId, docType = 'homepage' } = Astro.props;
+const { data, docId, docType = 'homepage', styleProps } = Astro.props;
 
 const heading = data?.heading ?? "Everything you'd expect. Plus what others charge extra for.";
 const body = data?.body ?? 'Every feature your support and IT teams need — in one plan, at one price.';
@@ -29,15 +30,22 @@ const staticCapabilities = [
 ];
 
 const capabilities = data?.capabilities?.length
-  ? data.capabilities.map(c => ({ title: c.title, description: c.description ?? '', icon: c.icon ?? 'bolt' }))
+  ? data.capabilities.map(c => ({ _key: c._key, title: c.title, description: c.description ?? '', icon: c.icon ?? 'bolt', iconImage: c.iconImage?.asset?.url }))
   : staticCapabilities;
 
 let sanityAttr: string | undefined;
+let daFn: ((path: string) => string) | undefined;
 if (docId && data?._key) {
   try {
     const da = createDataAttribute({ id: docId, type: docType });
     sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+    daFn = (path: string) => da(path);
   } catch {}
+}
+
+function capIconImgAttr(capKey: string | undefined) {
+  if (!daFn || !data?._key || !capKey) return undefined;
+  return daFn(`pageBuilder[_key=="${data._key}"].capabilities[_key=="${capKey}"].iconImage`);
 }
 
 // SVG icons for each capability card
@@ -63,7 +71,13 @@ const icons = [
 ];
 ---
 
-<section id="d365-capabilities" class="d365-capabilities d365-section--gray" data-sanity={sanityAttr}>
+{styleProps?.css && <style is:inline set:html={styleProps.css} />}
+<section
+  id={styleProps?.sectionId ?? 'd365-capabilities'}
+  class:list={['d365-capabilities', 'd365-section--gray', styleProps?.extraClass]}
+  style={styleProps?.inlineStyle || undefined}
+  data-sanity={sanityAttr}
+>
   <div class="d365-container">
     <div class="d365-section-header">
       <h2 class="d365-heading">{heading}</h2>
@@ -73,7 +87,20 @@ const icons = [
     <div class="d365-capabilities__grid">
       {capabilities.map((cap, i) => (
         <div class="d365-capabilities__card">
-          <div class="d365-icon-box" set:html={icons[i % icons.length]} style="color: var(--d365-blue);" />
+          {cap.iconImage ? (
+            <div class="d365-icon-box">
+              <img
+                src={cap.iconImage}
+                alt={cap.title}
+                loading="lazy"
+                width="24"
+                height="24"
+                data-sanity={capIconImgAttr(cap._key)}
+              />
+            </div>
+          ) : (
+            <div class="d365-icon-box" set:html={icons[i % icons.length]} style="color: var(--d365-blue);" />
+          )}
           <h3 class="d365-capabilities__card-title">{cap.title}</h3>
           <p class="d365-capabilities__card-desc">{cap.description}</p>
         </div>

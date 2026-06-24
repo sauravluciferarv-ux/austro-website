@@ -1,0 +1,423 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import HomeSectionRenderer from '../../components/home/HomeSectionRenderer.astro';
+import { sanityClient, getDraftClient } from '../../lib/sanity';
+import { requestDemoPageQuery } from '../../lib/queries';
+import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
+import {
+  DEMO_DEFAULTS,
+  DEMO_FORM_DEFAULTS,
+  DEFAULT_BENEFITS,
+  DEFAULT_TESTIMONIALS,
+  DEFAULT_TRUST_BADGES,
+} from '../../lib/page-defaults';
+
+const isPreview = Astro.locals.isPreview ?? false;
+const client = isPreview ? getDraftClient() : sanityClient;
+const cmsData = await client.fetch(requestDemoPageQuery).catch(() => null);
+
+if (!isPreview) {
+  Astro.response.headers.set('Cache-Control', 's-maxage=300, stale-while-revalidate=3600');
+}
+
+// ── Hero / heading ────────────────────────────────────────────────────────────
+const heroHeading      = cmsData?.heroHeading      || DEMO_DEFAULTS.heroHeading;
+const heroSubheading   = cmsData?.heroSubheading   || DEMO_DEFAULTS.heroSubheading;
+const formHeading      = cmsData?.formHeading      || DEMO_DEFAULTS.formHeading;
+const benefitsSectionTitle = cmsData?.benefitsSectionTitle || DEMO_DEFAULTS.benefitsSectionTitle;
+
+// ── Success state ─────────────────────────────────────────────────────────────
+const successHeading   = cmsData?.successHeading   || DEMO_DEFAULTS.successHeading;
+const successBody      = cmsData?.successBody      || DEMO_DEFAULTS.successBody;
+const successCtaLabel  = cmsData?.successCtaLabel  || DEMO_DEFAULTS.successCtaLabel;
+const successCtaHref   = cmsData?.successCtaHref   || DEMO_DEFAULTS.successCtaHref;
+
+// ── Form fields ───────────────────────────────────────────────────────────────
+const fc = cmsData?.formConfig ?? {};
+const firstNameLabel          = fc.firstNameLabel          || DEMO_FORM_DEFAULTS.firstNameLabel;
+const lastNameLabel           = fc.lastNameLabel           || DEMO_FORM_DEFAULTS.lastNameLabel;
+const workEmailLabel          = fc.workEmailLabel          || DEMO_FORM_DEFAULTS.workEmailLabel;
+const companyLabel            = fc.companyLabel            || DEMO_FORM_DEFAULTS.companyLabel;
+const teamSizeLabel           = fc.teamSizeLabel           || DEMO_FORM_DEFAULTS.teamSizeLabel;
+const currentHelpdeskLabel    = fc.currentHelpdeskLabel    || DEMO_FORM_DEFAULTS.currentHelpdeskLabel;
+const messageLabel            = fc.messageLabel            || DEMO_FORM_DEFAULTS.messageLabel;
+const firstNamePlaceholder    = fc.firstNamePlaceholder    || DEMO_FORM_DEFAULTS.firstNamePlaceholder;
+const lastNamePlaceholder     = fc.lastNamePlaceholder     || DEMO_FORM_DEFAULTS.lastNamePlaceholder;
+const workEmailPlaceholder    = fc.workEmailPlaceholder    || DEMO_FORM_DEFAULTS.workEmailPlaceholder;
+const companyPlaceholder      = fc.companyPlaceholder      || DEMO_FORM_DEFAULTS.companyPlaceholder;
+const messagePlaceholder      = fc.messagePlaceholder      || DEMO_FORM_DEFAULTS.messagePlaceholder;
+const submitLabel             = fc.submitLabel             || DEMO_FORM_DEFAULTS.submitLabel;
+const privacyText             = fc.privacyText             || DEMO_FORM_DEFAULTS.privacyText;
+const privacyPolicyLabel      = fc.privacyPolicyLabel      || DEMO_FORM_DEFAULTS.privacyPolicyLabel;
+const privacyPolicyHref       = fc.privacyPolicyHref       || DEMO_FORM_DEFAULTS.privacyPolicyHref;
+const teamSizeOptions: string[]         = fc.teamSizeOptions?.length         ? fc.teamSizeOptions         : DEMO_FORM_DEFAULTS.teamSizeOptions;
+const currentHelpdeskOptions: string[]  = fc.currentHelpdeskOptions?.length  ? fc.currentHelpdeskOptions  : DEMO_FORM_DEFAULTS.currentHelpdeskOptions;
+
+// Split privacy text around the policy link label for inline link rendering
+const privacyParts  = privacyText.split(privacyPolicyLabel);
+const privacyBefore = privacyParts[0] ?? '';
+const privacyAfter  = privacyParts[1] ?? '';
+
+// ── Lists ─────────────────────────────────────────────────────────────────────
+const benefits     = (cmsData?.benefits?.length     ? cmsData.benefits     : DEFAULT_BENEFITS) as string[];
+const testimonials = (cmsData?.testimonials?.length ? cmsData.testimonials : DEFAULT_TESTIMONIALS) as typeof DEFAULT_TESTIMONIALS;
+const trustBadges  = (cmsData?.trustBadges?.length  ? cmsData.trustBadges  : DEFAULT_TRUST_BADGES) as { label: string; icon?: { asset?: { url?: string } } }[];
+
+// ── Page builder ──────────────────────────────────────────────────────────────
+const pageBuilder = cmsData?.pageBuilder ?? [];
+const docId       = cmsData?._id ?? 'requestDemoPage';
+const seo         = cmsData?.seo ?? {};
+
+// ── Visual editing data attributes ────────────────────────────────────────────
+const da = createDataAttribute({ id: docId, type: 'requestDemoPage' });
+let heroSectionAttr: string | undefined;
+let benefitsSectionAttr: string | undefined;
+let testimonialsSectionAttr: string | undefined;
+let formConfigAttr: string | undefined;
+let successAttr: string | undefined;
+try {
+  heroSectionAttr         = da('heroHeading');
+  benefitsSectionAttr     = da('benefits');
+  testimonialsSectionAttr = da('testimonials');
+  formConfigAttr          = da('formConfig');
+  successAttr             = da('successHeading');
+} catch {}
+---
+
+<BaseLayout seo={{
+  metaTitle: seo.metaTitle || 'Book a Demo — Desk365 | AI-Powered Helpdesk Software',
+  metaDescription: seo.metaDescription || 'See Desk365 in action. Book a personalized 30-minute demo with a product specialist and discover how to simplify your support operations.',
+  ogImage: seo.ogImage,
+}}>
+
+<!-- ─── Hero / Form ───────────────────────────────────────────────────────── -->
+<section class="demo-hero d365-section--white" data-sanity={heroSectionAttr}>
+  <div class="d365-container">
+    <div class="demo-layout">
+
+      <!-- Left: Form -->
+      <div class="demo-form-col" data-sanity={formConfigAttr}>
+        <p class="d365-eyebrow">{formHeading}</p>
+        <h1 class="d365-heading">{heroHeading}</h1>
+        <p class="demo-sub">{heroSubheading}</p>
+
+        <form class="demo-form" id="demo-form" novalidate>
+          <div class="demo-form__row">
+            <div class="demo-form__field">
+              <label for="first-name" class="demo-form__label">{firstNameLabel} <span aria-hidden="true">*</span></label>
+              <input type="text" id="first-name" name="firstName" class="demo-form__input" required placeholder={firstNamePlaceholder} />
+            </div>
+            <div class="demo-form__field">
+              <label for="last-name" class="demo-form__label">{lastNameLabel} <span aria-hidden="true">*</span></label>
+              <input type="text" id="last-name" name="lastName" class="demo-form__input" required placeholder={lastNamePlaceholder} />
+            </div>
+          </div>
+          <div class="demo-form__field">
+            <label for="work-email" class="demo-form__label">{workEmailLabel} <span aria-hidden="true">*</span></label>
+            <input type="email" id="work-email" name="workEmail" class="demo-form__input" required placeholder={workEmailPlaceholder} />
+          </div>
+          <div class="demo-form__field">
+            <label for="company" class="demo-form__label">{companyLabel} <span aria-hidden="true">*</span></label>
+            <input type="text" id="company" name="company" class="demo-form__input" required placeholder={companyPlaceholder} />
+          </div>
+          <div class="demo-form__row">
+            <div class="demo-form__field">
+              <label for="team-size" class="demo-form__label">{teamSizeLabel}</label>
+              <select id="team-size" name="teamSize" class="demo-form__select">
+                <option value="">Select size</option>
+                {teamSizeOptions.map(opt => <option value={opt}>{opt}</option>)}
+              </select>
+            </div>
+            <div class="demo-form__field">
+              <label for="current-tool" class="demo-form__label">{currentHelpdeskLabel}</label>
+              <select id="current-tool" name="currentTool" class="demo-form__select">
+                <option value="">Select tool</option>
+                {currentHelpdeskOptions.map(opt => <option>{opt}</option>)}
+              </select>
+            </div>
+          </div>
+          <div class="demo-form__field">
+            <label for="message" class="demo-form__label">{messageLabel}</label>
+            <textarea id="message" name="message" class="demo-form__textarea" rows="3" placeholder={messagePlaceholder}></textarea>
+          </div>
+          <button type="submit" class="demo-form__submit d365-btn d365-btn--green" style="width:100%; justify-content:center">
+            {submitLabel}
+          </button>
+          <p class="demo-form__privacy">
+            {privacyBefore}<a href={privacyPolicyHref} target="_blank">{privacyPolicyLabel}</a>{privacyAfter}
+          </p>
+        </form>
+
+        <!-- Success message -->
+        <div class="demo-success" id="demo-success" style="display:none" data-sanity={successAttr}>
+          <div class="demo-success__icon">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="11" fill="#e8f5e9"/>
+              <path d="M7 12l3.5 3.5L17 8" stroke="#2e7d32" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h2>{successHeading}</h2>
+          <p>{successBody}</p>
+          <a href={successCtaHref} class="d365-btn d365-btn--green" style="margin-top:8px">
+            {successCtaLabel}
+          </a>
+        </div>
+      </div>
+
+      <!-- Right: Benefits -->
+      <div class="demo-benefits-col" data-sanity={benefitsSectionAttr}>
+        <div class="demo-benefits">
+          <h2 class="demo-benefits__title">{benefitsSectionTitle}</h2>
+          <ul class="demo-benefits__list">
+            {benefits.map(b => (
+              <li class="demo-benefits__item">
+                <svg class="demo-benefits__check" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <circle cx="10" cy="10" r="9" fill="#e8f5e9"/>
+                  <path d="M6.5 10l2.5 2.5 4.5-5" stroke="#2e7d32" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                {b}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <!-- Testimonials -->
+        <div class="demo-testimonials" data-sanity={testimonialsSectionAttr}>
+          {testimonials.map(t => (
+            <div class="demo-testimonial">
+              <div class="demo-testimonial__stars" aria-label="5 stars">
+                {[0,1,2,3,4].map(() => (
+                  <svg viewBox="0 0 12 12" fill="#f59e0b" aria-hidden="true">
+                    <path d="M6 0.5l1.5 3 3.5.5-2.5 2.5.6 3.5L6 8.5 2.9 10l.6-3.5L1 4l3.5-.5z"/>
+                  </svg>
+                ))}
+              </div>
+              <p class="demo-testimonial__quote">"{t.quote}"</p>
+              <p class="demo-testimonial__author">
+                <strong>{t.name}</strong> — {t.title}, {t.company}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <!-- Trust badges -->
+        <div class="demo-trust">
+          {trustBadges.map(badge => (
+            <div class="demo-trust__badge">
+              {badge.icon?.asset?.url ? (
+                <img src={badge.icon.asset.url} alt="" class="demo-trust__badge-icon" width="16" height="16" aria-hidden="true" />
+              ) : (
+                <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <path d="M10 1.5L3 4v5c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9V4L10 1.5z" stroke="currentColor" stroke-width="1.5" fill="rgba(63,81,181,0.1)"/>
+                  <path d="M7 10l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              )}
+              {badge.label}
+            </div>
+          ))}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{/* Sanity Page Builder sections */}
+{pageBuilder.map((section: any) => (
+  <HomeSectionRenderer section={section} isPreview={isPreview} docId={docId} docType="requestDemoPage" />
+))}
+
+</BaseLayout>
+
+<script>
+  const form    = document.getElementById('demo-form');
+  const success = document.getElementById('demo-success');
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = form.querySelector<HTMLButtonElement>('[type="submit"]');
+    if (btn) { btn.textContent = 'Sending…'; btn.disabled = true; }
+
+    // Real form submission would go to a webhook/backend here.
+    // For now simulate a brief delay then show success.
+    await new Promise(r => setTimeout(r, 1000));
+    form.style.display = 'none';
+    if (success) success.style.display = '';
+  });
+</script>
+
+<style>
+  .demo-hero {
+    padding: 72px 24px 88px;
+  }
+
+  /* ── Layout ── */
+  .demo-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 56px;
+    align-items: start;
+  }
+  @media (min-width: 960px) {
+    .demo-layout { grid-template-columns: 1fr 1fr; }
+  }
+
+  .demo-sub {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--d365-text-body);
+    margin: 0 0 28px;
+  }
+
+  /* ── Form ── */
+  .demo-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .demo-form__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 500px) {
+    .demo-form__row { grid-template-columns: 1fr; }
+  }
+  .demo-form__field { display: flex; flex-direction: column; gap: 6px; }
+  .demo-form__label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--d365-text-dark);
+  }
+  .demo-form__label span { color: var(--d365-blue); }
+  .demo-form__input,
+  .demo-form__select,
+  .demo-form__textarea {
+    padding: 11px 14px;
+    border: 1.5px solid var(--d365-border);
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--d365-text-dark);
+    background: #fff;
+    font-family: var(--font-sans);
+    transition: border-color var(--transition-base), box-shadow var(--transition-base);
+    width: 100%;
+  }
+  .demo-form__input::placeholder,
+  .demo-form__textarea::placeholder { color: #b0b4c8; }
+  .demo-form__input:focus,
+  .demo-form__select:focus,
+  .demo-form__textarea:focus {
+    outline: none;
+    border-color: var(--d365-blue);
+    box-shadow: 0 0 0 3px rgba(63,81,181,0.12);
+  }
+  .demo-form__textarea { resize: vertical; min-height: 80px; }
+  .demo-form__submit { font-size: 14px; padding: 14px 24px; }
+  .demo-form__privacy {
+    font-size: 12px;
+    color: #aaa;
+    text-align: center;
+    margin: -4px 0 0;
+  }
+  .demo-form__privacy a { color: var(--d365-blue); }
+
+  /* ── Success ── */
+  .demo-success {
+    text-align: center;
+    padding: 48px 24px;
+    background: var(--d365-bg-gray);
+    border-radius: 20px;
+  }
+  .demo-success__icon svg { width: 64px; height: 64px; margin: 0 auto 16px; display: block; }
+  .demo-success h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--d365-text-dark);
+    margin: 0 0 12px;
+  }
+  .demo-success p { font-size: 15px; color: var(--d365-text-body); line-height: 1.65; }
+
+  /* ── Benefits ── */
+  .demo-benefits {
+    background: var(--d365-bg-gray);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+  .demo-benefits__title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--d365-text-dark);
+    margin: 0 0 16px;
+    line-height: 1.3;
+  }
+  .demo-benefits__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .demo-benefits__item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 14px;
+    color: var(--d365-text-body);
+    line-height: 1.5;
+  }
+  .demo-benefits__check { width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── Testimonials ── */
+  .demo-testimonials { display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px; }
+  .demo-testimonial {
+    background: #fff;
+    border: 1.5px solid var(--d365-border);
+    border-radius: 14px;
+    padding: 20px;
+  }
+  .demo-testimonial__stars {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 8px;
+  }
+  .demo-testimonial__stars svg { width: 14px; height: 14px; }
+  .demo-testimonial__quote {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--d365-text-body);
+    font-style: italic;
+    margin: 0 0 10px;
+  }
+  .demo-testimonial__author {
+    font-size: 12px;
+    color: var(--d365-text-body);
+    margin: 0;
+  }
+  .demo-testimonial__author strong { color: var(--d365-text-dark); }
+
+  /* ── Trust Badges ── */
+  .demo-trust {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .demo-trust__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--d365-bg-gray);
+    border: 1px solid var(--d365-border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--d365-blue);
+  }
+  .demo-trust__badge svg { width: 16px; height: 16px; color: var(--d365-blue); }
+  .demo-trust__badge-icon { width: 16px; height: 16px; object-fit: contain; }
+</style>

@@ -1,0 +1,504 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { sanityClient, getDraftClient } from '../../lib/sanity';
+import { blogListQuery } from '../../lib/queries';
+
+const isPreview = Astro.locals.isPreview ?? false;
+const client = isPreview ? getDraftClient() : sanityClient;
+
+if (!isPreview) {
+  Astro.response.headers.set('Cache-Control', 's-maxage=120, stale-while-revalidate=600');
+}
+
+interface BlogPost {
+  _id: string;
+  title: string;
+  slug: string;
+  publishedAt: string;
+  excerpt?: string;
+  heroImage?: { asset?: { url: string }; alt?: string };
+  author?: { name: string; avatar?: { asset?: { url: string } } };
+  categories?: { title: string; slug: string }[];
+}
+
+let posts: BlogPost[] = [];
+try {
+  posts = await client.fetch<BlogPost[]>(blogListQuery);
+} catch (e) {
+  // Sanity may not have blog posts yet — fallback to empty
+  posts = [];
+}
+
+// Static demo posts as fallback when Sanity is empty
+const staticPosts: BlogPost[] = [
+  {
+    _id: 'demo-1',
+    title: 'Customer Support Trends 2026: The Rise of AI, CX, and Automation',
+    slug: 'customer-support-trends-2026',
+    publishedAt: '2026-06-19',
+    excerpt: 'Customer support is entering a new phase. AI agents, autonomous escalation, and intelligent copilots are reshaping how teams handle volume — without sacrificing quality.',
+    heroImage: { asset: { url: 'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&auto=format&fit=crop' }, alt: 'Customer support trends 2026' },
+    categories: [{ title: 'Reports', slug: 'reports' }],
+    author: { name: 'Suvedha Balasubramanian' },
+  },
+  {
+    _id: 'demo-2',
+    title: 'How to Reduce Ticket Volume by 40% With a Knowledge Base',
+    slug: 'reduce-ticket-volume-knowledge-base',
+    publishedAt: '2026-06-12',
+    excerpt: 'A well-structured knowledge base is the single most effective tool for deflecting repetitive support tickets. Here\'s how to build one that actually works.',
+    heroImage: { asset: { url: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&auto=format&fit=crop' }, alt: 'Knowledge base article' },
+    categories: [{ title: 'Customer Service', slug: 'customer-service' }],
+    author: { name: 'Desk365 Team' },
+  },
+  {
+    _id: 'demo-3',
+    title: 'Microsoft Teams as a Helpdesk: Everything You Need to Know',
+    slug: 'microsoft-teams-helpdesk',
+    publishedAt: '2026-06-05',
+    excerpt: 'Learn how to use Microsoft Teams as your primary support channel — without buying a separate ticketing system.',
+    heroImage: { asset: { url: 'https://images.unsplash.com/photo-1600267165477-6d4cc741b379?w=800&auto=format&fit=crop' }, alt: 'Microsoft Teams integration' },
+    categories: [{ title: 'Microsoft Teams', slug: 'microsoft-teams' }],
+    author: { name: 'Desk365 Team' },
+  },
+  {
+    _id: 'demo-4',
+    title: 'ITSM Best Practices for Modern IT Teams',
+    slug: 'itsm-best-practices',
+    publishedAt: '2026-05-28',
+    excerpt: 'IT Service Management has evolved. Discover the practices that keep modern IT departments efficient, compliant, and ready for anything.',
+    heroImage: { asset: { url: 'https://images.unsplash.com/photo-1551434678-e076c223a692?w=800&auto=format&fit=crop' }, alt: 'ITSM best practices' },
+    categories: [{ title: 'ITSM', slug: 'itsm' }],
+    author: { name: 'Desk365 Team' },
+  },
+  {
+    _id: 'demo-5',
+    title: 'SLA Management: How to Set, Track, and Meet Your Service Goals',
+    slug: 'sla-management-guide',
+    publishedAt: '2026-05-20',
+    excerpt: 'SLAs are the backbone of any reliable support operation. This guide covers how to define meaningful targets and automate enforcement.',
+    heroImage: { asset: { url: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&auto=format&fit=crop' }, alt: 'SLA management dashboard' },
+    categories: [{ title: 'Help Desk', slug: 'help-desk' }],
+    author: { name: 'Desk365 Team' },
+  },
+  {
+    _id: 'demo-6',
+    title: 'Desk365 Product Updates — June 2026',
+    slug: 'product-updates-june-2026',
+    publishedAt: '2026-06-01',
+    excerpt: 'New features this month: improved AI draft replies, bulk ticket actions, and an updated asset management interface.',
+    heroImage: { asset: { url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop' }, alt: 'Product updates June 2026' },
+    categories: [{ title: 'Product Updates', slug: 'product-updates' }],
+    author: { name: 'Desk365 Team' },
+  },
+];
+
+const displayPosts = posts.length > 0 ? posts : staticPosts;
+const featuredPost = displayPosts[0];
+const remainingPosts = displayPosts.slice(1);
+
+const allCategories = [
+  { label: 'View All', slug: '' },
+  { label: 'Customer Service', slug: 'customer-service' },
+  { label: 'Help Desk', slug: 'help-desk' },
+  { label: 'ITSM', slug: 'itsm' },
+  { label: 'Microsoft Teams', slug: 'microsoft-teams' },
+  { label: 'Product Updates', slug: 'product-updates' },
+  { label: 'Reports', slug: 'reports' },
+];
+
+function formatDate(dateStr: string) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+---
+
+<BaseLayout seo={{
+  metaTitle: 'Blog — Desk365 | Helpdesk, Customer Service & IT Tips',
+  metaDescription: 'Keep up with the latest technologies and strategies for better customer interactions. Tips on helpdesk software, ITSM, AI, and Microsoft Teams.',
+}}>
+
+<!-- ─── Hero ────────────────────────────────────────────────────────────────── -->
+<section class="blog-hero d365-section--white">
+  <div class="d365-container text-center">
+    <p class="d365-eyebrow">Blog</p>
+    <h1 class="d365-heading d365-heading--xl">Desk365 Blog</h1>
+    <p class="blog-hero__sub">
+      Keep up with the latest technologies and strategies for better customer interactions.
+      Tips, guides, and insights from the Desk365 team.
+    </p>
+  </div>
+</section>
+
+<!-- ─── Category Filter ───────────────────────────────────────────────────── -->
+<div class="blog-filter-bar">
+  <div class="d365-container">
+    <div class="blog-filter-bar__inner">
+      {allCategories.map(cat => (
+        <button
+          class={`blog-filter-btn${cat.slug === '' ? ' blog-filter-btn--active' : ''}`}
+          data-slug={cat.slug}
+          type="button"
+        >
+          {cat.label}
+        </button>
+      ))}
+    </div>
+  </div>
+</div>
+
+<!-- ─── Featured Post ─────────────────────────────────────────────────────── -->
+{featuredPost && (
+  <section class="d365-section--white" style="padding: 48px 24px 0;">
+    <div class="d365-container">
+      <a href={`/blog/${featuredPost.slug}/`} class="featured-post" data-categories={featuredPost.categories?.map(c => c.slug).join(',') ?? ''}>
+        {featuredPost.heroImage?.asset?.url && (
+          <div class="featured-post__image">
+            <img
+              src={featuredPost.heroImage.asset.url}
+              alt={featuredPost.heroImage.alt ?? featuredPost.title}
+              width="800"
+              height="450"
+              loading="eager"
+            />
+          </div>
+        )}
+        <div class="featured-post__content">
+          {featuredPost.categories?.[0] && (
+            <span class="blog-category-tag">{featuredPost.categories[0].title}</span>
+          )}
+          <h2 class="featured-post__title">{featuredPost.title}</h2>
+          {featuredPost.excerpt && (
+            <p class="featured-post__excerpt">{featuredPost.excerpt}</p>
+          )}
+          <div class="featured-post__meta">
+            {featuredPost.author && (
+              <span class="blog-author">{featuredPost.author.name}</span>
+            )}
+            <span class="blog-date">{formatDate(featuredPost.publishedAt)}</span>
+          </div>
+          <span class="d365-link">Read article</span>
+        </div>
+      </a>
+    </div>
+  </section>
+)}
+
+<!-- ─── Post Grid ─────────────────────────────────────────────────────────── -->
+<section class="d365-section d365-section--white">
+  <div class="d365-container">
+    <div class="blog-grid" id="blog-grid">
+      {remainingPosts.map(post => (
+        <a
+          href={`/blog/${post.slug}/`}
+          class="blog-card"
+          data-categories={post.categories?.map(c => c.slug).join(',') ?? ''}
+        >
+          {post.heroImage?.asset?.url ? (
+            <div class="blog-card__image">
+              <img
+                src={post.heroImage.asset.url}
+                alt={post.heroImage.alt ?? post.title}
+                width="400"
+                height="225"
+                loading="lazy"
+              />
+            </div>
+          ) : (
+            <div class="blog-card__image blog-card__image--placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+            </div>
+          )}
+          <div class="blog-card__body">
+            {post.categories?.[0] && (
+              <span class="blog-category-tag">{post.categories[0].title}</span>
+            )}
+            <h3 class="blog-card__title">{post.title}</h3>
+            {post.excerpt && (
+              <p class="blog-card__excerpt">{post.excerpt}</p>
+            )}
+            <div class="blog-card__meta">
+              {post.author && <span class="blog-author">{post.author.name}</span>}
+              <span class="blog-date">{formatDate(post.publishedAt)}</span>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    {displayPosts.length === 0 && (
+      <div class="blog-empty">
+        <p>No posts yet. Check back soon!</p>
+      </div>
+    )}
+  </div>
+</section>
+
+<!-- ─── Newsletter CTA ────────────────────────────────────────────────────── -->
+<section class="blog-newsletter">
+  <div class="d365-container text-center">
+    <h2 class="d365-heading d365-heading--white" style="margin-bottom:12px">Stay in the loop</h2>
+    <p style="color:rgba(255,255,255,0.75); font-size:17px; margin-bottom:32px">
+      Get the latest helpdesk tips and product updates delivered to your inbox.
+    </p>
+    <a href="/request-demo/" class="d365-btn d365-btn--green">Book a Demo</a>
+    <a href="https://app.desk365.io/register" class="d365-btn d365-btn--outline-white" style="margin-left:12px">
+      Start Free Trial
+    </a>
+  </div>
+</section>
+
+</BaseLayout>
+
+<script>
+  // Category filter
+  const filterBtns = document.querySelectorAll<HTMLButtonElement>('.blog-filter-btn');
+  const featured   = document.querySelector<HTMLAnchorElement>('.featured-post');
+  const cards      = document.querySelectorAll<HTMLAnchorElement>('.blog-card');
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const slug = btn.dataset.slug ?? '';
+      filterBtns.forEach(b => b.classList.toggle('blog-filter-btn--active', b === btn));
+
+      if (featured) {
+        const cats = featured.dataset.categories?.split(',') ?? [];
+        featured.style.display = !slug || cats.includes(slug) ? '' : 'none';
+      }
+
+      cards.forEach(card => {
+        const cats = card.dataset.categories?.split(',') ?? [];
+        card.style.display = !slug || cats.includes(slug) ? '' : 'none';
+      });
+    });
+  });
+</script>
+
+<style>
+  /* ── Hero ── */
+  .blog-hero {
+    padding: 72px 24px 48px;
+  }
+  .blog-hero__sub {
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--d365-text-body);
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  /* ── Filter Bar ── */
+  .blog-filter-bar {
+    background: #fff;
+    border-bottom: 1px solid var(--d365-border);
+    position: sticky;
+    top: 64px;
+    z-index: 30;
+  }
+  .blog-filter-bar__inner {
+    display: flex;
+    gap: 4px;
+    padding: 10px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .blog-filter-bar__inner::-webkit-scrollbar { display: none; }
+  .blog-filter-btn {
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    background: transparent;
+    color: var(--d365-text-body);
+    white-space: nowrap;
+    transition: background var(--transition-base), color var(--transition-base), border-color var(--transition-base);
+  }
+  .blog-filter-btn:hover {
+    background: var(--d365-bg-gray);
+    color: var(--d365-text-dark);
+  }
+  .blog-filter-btn--active {
+    background: var(--d365-blue-light);
+    color: var(--d365-blue);
+    border-color: rgba(63,81,181,0.2);
+  }
+
+  /* ── Featured Post ── */
+  .featured-post {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+    background: var(--d365-bg-gray);
+    border-radius: 20px;
+    overflow: hidden;
+    text-decoration: none;
+    transition: box-shadow var(--transition-base);
+  }
+  .featured-post:hover { box-shadow: var(--shadow-xl); }
+  @media (min-width: 860px) {
+    .featured-post { grid-template-columns: 1.4fr 1fr; }
+  }
+  .featured-post__image {
+    overflow: hidden;
+    max-height: 420px;
+  }
+  .featured-post__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  .featured-post:hover .featured-post__image img { transform: scale(1.03); }
+  .featured-post__content {
+    padding: 36px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    justify-content: center;
+  }
+  .featured-post__title {
+    font-size: clamp(20px, 2.5vw, 28px);
+    font-weight: 700;
+    color: var(--d365-text-dark);
+    line-height: 1.28;
+    margin: 0;
+    transition: color var(--transition-base);
+  }
+  .featured-post:hover .featured-post__title { color: var(--d365-blue); }
+  .featured-post__excerpt {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--d365-text-body);
+    margin: 0;
+  }
+  .featured-post__meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+  }
+
+  /* ── Blog Grid ── */
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+  }
+  @media (min-width: 900px) {
+    .blog-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .blog-card {
+    background: #fff;
+    border: 1.5px solid var(--d365-border);
+    border-radius: var(--d365-radius-card);
+    overflow: hidden;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow var(--transition-base), transform var(--transition-base), border-color var(--transition-base);
+  }
+  .blog-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px);
+    border-color: var(--d365-blue);
+  }
+  .blog-card__image {
+    overflow: hidden;
+    aspect-ratio: 16/9;
+    background: var(--d365-bg-gray);
+  }
+  .blog-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.35s ease;
+  }
+  .blog-card:hover .blog-card__image img { transform: scale(1.04); }
+  .blog-card__image--placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .blog-card__image--placeholder svg {
+    width: 40px;
+    height: 40px;
+    color: #d0d4e8;
+  }
+  .blog-card__body {
+    padding: 22px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+  }
+  .blog-card__title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--d365-text-dark);
+    margin: 0;
+    line-height: 1.35;
+    transition: color var(--transition-base);
+  }
+  .blog-card:hover .blog-card__title { color: var(--d365-blue); }
+  .blog-card__excerpt {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--d365-text-body);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .blog-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px solid var(--d365-border);
+  }
+
+  /* ── Shared ── */
+  .blog-category-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--d365-blue);
+    background: var(--d365-blue-light);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .blog-author {
+    color: var(--d365-text-dark);
+    font-weight: 600;
+  }
+  .blog-date {
+    color: var(--d365-text-body);
+  }
+
+  .blog-empty {
+    text-align: center;
+    padding: 80px 0;
+    color: var(--d365-text-body);
+    font-size: 16px;
+  }
+
+  /* ── Newsletter CTA ── */
+  .blog-newsletter {
+    background: linear-gradient(135deg, var(--d365-blue) 0%, #5e35b1 100%);
+    padding: 80px 24px;
+  }
+</style>

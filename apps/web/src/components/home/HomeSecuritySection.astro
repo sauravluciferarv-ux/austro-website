@@ -1,15 +1,16 @@
 ---
 import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
-import type { D365SecuritySection } from '../../lib/types';
+import type { D365SecuritySection, D365SectionStyleProps } from '../../lib/types';
 
 interface Props {
   data?: D365SecuritySection;
   isPreview?: boolean;
   docId?: string;
   docType?: string;
+  styleProps?: D365SectionStyleProps;
 }
 
-const { data, docId, docType = 'homepage' } = Astro.props;
+const { data, docId, docType = 'homepage', styleProps } = Astro.props;
 
 const heading = data?.heading ?? 'Security, Safety and Compliance';
 const bullets = data?.bullets?.length
@@ -23,15 +24,23 @@ const badgeImageSrc = data?.badgeImage?.asset?.url ?? 'https://www.desk365.io/wp
 const badgeImageAlt = data?.badgeImageAlt ?? 'SOC 2 and GDPR compliance badges';
 
 let sanityAttr: string | undefined;
+let badgeImgAttr: string | undefined;
 if (docId && data?._key) {
   try {
     const da = createDataAttribute({ id: docId, type: docType });
     sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+    badgeImgAttr = da(`pageBuilder[_key=="${data._key}"].badgeImage`);
   } catch {}
 }
 ---
 
-<section id="d365-security" class="d365-security d365-section--blue-light" data-sanity={sanityAttr}>
+{styleProps?.css && <style is:inline set:html={styleProps.css} />}
+<section
+  id={styleProps?.sectionId ?? 'd365-security'}
+  class:list={['d365-security', 'd365-section--blue-light', styleProps?.extraClass]}
+  style={styleProps?.inlineStyle || undefined}
+  data-sanity={sanityAttr}
+>
   <div class="d365-container">
     <div class="d365-security__inner">
 
@@ -57,6 +66,7 @@ if (docId && data?._key) {
           alt={badgeImageAlt}
           class="d365-security__badge-img"
           loading="lazy"
+          data-sanity={badgeImgAttr}
         />
       </div>
 

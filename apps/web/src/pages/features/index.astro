@@ -1,0 +1,356 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import HomeSectionRenderer from '../../components/home/HomeSectionRenderer.astro';
+import { sanityClient, getDraftClient } from '../../lib/sanity';
+import { featuresPageQuery } from '../../lib/queries';
+import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
+import { FEATURES_DEFAULTS, DEFAULT_FEATURE_CATEGORIES } from '../../lib/page-defaults';
+
+const isPreview = Astro.locals.isPreview ?? false;
+const client = isPreview ? getDraftClient() : sanityClient;
+const cmsData = await client.fetch(featuresPageQuery).catch(() => null);
+
+if (!isPreview) {
+  Astro.response.headers.set('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
+}
+
+// icon is now seeded into Sanity (featuresPage.categories[].icon field)
+// fallback merges CMS categories with default icons for any missing ones
+const categories = (cmsData?.categories?.length
+  ? cmsData.categories.map((cat: any) => ({
+      ...cat,
+      icon: cat.icon || DEFAULT_FEATURE_CATEGORIES.find(d => d.id === cat.id)?.icon || '',
+    }))
+  : DEFAULT_FEATURE_CATEGORIES) as typeof DEFAULT_FEATURE_CATEGORIES;
+
+const heroEyebrow         = cmsData?.heroEyebrow         || FEATURES_DEFAULTS.heroEyebrow;
+const heroHeading         = cmsData?.heroHeading         || FEATURES_DEFAULTS.heroHeading;
+const heroSubheading      = cmsData?.heroSubheading      || FEATURES_DEFAULTS.heroSubheading;
+const heroPrimaryCtaLabel = cmsData?.heroPrimaryCtaLabel || FEATURES_DEFAULTS.heroPrimaryCtaLabel;
+const heroPrimaryCtaHref  = cmsData?.heroPrimaryCtaHref  || FEATURES_DEFAULTS.heroPrimaryCtaHref;
+const heroSecondaryCtaLabel = cmsData?.heroSecondaryCtaLabel || FEATURES_DEFAULTS.heroSecondaryCtaLabel;
+const heroSecondaryCtaHref  = cmsData?.heroSecondaryCtaHref  || FEATURES_DEFAULTS.heroSecondaryCtaHref;
+const heroFootnote        = cmsData?.heroFootnote        || FEATURES_DEFAULTS.heroFootnote;
+const learnMoreLabel      = cmsData?.learnMoreLabel      || FEATURES_DEFAULTS.learnMoreLabel;
+
+const finalCtaHeading        = cmsData?.finalCtaHeading        || FEATURES_DEFAULTS.finalCtaHeading;
+const finalCtaSubheading     = cmsData?.finalCtaSubheading     || FEATURES_DEFAULTS.finalCtaSubheading;
+const finalCtaPrimaryLabel   = cmsData?.finalCtaPrimaryLabel   || FEATURES_DEFAULTS.finalCtaPrimaryLabel;
+const finalCtaPrimaryHref    = cmsData?.finalCtaPrimaryHref    || FEATURES_DEFAULTS.finalCtaPrimaryHref;
+const finalCtaSecondaryLabel = cmsData?.finalCtaSecondaryLabel || FEATURES_DEFAULTS.finalCtaSecondaryLabel;
+const finalCtaSecondaryHref  = cmsData?.finalCtaSecondaryHref  || FEATURES_DEFAULTS.finalCtaSecondaryHref;
+const finalCtaGradientAccent = cmsData?.finalCtaGradientAccent || FEATURES_DEFAULTS.finalCtaGradientAccent;
+
+const pageBuilder         = cmsData?.pageBuilder ?? [];
+const docId               = cmsData?._id ?? 'featuresPage';
+const seo                 = cmsData?.seo ?? {};
+
+const da = createDataAttribute({ id: docId, type: 'featuresPage' });
+let heroSectionAttr: string | undefined;
+let categoriesSectionAttr: string | undefined;
+try {
+  heroSectionAttr       = da('heroHeading');
+  categoriesSectionAttr = da('categories');
+} catch {}
+---
+
+<BaseLayout seo={{
+  metaTitle: seo.metaTitle || 'Features — Desk365 | AI-Powered Helpdesk Software',
+  metaDescription: seo.metaDescription || 'Explore all Desk365 features: AI agents, Microsoft Teams integration, omnichannel ticketing, ITSM, knowledge base, automations, and more.',
+  ogImage: seo.ogImage,
+}}>
+
+<!-- ─── Hero ────────────────────────────────────────────────────────────────── -->
+<section class="features-hero d365-section--white" data-sanity={heroSectionAttr}>
+  <div class="d365-container text-center">
+    <p class="d365-eyebrow">{heroEyebrow}</p>
+    <h1 class="d365-heading d365-heading--xl">{heroHeading}</h1>
+    <p class="features-hero__sub">{heroSubheading}</p>
+    <div class="features-hero__ctas">
+      <a href={heroPrimaryCtaHref} class="d365-btn d365-btn--green">
+        {heroPrimaryCtaLabel}
+      </a>
+      <a href={heroSecondaryCtaHref} class="d365-btn d365-btn--outline-blue">
+        {heroSecondaryCtaLabel}
+      </a>
+    </div>
+    <p class="features-hero__footnote">{heroFootnote}</p>
+  </div>
+</section>
+
+<!-- ─── Category Nav ─────────────────────────────────────────────────────────── -->
+<div class="feat-nav-sticky" id="feat-nav">
+  <div class="d365-container">
+    <nav class="feat-nav" aria-label="Feature categories">
+      {categories.map(cat => (
+        <a href={`#${cat.id}`} class="feat-nav__item" data-cat={cat.id}>
+          {cat.label}
+        </a>
+      ))}
+    </nav>
+  </div>
+</div>
+
+<!-- ─── Feature Sections ──────────────────────────────────────────────────────── -->
+{categories.map((cat, i) => (
+  <section
+    id={cat.id}
+    class={`d365-section ${i % 2 === 0 ? 'd365-section--white' : 'd365-section--gray'}`}
+    data-sanity={categoriesSectionAttr}
+  >
+    <div class="d365-container">
+      <!-- Category Header -->
+      <div class="feat-cat-header">
+        <div class="feat-cat-header__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" set:html={cat.icon}></svg>
+        </div>
+        <h2 class="feat-cat-header__title">{cat.label}</h2>
+      </div>
+
+      <!-- Feature cards -->
+      <div class="feat-cards">
+        {cat.features.map(feat => (
+          <div class="feat-card">
+            <div class="feat-card__body">
+              <h3 class="feat-card__name">
+                <a href={feat.href} class="feat-card__name-link">{feat.name}</a>
+              </h3>
+              <p class="feat-card__desc">{feat.description}</p>
+              <div class="feat-card__tags">
+                {feat.tags.map(tag => (
+                  <span class="feat-card__tag">{tag}</span>
+                ))}
+              </div>
+            </div>
+            <a href={feat.href} class="feat-card__learn-more" aria-label={`Learn more about ${feat.name}`}>
+              {learnMoreLabel}
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                <path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+))}
+
+<!-- ─── Final CTA ──────────────────────────────────────────────────────────── -->
+<section class="features-final-cta" style={`background: linear-gradient(135deg, var(--d365-blue) 0%, ${finalCtaGradientAccent} 100%)`}>
+  <div class="d365-container text-center">
+    <h2 class="d365-heading d365-heading--white">{finalCtaHeading}</h2>
+    <p style="color:rgba(255,255,255,0.8); font-size:17px; margin-bottom:32px">
+      {finalCtaSubheading}
+    </p>
+    <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center">
+      <a href={finalCtaPrimaryHref} class="d365-btn d365-btn--green">
+        {finalCtaPrimaryLabel}
+      </a>
+      <a href={finalCtaSecondaryHref} class="d365-btn d365-btn--outline-white">
+        {finalCtaSecondaryLabel}
+      </a>
+    </div>
+  </div>
+</section>
+
+{/* Sanity Page Builder sections */}
+{pageBuilder.map((section: any) => (
+  <HomeSectionRenderer section={section} isPreview={isPreview} docId={docId} docType="featuresPage" />
+))}
+
+</BaseLayout>
+
+<script>
+  // Sticky nav active state on scroll
+  const navItems = document.querySelectorAll<HTMLAnchorElement>('.feat-nav__item');
+  const sections = document.querySelectorAll<HTMLElement>('section[id]');
+
+  const observer = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navItems.forEach(n => {
+            n.classList.toggle('feat-nav__item--active', n.dataset.cat === entry.target.id);
+          });
+        }
+      });
+    },
+    { rootMargin: '-80px 0px -60% 0px', threshold: 0 }
+  );
+
+  sections.forEach(s => observer.observe(s));
+</script>
+
+<style>
+  /* ── Hero ── */
+  .features-hero {
+    padding: 72px 24px 56px;
+  }
+  .features-hero__sub {
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--d365-text-body);
+    max-width: 680px;
+    margin: 0 auto 32px;
+  }
+  .features-hero__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  .features-hero__footnote {
+    font-size: 13px;
+    color: #aaa;
+    margin: 0;
+  }
+
+  /* ── Category Nav ── */
+  .feat-nav-sticky {
+    position: sticky;
+    top: 64px;
+    z-index: 40;
+    background: #fff;
+    border-bottom: 1px solid var(--d365-border);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .feat-nav {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 0 0 0;
+  }
+  .feat-nav::-webkit-scrollbar { display: none; }
+  .feat-nav__item {
+    padding: 14px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--d365-text-body);
+    text-decoration: none;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: color var(--transition-base), border-color var(--transition-base);
+  }
+  .feat-nav__item:hover { color: var(--d365-blue); }
+  .feat-nav__item--active {
+    color: var(--d365-blue);
+    border-bottom-color: var(--d365-blue);
+  }
+
+  /* ── Category Header ── */
+  .feat-cat-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .feat-cat-header__icon {
+    width: 52px;
+    height: 52px;
+    background: var(--d365-blue-light);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .feat-cat-header__icon svg {
+    width: 26px;
+    height: 26px;
+    color: var(--d365-blue);
+  }
+  .feat-cat-header__title {
+    font-size: clamp(22px, 2.5vw, 28px);
+    font-weight: 700;
+    color: var(--d365-text-dark);
+    margin: 0;
+    line-height: 1.25;
+  }
+
+  /* ── Feature Cards ── */
+  .feat-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  @media (min-width: 900px) {
+    .feat-cards { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1200px) {
+    .feat-cards { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .feat-card {
+    background: #fff;
+    border: 1.5px solid var(--d365-border);
+    border-radius: var(--d365-radius-card);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: box-shadow var(--transition-base), transform var(--transition-base), border-color var(--transition-base);
+  }
+  .feat-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+    border-color: var(--d365-blue);
+  }
+  .feat-card__body { flex: 1; }
+  .feat-card__name {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--d365-text-dark);
+    margin: 0 0 10px;
+    line-height: 1.3;
+  }
+  .feat-card__name-link {
+    color: inherit;
+    text-decoration: none;
+    transition: color var(--transition-base);
+  }
+  .feat-card__name-link:hover { color: var(--d365-blue); }
+  .feat-card__desc {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--d365-text-body);
+    margin: 0 0 16px;
+  }
+  .feat-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .feat-card__tag {
+    background: var(--d365-blue-light);
+    color: var(--d365-blue);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(63,81,181,0.15);
+  }
+  .feat-card__learn-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--d365-blue);
+    text-decoration: none;
+    transition: gap var(--transition-base);
+  }
+  .feat-card__learn-more:hover { gap: 10px; }
+  .feat-card__learn-more svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* ── Final CTA ── */
+  .features-final-cta {
+    padding: 88px 24px;
+  }
+</style>

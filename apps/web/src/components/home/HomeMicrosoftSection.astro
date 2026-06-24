@@ -1,15 +1,16 @@
 ---
 import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
-import type { D365MicrosoftSection } from '../../lib/types';
+import type { D365MicrosoftSection, D365SectionStyleProps } from '../../lib/types';
 
 interface Props {
   data?: D365MicrosoftSection;
   isPreview?: boolean;
   docId?: string;
   docType?: string;
+  styleProps?: D365SectionStyleProps;
 }
 
-const { data, docId, docType = 'homepage' } = Astro.props;
+const { data, docId, docType = 'homepage', styleProps } = Astro.props;
 
 const heading = data?.heading ?? "We're committed to your Microsoft investment";
 const body = data?.body ?? "Desk365 doesn't just plug into Teams – it's built to live inside the Microsoft ecosystem. From SSO to Entra ID Sync, you can do it all within Desk365 out-of-the-box.";
@@ -27,19 +28,36 @@ const staticCards = [
 ];
 
 const cards = data?.cards?.length
-  ? data.cards.map(c => ({ title: c.title, description: c.description ?? '', iconSrc: c.icon?.asset?.url ?? '' }))
+  ? data.cards.map(c => ({ _key: c._key, title: c.title, description: c.description ?? '', iconSrc: c.icon?.asset?.url ?? '' }))
   : staticCards;
 
 let sanityAttr: string | undefined;
+let daFn: ((path: string) => string) | undefined;
 if (docId && data?._key) {
   try {
     const da = createDataAttribute({ id: docId, type: docType });
     sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+    daFn = (path: string) => da(path);
   } catch {}
+}
+
+function heroImgAttr() {
+  if (!daFn || !data?._key) return undefined;
+  return daFn(`pageBuilder[_key=="${data._key}"].heroImage`);
+}
+function cardIconAttr(cardKey: string | undefined) {
+  if (!daFn || !data?._key || !cardKey) return undefined;
+  return daFn(`pageBuilder[_key=="${data._key}"].cards[_key=="${cardKey}"].icon`);
 }
 ---
 
-<section id="d365-microsoft" class="d365-microsoft d365-section--blue-light" data-sanity={sanityAttr}>
+{styleProps?.css && <style is:inline set:html={styleProps.css} />}
+<section
+  id={styleProps?.sectionId ?? 'd365-microsoft'}
+  class:list={['d365-microsoft', 'd365-section--blue-light', styleProps?.extraClass]}
+  style={styleProps?.inlineStyle || undefined}
+  data-sanity={sanityAttr}
+>
   <div class="d365-container">
 
     <!-- Top: text + image -->
@@ -55,6 +73,7 @@ if (docId && data?._key) {
           alt={imageAlt}
           class="d365-microsoft__hero-img"
           loading="lazy"
+          data-sanity={heroImgAttr()}
         />
       </div>
     </div>
@@ -64,7 +83,7 @@ if (docId && data?._key) {
       {cards.map(card => (
         <div class="d365-card d365-card--flat d365-microsoft__card">
           <div class="d365-icon-box">
-            <img src={card.iconSrc} alt={card.title} loading="lazy" />
+            <img src={card.iconSrc} alt={card.title} loading="lazy" data-sanity={cardIconAttr((card as any)._key)} />
           </div>
           <h3 class="d365-microsoft__card-title">{card.title}</h3>
           <p class="d365-body d365-body--sm" style="margin:0">{card.description}</p>

@@ -1,15 +1,16 @@
 ---
 import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
-import type { D365ChannelTabsSection } from '../../lib/types';
+import type { D365ChannelTabsSection, D365SectionStyleProps } from '../../lib/types';
 
 interface Props {
   data?: D365ChannelTabsSection;
   isPreview?: boolean;
   docId?: string;
   docType?: string;
+  styleProps?: D365SectionStyleProps;
 }
 
-const { data, docId, docType = 'homepage' } = Astro.props;
+const { data, docId, docType = 'homepage', styleProps } = Astro.props;
 
 const heading = data?.heading ?? 'Meet your customers where they already are';
 const body = data?.body ?? 'From Microsoft Teams to email to a branded support portal – every channel feeds into one unified inbox. No channel-switching, no missed tickets.';
@@ -23,19 +24,32 @@ const staticTabs = [
 ];
 
 const tabs = data?.tabs?.length
-  ? data.tabs.map((t, i) => ({ id: t._key ?? `tab-${i}`, label: t.label, description: t.description ?? '', imageSrc: t.image?.asset?.url ?? '', imageAlt: t.imageAlt ?? t.label }))
+  ? data.tabs.map((t, i) => ({ id: t._key ?? `tab-${i}`, _key: t._key, label: t.label, description: t.description ?? '', imageSrc: t.image?.asset?.url ?? '', imageAlt: t.imageAlt ?? t.label }))
   : staticTabs;
 
 let sanityAttr: string | undefined;
+let daFn: ((path: string) => string) | undefined;
 if (docId && data?._key) {
   try {
     const da = createDataAttribute({ id: docId, type: docType });
     sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+    daFn = (path: string) => da(path);
   } catch {}
+}
+
+function tabImgAttr(tabKey: string | undefined) {
+  if (!daFn || !data?._key || !tabKey) return undefined;
+  return daFn(`pageBuilder[_key=="${data._key}"].tabs[_key=="${tabKey}"].image`);
 }
 ---
 
-<section id="d365-channels" class="d365-channels d365-section--gray" data-sanity={sanityAttr}>
+{styleProps?.css && <style is:inline set:html={styleProps.css} />}
+<section
+  id={styleProps?.sectionId ?? 'd365-channels'}
+  class:list={['d365-channels', 'd365-section--gray', styleProps?.extraClass]}
+  style={styleProps?.inlineStyle || undefined}
+  data-sanity={sanityAttr}
+>
   <div class="d365-container">
     <div class="d365-section-header">
       <h2 class="d365-heading">{heading}</h2>
@@ -79,6 +93,7 @@ if (docId && data?._key) {
               alt={tab.imageAlt || tab.label}
               class="d365-channels__img"
               loading={i === 0 ? 'eager' : 'lazy'}
+              data-sanity={tabImgAttr((tab as any)._key)}
             />
           </div>
         ))}

@@ -1,0 +1,353 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import HomeSectionRenderer from '../../components/home/HomeSectionRenderer.astro';
+import { sanityClient, getDraftClient } from '../../lib/sanity';
+import { aboutPageQuery } from '../../lib/queries';
+import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
+import { ABOUT_DEFAULTS, DEFAULT_STATS, DEFAULT_VALUES, DEFAULT_MILESTONES, DEFAULT_MISSION_STATS } from '../../lib/page-defaults';
+
+const isPreview = Astro.locals.isPreview ?? false;
+const client = isPreview ? getDraftClient() : sanityClient;
+const cmsData = await client.fetch(aboutPageQuery).catch(() => null);
+
+if (!isPreview) {
+  Astro.response.headers.set('Cache-Control', 's-maxage=600, stale-while-revalidate=3600');
+}
+
+// icon is seeded into Sanity (aboutPage.values[].icon field)
+const stats      = (cmsData?.stats?.length      ? cmsData.stats      : DEFAULT_STATS) as typeof DEFAULT_STATS;
+const values     = (cmsData?.values?.length
+  ? cmsData.values.map((v: any) => ({
+      ...v,
+      icon: v.icon || DEFAULT_VALUES.find(d => d.title === v.title)?.icon || '',
+    }))
+  : DEFAULT_VALUES) as typeof DEFAULT_VALUES;
+const milestones = (cmsData?.milestones?.length ? cmsData.milestones : DEFAULT_MILESTONES) as typeof DEFAULT_MILESTONES;
+const missionStats: { stat: string; label: string; colorKey: string }[] =
+  cmsData?.missionStats?.length ? cmsData.missionStats : DEFAULT_MISSION_STATS;
+
+const heroEyebrow    = cmsData?.heroEyebrow    || ABOUT_DEFAULTS.heroEyebrow;
+const heroHeading    = cmsData?.heroHeading    || ABOUT_DEFAULTS.heroHeading;
+const heroSubheading = cmsData?.heroSubheading || ABOUT_DEFAULTS.heroSubheading;
+const heroBgGradient = cmsData?.heroBgGradient || ABOUT_DEFAULTS.heroBgGradient;
+const missionEyebrow = cmsData?.missionEyebrow || ABOUT_DEFAULTS.missionEyebrow;
+const missionHeading = cmsData?.missionHeading || ABOUT_DEFAULTS.missionHeading;
+const missionBody1   = cmsData?.missionBody1   || ABOUT_DEFAULTS.missionBody1;
+const missionBody2   = cmsData?.missionBody2   || ABOUT_DEFAULTS.missionBody2;
+const valuesEyebrow  = cmsData?.valuesEyebrow  || ABOUT_DEFAULTS.valuesEyebrow;
+const valuesHeading  = cmsData?.valuesHeading  || ABOUT_DEFAULTS.valuesHeading;
+const timelineEyebrow = cmsData?.timelineEyebrow || ABOUT_DEFAULTS.timelineEyebrow;
+const timelineHeading = cmsData?.timelineHeading || ABOUT_DEFAULTS.timelineHeading;
+
+const finalCtaHeading        = cmsData?.finalCtaHeading        || ABOUT_DEFAULTS.finalCtaHeading;
+const finalCtaSubheading     = cmsData?.finalCtaSubheading     || ABOUT_DEFAULTS.finalCtaSubheading;
+const finalCtaPrimaryLabel   = cmsData?.finalCtaPrimaryLabel   || ABOUT_DEFAULTS.finalCtaPrimaryLabel;
+const finalCtaPrimaryHref    = cmsData?.finalCtaPrimaryHref    || ABOUT_DEFAULTS.finalCtaPrimaryHref;
+const finalCtaSecondaryLabel = cmsData?.finalCtaSecondaryLabel || ABOUT_DEFAULTS.finalCtaSecondaryLabel;
+const finalCtaSecondaryHref  = cmsData?.finalCtaSecondaryHref  || ABOUT_DEFAULTS.finalCtaSecondaryHref;
+const finalCtaGradientAccent = cmsData?.finalCtaGradientAccent || ABOUT_DEFAULTS.finalCtaGradientAccent;
+
+const pageBuilder    = cmsData?.pageBuilder ?? [];
+const docId          = cmsData?._id ?? 'aboutPage';
+const seo            = cmsData?.seo ?? {};
+
+const da = createDataAttribute({ id: docId, type: 'aboutPage' });
+let heroSectionAttr: string | undefined;
+let statsSectionAttr: string | undefined;
+let valuesSectionAttr: string | undefined;
+let missionSectionAttr: string | undefined;
+try {
+  heroSectionAttr    = da('heroHeading');
+  statsSectionAttr   = da('stats');
+  valuesSectionAttr  = da('values');
+  missionSectionAttr = da('missionHeading');
+} catch {}
+---
+
+<BaseLayout seo={{
+  metaTitle: seo.metaTitle || 'About Us — Desk365 | Building the Helpdesk for the Modern Era',
+  metaDescription: seo.metaDescription || 'Desk365 was founded to make powerful helpdesk software accessible to every team — not just enterprise. Learn about our mission, values, and story.',
+  ogImage: seo.ogImage,
+}}>
+
+<!-- ─── Hero ────────────────────────────────────────────────────────────────── -->
+<section class="about-hero" style={`background: ${heroBgGradient}`} data-sanity={heroSectionAttr}>
+  <div class="d365-container">
+    <div class="about-hero__content">
+      <p class="d365-eyebrow">{heroEyebrow}</p>
+      <h1 class="d365-heading d365-heading--xl d365-heading--white">{heroHeading}</h1>
+      <p class="about-hero__sub">{heroSubheading}</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Stats ─────────────────────────────────────────────────────────────── -->
+<section class="d365-section--sm d365-section--white" style="border-bottom:1px solid var(--d365-border)" data-sanity={statsSectionAttr}>
+  <div class="d365-container">
+    <div class="about-stats">
+      {stats.map(s => (
+        <div class="about-stat">
+          <span class="about-stat__number">{s.number}</span>
+          <span class="about-stat__label">{s.label}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- ─── Mission ───────────────────────────────────────────────────────────── -->
+<section class="d365-section d365-section--white" data-sanity={missionSectionAttr}>
+  <div class="d365-container">
+    <div class="about-mission">
+      <div class="about-mission__text">
+        <p class="d365-eyebrow">{missionEyebrow}</p>
+        <h2 class="d365-heading">{missionHeading}</h2>
+        <p class="d365-body">{missionBody1}</p>
+        <p class="d365-body" style="margin-bottom:0">{missionBody2}</p>
+      </div>
+      <div class="about-mission__visual" aria-hidden="true">
+        {missionStats.map(s => (
+          <div class={`about-mission__card about-mission__card--${s.colorKey}`}>
+            <p class="about-mission__card-stat">{s.stat}</p>
+            <p class="about-mission__card-label">{s.label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Values ────────────────────────────────────────────────────────────── -->
+<section class="d365-section d365-section--gray" data-sanity={valuesSectionAttr}>
+  <div class="d365-container">
+    <div class="d365-section-header">
+      <p class="d365-eyebrow">{valuesEyebrow}</p>
+      <h2 class="d365-heading">{valuesHeading}</h2>
+    </div>
+    <div class="values-grid">
+      {values.map(v => (
+        <div class="value-card">
+          <div class="d365-icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" set:html={v.icon}></svg>
+          </div>
+          <h3 class="value-card__title">{v.title}</h3>
+          <p class="value-card__desc">{v.description}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- ─── Timeline ──────────────────────────────────────────────────────────── -->
+<section class="d365-section d365-section--white">
+  <div class="d365-container">
+    <div class="d365-section-header">
+      <p class="d365-eyebrow">{timelineEyebrow}</p>
+      <h2 class="d365-heading">{timelineHeading}</h2>
+    </div>
+    <div class="timeline">
+      {milestones.map((m, i) => (
+        <div class={`timeline-item${i % 2 === 0 ? ' timeline-item--left' : ' timeline-item--right'}`}>
+          <div class="timeline-item__year">{m.year}</div>
+          <div class="timeline-item__dot"></div>
+          <div class="timeline-item__content">
+            <p class="timeline-item__event">{m.event}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- ─── Final CTA ──────────────────────────────────────────────────────────── -->
+<section class="about-cta" style={`background: linear-gradient(135deg, var(--d365-blue) 0%, ${finalCtaGradientAccent} 100%)`}>
+  <div class="d365-container text-center">
+    <h2 class="d365-heading d365-heading--white">{finalCtaHeading}</h2>
+    <p style="color:rgba(255,255,255,0.8); font-size:17px; margin-bottom:32px">
+      {finalCtaSubheading}
+    </p>
+    <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center">
+      <a href={finalCtaPrimaryHref} class="d365-btn d365-btn--green">{finalCtaPrimaryLabel}</a>
+      <a href={finalCtaSecondaryHref} class="d365-btn d365-btn--outline-white">{finalCtaSecondaryLabel}</a>
+    </div>
+  </div>
+</section>
+
+{/* Sanity Page Builder sections */}
+{pageBuilder.map((section: any) => (
+  <HomeSectionRenderer section={section} isPreview={isPreview} docId={docId} docType="aboutPage" />
+))}
+
+</BaseLayout>
+
+<style>
+  /* ── Hero ── */
+  .about-hero {
+    padding: 88px 24px 80px;
+  }
+  .about-hero__content { max-width: 700px; }
+  .about-hero .d365-eyebrow { color: rgba(255,255,255,0.7); }
+  .about-hero__sub {
+    font-size: 18px;
+    line-height: 1.75;
+    color: rgba(255,255,255,0.85);
+    margin: 0;
+  }
+
+  /* ── Stats ── */
+  .about-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+  @media (min-width: 640px) {
+    .about-stats { grid-template-columns: repeat(4, 1fr); }
+  }
+  .about-stat {
+    text-align: center;
+    padding: 24px;
+  }
+  .about-stat__number {
+    display: block;
+    font-size: clamp(28px, 3.5vw, 40px);
+    font-weight: 800;
+    color: var(--d365-blue);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .about-stat__label {
+    display: block;
+    font-size: 14px;
+    color: var(--d365-text-body);
+  }
+
+  /* ── Mission ── */
+  .about-mission {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  @media (min-width: 900px) {
+    .about-mission { grid-template-columns: 1fr 1fr; align-items: center; }
+  }
+  .about-mission__visual {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .about-mission__card {
+    border-radius: 16px;
+    padding: 24px 28px;
+    color: #fff;
+  }
+  .about-mission__card--blue  { background: var(--d365-blue); }
+  .about-mission__card--green { background: var(--d365-green); }
+  .about-mission__card--dark  { background: #1a1a2e; }
+  .about-mission__card-stat {
+    font-size: 40px;
+    font-weight: 900;
+    margin: 0 0 4px;
+    line-height: 1;
+  }
+  .about-mission__card-label {
+    font-size: 14px;
+    color: rgba(255,255,255,0.75);
+    margin: 0;
+  }
+
+  /* ── Values ── */
+  .values-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 24px;
+  }
+  @media (min-width: 900px) {
+    .values-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 1100px) {
+    .values-grid { grid-template-columns: repeat(4, 1fr); }
+  }
+  .value-card {
+    background: #fff;
+    border: 1.5px solid var(--d365-border);
+    border-radius: var(--d365-radius-card);
+    padding: 28px;
+    transition: box-shadow var(--transition-base), transform var(--transition-base);
+  }
+  .value-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+  .value-card__title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--d365-text-dark);
+    margin: 0 0 10px;
+  }
+  .value-card__desc {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--d365-text-body);
+    margin: 0;
+  }
+
+  /* ── Timeline ── */
+  .timeline {
+    max-width: 640px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--d365-border);
+    transform: translateX(-50%);
+  }
+  @media (max-width: 640px) {
+    .timeline::before { left: 16px; }
+  }
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 1fr 24px 1fr;
+    gap: 20px;
+    align-items: start;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 640px) {
+    .timeline-item { grid-template-columns: 40px 24px 1fr; }
+  }
+  .timeline-item__year {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--d365-blue);
+    text-align: right;
+    padding-top: 2px;
+  }
+  @media (max-width: 640px) {
+    .timeline-item__year { font-size: 11px; text-align: right; }
+  }
+  .timeline-item__dot {
+    width: 12px;
+    height: 12px;
+    background: var(--d365-blue);
+    border: 3px solid #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--d365-blue);
+    margin: 4px auto;
+  }
+  .timeline-item__event {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--d365-text-body);
+    margin: 0;
+  }
+
+  /* ── CTA ── */
+  .about-cta {
+    padding: 88px 24px;
+  }
+</style>

@@ -5,6 +5,19 @@ import page from './documents/page';
 import blogPost from './documents/blogPost';
 import author from './documents/author';
 import sectionTemplate from './documents/sectionTemplate';
+// Dedicated page schemas
+import pricingPage from './documents/pricingPage';
+import featuresPage from './documents/featuresPage';
+import contactPage from './documents/contactPage';
+import aboutPage from './documents/aboutPage';
+import requestDemoPage from './documents/requestDemoPage';
+// Style objects
+import styleSpacing from './objects/style/styleSpacing';
+import styleTypography from './objects/style/styleTypography';
+import styleBackground from './objects/style/styleBackground';
+import styleBorder from './objects/style/styleBorder';
+import styleSize from './objects/style/styleSize';
+import styleResponsive from './objects/style/styleResponsive';
 import link from './objects/link';
 import socialLink from './objects/socialLink';
 import seo from './objects/seo';
@@ -63,6 +76,19 @@ export const schemaTypes = [
   blogPost,
   author,
   sectionTemplate,
+  // Dedicated page documents
+  pricingPage,
+  featuresPage,
+  contactPage,
+  aboutPage,
+  requestDemoPage,
+  // Style objects (shared, reused by all blocks and sections)
+  styleSpacing,
+  styleTypography,
+  styleBackground,
+  styleBorder,
+  styleSize,
+  styleResponsive,
   // Objects (existing)
   link,
   socialLink,

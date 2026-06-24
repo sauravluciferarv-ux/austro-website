@@ -1,5 +1,9 @@
 ---
 import type { PageSectionBlock } from '../../lib/types';
+import {
+  resolveSpacing, resolveBorder, resolveSize, mergeStyles,
+  resolveResponsiveCss, resolveScopedCss,
+} from '../../lib/styleResolver';
 
 interface Props {
   block: PageSectionBlock;
@@ -13,26 +17,44 @@ const {
   caption,
   link,
   openInNewTab,
-  width = '100%',
   alignment = 'left',
   blockId,
   blockClass,
 } = block;
 
-const id = blockId || `block-${block._key}`;
+const objectFit   = (block as any).objectFit   ?? 'cover';
+const aspectRatio = (block as any).aspectRatio ?? 'auto';
+
+const id  = blockId  || `block-${block._key}`;
 const cls = blockClass || `image-${block._key}`;
+
 const alignItems =
   alignment === 'center' ? 'items-center' : alignment === 'right' ? 'items-end' : 'items-start';
 
-const hideClasses = [
-  block.hideOnMobile && 'hidden md:block',
-  block.hideOnDesktop && 'block md:hidden',
-].filter(Boolean);
+const figureStyle = mergeStyles(
+  resolveSpacing(block.spacing),
+  resolveSize(block.size),
+);
+
+const imgStyle = mergeStyles(
+  `object-fit:${objectFit}`,
+  aspectRatio !== 'auto' ? `aspect-ratio:${aspectRatio}` : '',
+  resolveBorder(block.border),
+  'width:100%',
+);
+
+const responsiveCss = resolveResponsiveCss(cls, block.responsive);
+const scopedCss     = resolveScopedCss(cls, block.customCss);
 ---
+
+{(responsiveCss || scopedCss) && (
+  <style is:inline set:html={responsiveCss + scopedCss} />
+)}
 
 <figure
   id={id}
-  class:list={[cls, 'flex flex-col', alignItems, ...hideClasses, isPreview && 'pb-outline-block']}
+  class:list={[cls, 'flex flex-col', alignItems, isPreview && 'pb-outline-block']}
+  style={figureStyle || undefined}
   data-block-type="imageBlock"
   data-sanity={dataSanity}
 >
@@ -43,20 +65,10 @@ const hideClasses = [
         target={openInNewTab ? '_blank' : '_self'}
         rel={openInNewTab ? 'noopener noreferrer' : undefined}
       >
-        <img
-          src={image.asset.url}
-          alt={image?.alt ?? ''}
-          style={`width:${width};`}
-          loading="lazy"
-        />
+        <img src={image.asset.url} alt={image?.alt ?? ''} style={imgStyle} loading="lazy" />
       </a>
     ) : (
-      <img
-        src={image.asset.url}
-        alt={image?.alt ?? ''}
-        style={`width:${width};`}
-        loading="lazy"
-      />
+      <img src={image.asset.url} alt={image?.alt ?? ''} style={imgStyle} loading="lazy" />
     )
   ) : isPreview ? (
     <div style="display:flex;align-items:center;justify-content:center;border-radius:12px;background:#f1f5f9;border:2px dashed #cbd5e1;min-height:200px;width:100%;">

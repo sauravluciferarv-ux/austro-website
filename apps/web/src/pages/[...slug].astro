@@ -2,14 +2,13 @@
 export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
-import PageSection from '../components/PageSection.astro';
+import HomeSectionRenderer from '../components/home/HomeSectionRenderer.astro';
 import { sanityClient, getDraftClient } from '../lib/sanity';
 import { pageBySlugQuery } from '../lib/queries';
 import type { PageBuilderPage } from '../lib/types';
 
 const { slug } = Astro.params;
 
-// Redirect bare root hits — shouldn't happen with index.astro in place but guard anyway
 if (!slug) return Astro.redirect('/');
 
 const isPreview = Astro.locals.isPreview ?? false;
@@ -33,6 +32,11 @@ if (!isPreview) {
 
 <BaseLayout seo={page.seo}>
   {(page.pageBuilder ?? []).map(section => (
-    <PageSection section={section} isPreview={isPreview} docId={page._id} docType="page" />
+    <HomeSectionRenderer
+      section={section as any}
+      isPreview={isPreview}
+      docId={page._id}
+      docType="page"
+    />
   ))}
 </BaseLayout>

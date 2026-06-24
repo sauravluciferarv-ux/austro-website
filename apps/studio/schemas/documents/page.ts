@@ -5,9 +5,9 @@ export default defineType({
   title: 'Page',
   type: 'document',
   groups: [
-    { name: 'content', title: 'Content', default: true },
-    { name: 'seo', title: 'SEO' },
+    { name: 'content', title: 'Page Builder', default: true },
     { name: 'settings', title: 'Settings' },
+    { name: 'seo', title: 'SEO' },
   ],
   fields: [
     defineField({
@@ -29,6 +29,29 @@ export default defineType({
       },
       validation: R => R.required(),
       group: 'settings',
+    }),
+    defineField({
+      name: 'status',
+      title: 'Status',
+      type: 'string',
+      group: 'settings',
+      options: {
+        list: [
+          { title: 'Draft', value: 'draft' },
+          { title: 'Review', value: 'review' },
+          { title: 'Published', value: 'published' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'published',
+    }),
+    defineField({
+      name: 'previewImage',
+      title: 'Preview Image',
+      description: 'Shown as a thumbnail in the Pages list.',
+      type: 'image',
+      group: 'settings',
+      options: { hotspot: true },
     }),
     defineField({
       name: 'publishedAt',
@@ -53,8 +76,27 @@ export default defineType({
       name: 'pageBuilder',
       title: 'Page Builder',
       type: 'array',
-      of: [{ type: 'pageSection' }],
-      description: 'Build the page by adding sections and blocks.',
+      of: [
+        { type: 'pageSection' },
+        // D365 pre-built sections
+        { type: 'd365HeroSection' },
+        { type: 'd365TrustBarSection' },
+        { type: 'd365StatsSection' },
+        { type: 'd365FeatureCardsSection' },
+        { type: 'd365ChannelTabsSection' },
+        { type: 'd365AIFeaturesSection' },
+        { type: 'd365MicrosoftSection' },
+        { type: 'd365ITSMSection' },
+        { type: 'd365CapabilitiesSection' },
+        { type: 'd365ComparisonSection' },
+        { type: 'd365IntegrationsSection' },
+        { type: 'd365TestimonialsSection' },
+        { type: 'd365WhyChooseSection' },
+        { type: 'd365SecuritySection' },
+        { type: 'd365BlogSection' },
+        { type: 'd365FinalCtaSection' },
+      ],
+      description: 'Build the page by adding and reordering sections.',
       group: 'content',
     }),
   ],
@@ -62,11 +104,20 @@ export default defineType({
     select: {
       title: 'title',
       slug: 'slug.current',
+      media: 'previewImage',
+      status: 'status',
       noIndex: 'seo.noIndex',
     },
-    prepare: ({ title, slug, noIndex }: { title?: string; slug?: string; noIndex?: boolean }) => ({
+    prepare: ({ title, slug, media, status, noIndex }: {
+      title?: string;
+      slug?: string;
+      media?: unknown;
+      status?: string;
+      noIndex?: boolean;
+    }) => ({
       title,
-      subtitle: `/${slug ?? ''}` + (noIndex ? '  ·  noindex' : ''),
+      subtitle: `/${slug ?? ''}` + (status ? `  ·  ${status}` : '') + (noIndex ? '  ·  noindex' : ''),
+      media,
     }),
   },
   orderings: [

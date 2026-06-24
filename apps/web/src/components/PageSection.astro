@@ -2,134 +2,159 @@
 import type { PageSection } from '../lib/types';
 import BlockRenderer from './blocks/BlockRenderer.astro';
 import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
+import {
+  resolveSpacing,
+  resolveBackground,
+  resolveBorder,
+  resolveSize,
+  resolveGap,
+  resolveColumns,
+  resolveSectionMaxWidth,
+  resolveResponsiveCss,
+  resolveScopedCss,
+  mergeStyles,
+} from '../lib/styleResolver';
 
 interface Props {
   section: PageSection;
   isPreview?: boolean;
-  /** Sanity document _id — required for click-to-edit overlays in Presentation mode */
   docId?: string;
-  /** Sanity document type, e.g. "page" or "homepage" */
   docType?: string;
 }
 
 const { section, isPreview, docId, docType = 'page' } = Astro.props;
 
-const key = section._key ?? Math.random().toString(36).slice(2);
-const sectionId = section.sectionId || `section-${key}`;
+const key         = section._key ?? Math.random().toString(36).slice(2);
+const sectionId   = section.sectionId || `section-${key}`;
 const sectionClass = section.sectionClass || `pb-section-${key}`;
 
-// data-sanity attribute for Sanity Presentation visual editing overlays
+// ── Presentation tool click-to-edit ────────────────────────────────────────
 let sectionSanityAttr: string | undefined;
 if (docId && section._key) {
   try {
     const da = createDataAttribute({ id: docId, type: docType });
     sectionSanityAttr = da(`pageBuilder[_key=="${section._key}"]`);
-  } catch {
-    // Non-critical: silently skip if encoding fails
-  }
+  } catch { /* non-critical */ }
 }
 
-// Container width classes
-const containerMap: Record<string, string> = {
-  full: 'w-full',
-  wide: 'max-w-[1400px] mx-auto',
-  contained: 'max-w-[1200px] mx-auto',
-  narrow: 'max-w-[800px] mx-auto',
-};
-const containerClass = containerMap[section.containerWidth ?? 'contained'] ?? containerMap.contained;
+// ── Layout ──────────────────────────────────────────────────────────────────
+const sec = section as any;
 
-// Layout classes for the blocks wrapper
-const layoutMap: Record<string, string> = {
-  stack: 'flex flex-col',
-  'cols-2': 'grid grid-cols-1 md:grid-cols-2',
-  'cols-3': 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
-  'cols-4': 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4',
-  grid: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
-  carousel: 'flex overflow-x-auto snap-x snap-mandatory',
-};
-const layoutClass = layoutMap[section.layout ?? 'stack'] ?? layoutMap.stack;
+// Container (outer wrapper) max-width
+const maxWidth = resolveSectionMaxWidth(sec.sectionWidth, sec.customSectionWidth);
+const containerStyle = maxWidth ? `max-width:${maxWidth};margin-left:auto;margin-right:auto;width:100%;` : 'width:100%;';
 
-const gapMap: Record<string, string> = {
-  none: 'gap-0',
-  xs: 'gap-2',
-  sm: 'gap-4',
-  md: 'gap-6',
-  lg: 'gap-8',
-  xl: 'gap-12',
-};
-const gapClass = gapMap[section.gap ?? 'md'] ?? gapMap.md;
+// Column grid
+const gridTemplate = resolveColumns(sec.columns, sec.customGridTemplate);
+const columnGapPx  = resolveGap(sec.columnGap ?? sec.gap);
+const rowGapPx     = resolveGap(sec.rowGap ?? sec.gap);
 
-const vAlignMap: Record<string, string> = {
-  start: 'items-start',
-  center: 'items-center',
-  end: 'items-end',
-  stretch: 'items-stretch',
-};
-const hAlignMap: Record<string, string> = {
-  start: 'justify-start',
-  center: 'justify-center',
-  end: 'justify-end',
-  between: 'justify-between',
-  around: 'justify-around',
-};
-const vAlignClass = vAlignMap[section.verticalAlign ?? 'start'] ?? '';
-const hAlignClass = hAlignMap[section.horizontalAlign ?? 'start'] ?? '';
-
-// Build inline section styles
-const sectionStyles: string[] = [];
-if (section.bgColor) sectionStyles.push(`background-color:${section.bgColor}`);
-if (section.bgGradient) sectionStyles.push(`background:${section.bgGradient}`);
-if (section.bgImage?.asset?.url) {
-  sectionStyles.push(
-    `background-image:url('${section.bgImage.asset.url}');background-size:cover;background-position:center`
-  );
+let blocksWrapStyle = '';
+if (gridTemplate && gridTemplate !== '1fr') {
+  blocksWrapStyle = `display:grid;grid-template-columns:${gridTemplate};`;
+  if (columnGapPx) blocksWrapStyle += `column-gap:${columnGapPx};`;
+  if (rowGapPx)    blocksWrapStyle += `row-gap:${rowGapPx};`;
+} else {
+  blocksWrapStyle = 'display:flex;flex-direction:column;';
+  if (columnGapPx) blocksWrapStyle += `gap:${columnGapPx};`;
 }
-if (section.paddingTop) sectionStyles.push(`padding-top:${section.paddingTop}`);
-if (section.paddingBottom) sectionStyles.push(`padding-bottom:${section.paddingBottom}`);
-if (section.paddingLeft) sectionStyles.push(`padding-left:${section.paddingLeft}`);
-if (section.paddingRight) sectionStyles.push(`padding-right:${section.paddingRight}`);
-if (section.marginTop) sectionStyles.push(`margin-top:${section.marginTop}`);
-if (section.marginBottom) sectionStyles.push(`margin-bottom:${section.marginBottom}`);
-if (section.minHeight) sectionStyles.push(`min-height:${section.minHeight}`);
 
-// Collect custom CSS from this section and its blocks
-function buildCustomCss(sec: PageSection, secClass: string): string {
+// Alignment on blocks wrapper
+const vAlignMap: Record<string, string> = { start: 'flex-start', center: 'center', end: 'flex-end', stretch: 'stretch' };
+const hAlignMap: Record<string, string> = { start: 'flex-start', center: 'center', end: 'flex-end', between: 'space-between', around: 'space-around' };
+if (sec.verticalAlign)   blocksWrapStyle += `align-items:${vAlignMap[sec.verticalAlign] ?? 'flex-start'};`;
+if (sec.horizontalAlign) blocksWrapStyle += `justify-content:${hAlignMap[sec.horizontalAlign] ?? 'flex-start'};`;
+
+// ── Section inline styles ───────────────────────────────────────────────────
+// Support new structured style objects AND legacy flat fields
+const sectionStyle = mergeStyles(
+  // New style objects (take priority)
+  resolveBackground(sec.background),
+  resolveBorder(sec.border),
+  resolveSpacing(sec.spacing),
+  resolveSize(sec.size),
+  // Legacy flat spacing fields (fallback when new objects not set)
+  !sec.spacing && sec.paddingTop    ? `padding-top:${sec.paddingTop}`       : '',
+  !sec.spacing && sec.paddingBottom ? `padding-bottom:${sec.paddingBottom}` : '',
+  !sec.spacing && sec.paddingLeft   ? `padding-left:${sec.paddingLeft}`     : '',
+  !sec.spacing && sec.paddingRight  ? `padding-right:${sec.paddingRight}`   : '',
+  !sec.spacing && sec.marginTop     ? `margin-top:${sec.marginTop}`         : '',
+  !sec.spacing && sec.marginBottom  ? `margin-bottom:${sec.marginBottom}`   : '',
+  // Legacy background fields (fallback)
+  !sec.background && sec.bgColor    ? `background-color:${sec.bgColor}`    : '',
+  !sec.background && sec.bgGradient ? `background:${sec.bgGradient}`       : '',
+  !sec.background && sec.bgImage?.asset?.url
+    ? `background-image:url('${sec.bgImage.asset.url}');background-size:cover;background-position:center`
+    : '',
+  // Legacy minHeight
+  !sec.size && sec.minHeight        ? `min-height:${sec.minHeight}`         : '',
+);
+
+// ── Responsive CSS (media queries + visibility) ─────────────────────────────
+const responsiveCss = resolveResponsiveCss(sectionClass, sec.responsive);
+
+// Responsive column overrides
+const responsiveColumnCss = [
+  sec.tabletColumns
+    ? `@media (min-width:768px) and (max-width:1023px){.${sectionClass} .pb-blocks-wrap{grid-template-columns:repeat(${sec.tabletColumns},1fr)}}`
+    : '',
+  sec.mobileColumns
+    ? `@media (max-width:767px){.${sectionClass} .pb-blocks-wrap{grid-template-columns:repeat(${sec.mobileColumns},1fr)}}`
+    : '',
+].join('');
+
+// Background image overlay (requires a pseudo-element, handled via scoped style)
+const overlayColor = sec.background?.type === 'image' && sec.background?.overlay;
+const overlayCss   = overlayColor
+  ? `.${sectionClass}{position:relative}.${sectionClass}::after{content:'';position:absolute;inset:0;background:${overlayColor};pointer-events:none;}`
+  : '';
+
+// Section-level and block-level custom CSS
+function collectCustomCss(): string {
   const parts: string[] = [];
   if (sec.customCss) {
-    parts.push(sec.customCss);
+    const hasBraces = /\{/.test(sec.customCss);
+    parts.push(hasBraces ? sec.customCss : `.${sectionClass} { ${sec.customCss} }`);
   }
   for (const block of sec.blocks ?? []) {
     if (!block.customCss) continue;
-    parts.push(block.customCss);
+    const blockCls = block.blockClass || `block-${block._key}`;
+    const hasBraces = /\{/.test(block.customCss);
+    parts.push(hasBraces ? block.customCss : `.${blockCls} { ${block.customCss} }`);
   }
   return parts.join('\n');
 }
 
-const pageCustomCss = buildCustomCss(section, sectionClass);
+const allCustomCss = collectCustomCss();
+const allInjectedCss = responsiveCss + responsiveColumnCss + overlayCss + allCustomCss;
 
-const hideOnMobile = section.hideOnMobile ?? false;
-const hideOnDesktop = section.hideOnDesktop ?? false;
+// ── Legacy visibility ───────────────────────────────────────────────────────
+// Prefer responsive object; fall back to old flat booleans
+const hideOnMobile  = sec.responsive?.hideOnMobile  ?? sec.hideOnMobile  ?? false;
+const hideOnDesktop = sec.responsive?.hideOnDesktop ?? sec.hideOnDesktop ?? false;
 ---
 
-{pageCustomCss && <style is:inline set:html={pageCustomCss} />}
+{allInjectedCss && <style is:inline set:html={allInjectedCss} />}
 
 <section
   id={sectionId}
   class:list={[
     sectionClass,
-    hideOnMobile && 'hidden md:block',
+    hideOnMobile  && 'hidden md:block',
     hideOnDesktop && 'block md:hidden',
-    isPreview && 'pb-section-wrapper',
+    isPreview     && 'pb-section-wrapper',
   ]}
-  style={sectionStyles.join(';')}
+  style={sectionStyle || undefined}
+  aria-label={sec.ariaLabel || undefined}
   data-section-id={sectionId}
   data-sanity={sectionSanityAttr}
 >
   {isPreview && section.label && (
     <div class="pb-section-label">{section.label}</div>
   )}
-  <div class={containerClass}>
-    <div class:list={[layoutClass, gapClass, vAlignClass, hAlignClass]}>
+
+  <div style={containerStyle}>
+    <div class="pb-blocks-wrap" style={blocksWrapStyle}>
       {(section.blocks ?? []).map(block => (
         <BlockRenderer
           block={block}

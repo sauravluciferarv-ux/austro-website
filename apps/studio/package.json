@@ -6,7 +6,8 @@
     "dev": "sanity dev",
     "build": "sanity build",
     "deploy": "sanity deploy",
-    "seed": "sanity exec scripts/seed-homepage.ts"
+    "seed": "sanity exec scripts/seed-homepage.ts",
+    "seed:all": "sanity exec scripts/seed-all-pages.ts"
   },
   "dependencies": {
     "@sanity/code-input": "^5.2.1",

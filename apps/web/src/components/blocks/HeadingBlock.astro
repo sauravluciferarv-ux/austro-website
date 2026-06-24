@@ -1,5 +1,9 @@
 ---
 import type { PageSectionBlock } from '../../lib/types';
+import {
+  resolveTypography, resolveTypographyClass, resolveSpacing,
+  mergeStyles, resolveResponsiveCss, resolveScopedCss,
+} from '../../lib/styleResolver';
 
 interface Props {
   block: PageSectionBlock;
@@ -8,21 +12,28 @@ interface Props {
 }
 
 const { block, isPreview, dataSanity } = Astro.props;
-const { level = 'h2', text = '', alignment = 'left', blockId, blockClass } = block;
+const { level = 'h2', text = '', blockId, blockClass } = block;
 
-const Tag = level as any;
-const id = blockId || `block-${block._key}`;
+const id  = blockId  || `block-${block._key}`;
 const cls = blockClass || `heading-${block._key}`;
+const Tag = level as any;
 
-const hideClasses = [
-  block.hideOnMobile && 'hidden md:block',
-  block.hideOnDesktop && 'block md:hidden',
-].filter(Boolean);
+const inlineStyle   = mergeStyles(resolveTypography(block.typography), resolveSpacing(block.spacing));
+const presetClass   = resolveTypographyClass(block.typography);
+const textAlign     = block.typography?.textAlign;
+const alignClass    = textAlign ? `text-${textAlign}` : '';
+const responsiveCss = resolveResponsiveCss(cls, block.responsive);
+const scopedCss     = resolveScopedCss(cls, block.customCss);
 ---
+
+{(responsiveCss || scopedCss) && (
+  <style is:inline set:html={responsiveCss + scopedCss} />
+)}
 
 <Tag
   id={id}
-  class:list={[cls, `text-${alignment}`, ...hideClasses, isPreview && 'pb-outline-block']}
+  class:list={[cls, alignClass, presetClass, isPreview && 'pb-outline-block']}
+  style={inlineStyle || undefined}
   data-block-type="headingBlock"
   data-sanity={dataSanity}
 >

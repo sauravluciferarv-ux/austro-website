@@ -1,15 +1,16 @@
 ---
 import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
-import type { D365FeatureCardsSection } from '../../lib/types';
+import type { D365FeatureCardsSection, D365SectionStyleProps } from '../../lib/types';
 
 interface Props {
   data?: D365FeatureCardsSection;
   isPreview?: boolean;
   docId?: string;
   docType?: string;
+  styleProps?: D365SectionStyleProps;
 }
 
-const { data, docId, docType = 'homepage' } = Astro.props;
+const { data, docId, docType = 'homepage', styleProps } = Astro.props;
 
 const headingGradient = data?.headingGradient ?? 'Ticketing + AI';
 const headingPlain = data?.headingPlain ?? 'The only platform your agents need.';
@@ -21,19 +22,32 @@ const staticCards = [
   { title: 'Link assets & tickets to unify IT service', src: 'https://www.desk365.io/wp-content/uploads/2026/06/Frame-21168.png', alt: 'Asset management and IT service' },
 ];
 const cards = data?.cards?.length
-  ? data.cards.map(c => ({ title: c.title, src: c.image?.asset?.url ?? '', alt: c.imageAlt ?? c.title }))
+  ? data.cards.map(c => ({ _key: c._key, title: c.title, src: c.image?.asset?.url ?? '', alt: c.imageAlt ?? c.title }))
   : staticCards;
 
 let sanityAttr: string | undefined;
+let daFn: ((path: string) => string) | undefined;
 if (docId && data?._key) {
   try {
     const da = createDataAttribute({ id: docId, type: docType });
     sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+    daFn = (path: string) => da(path);
   } catch {}
+}
+
+function cardImgAttr(cardKey: string | undefined) {
+  if (!daFn || !data?._key || !cardKey) return undefined;
+  return daFn(`pageBuilder[_key=="${data._key}"].cards[_key=="${cardKey}"].image`);
 }
 ---
 
-<section id="d365-feature-cards" class="d365-feature-cards d365-section--white" data-sanity={sanityAttr}>
+{styleProps?.css && <style is:inline set:html={styleProps.css} />}
+<section
+  id={styleProps?.sectionId ?? 'd365-feature-cards'}
+  class:list={['d365-feature-cards', 'd365-section--white', styleProps?.extraClass]}
+  style={styleProps?.inlineStyle || undefined}
+  data-sanity={sanityAttr}
+>
   <div class="d365-container">
     <div class="d365-section-header">
       <h2 class="d365-heading">
@@ -51,6 +65,7 @@ if (docId && data?._key) {
             alt={card.alt || card.title}
             class="d365-feature-cards__img"
             loading="lazy"
+            data-sanity={cardImgAttr((card as any)._key)}
           />
           <h3 class="d365-feature-cards__title">{card.title}</h3>
         </div>

@@ -1,0 +1,377 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import HomeSectionRenderer from '../../components/home/HomeSectionRenderer.astro';
+import { sanityClient, getDraftClient } from '../../lib/sanity';
+import { contactPageQuery } from '../../lib/queries';
+import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
+import { CONTACT_DEFAULTS, DEFAULT_OFFICES, CONTACT_RESOURCES, DEFAULT_CONTACT_CARDS } from '../../lib/page-defaults';
+
+const isPreview = Astro.locals.isPreview ?? false;
+const client = isPreview ? getDraftClient() : sanityClient;
+const cmsData = await client.fetch(contactPageQuery).catch(() => null);
+
+if (!isPreview) {
+  Astro.response.headers.set('Cache-Control', 's-maxage=600, stale-while-revalidate=3600');
+}
+
+const offices      = (cmsData?.offices?.length ? cmsData.offices : DEFAULT_OFFICES) as typeof DEFAULT_OFFICES;
+const supportEmail = cmsData?.supportEmail || CONTACT_DEFAULTS.supportEmail;
+const generalEmail = cmsData?.generalEmail || CONTACT_DEFAULTS.generalEmail;
+const careersEmail = cmsData?.careersEmail || CONTACT_DEFAULTS.careersEmail;
+
+// Contact cards: use CMS if available, else fall back to DEFAULT_CONTACT_CARDS
+const contactCards: { title: string; description: string; emailKey: string; icon?: { asset?: { url?: string } } }[] =
+  cmsData?.contactCards?.length ? cmsData.contactCards : DEFAULT_CONTACT_CARDS;
+
+// Email resolver
+function resolveEmail(emailKey: string): string {
+  if (emailKey === 'support') return supportEmail;
+  if (emailKey === 'general') return generalEmail;
+  if (emailKey === 'careers') return careersEmail;
+  return supportEmail;
+}
+
+// Resources: use CMS if available, else fall back to CONTACT_RESOURCES
+const resources = (cmsData?.resources?.length ? cmsData.resources : CONTACT_RESOURCES) as typeof CONTACT_RESOURCES;
+
+const heroEyebrow    = cmsData?.heroEyebrow    || CONTACT_DEFAULTS.heroEyebrow;
+const heroHeading    = cmsData?.heroHeading    || CONTACT_DEFAULTS.heroHeading;
+const heroSubheading = cmsData?.heroSubheading || CONTACT_DEFAULTS.heroSubheading;
+const heroPrimaryCtaLabel   = cmsData?.heroPrimaryCtaLabel   || CONTACT_DEFAULTS.heroPrimaryCtaLabel;
+const heroPrimaryCtaHref    = cmsData?.heroPrimaryCtaHref    || CONTACT_DEFAULTS.heroPrimaryCtaHref;
+const heroSecondaryCtaLabel = cmsData?.heroSecondaryCtaLabel || CONTACT_DEFAULTS.heroSecondaryCtaLabel;
+const heroSecondaryCtaHref  = cmsData?.heroSecondaryCtaHref  || CONTACT_DEFAULTS.heroSecondaryCtaHref;
+
+const officesEyebrow = cmsData?.officesEyebrow || CONTACT_DEFAULTS.officesEyebrow;
+const officesHeading = cmsData?.officesHeading || CONTACT_DEFAULTS.officesHeading;
+
+const resourcesEyebrow    = cmsData?.resourcesEyebrow    || CONTACT_DEFAULTS.resourcesEyebrow;
+const resourcesHeading    = cmsData?.resourcesHeading    || CONTACT_DEFAULTS.resourcesHeading;
+const resourcesSubheading = cmsData?.resourcesSubheading || CONTACT_DEFAULTS.resourcesSubheading;
+
+const finalCtaHeading        = cmsData?.finalCtaHeading        || CONTACT_DEFAULTS.finalCtaHeading;
+const finalCtaSubheading     = cmsData?.finalCtaSubheading     || CONTACT_DEFAULTS.finalCtaSubheading;
+const finalCtaPrimaryLabel   = cmsData?.finalCtaPrimaryLabel   || CONTACT_DEFAULTS.finalCtaPrimaryLabel;
+const finalCtaPrimaryHref    = cmsData?.finalCtaPrimaryHref    || CONTACT_DEFAULTS.finalCtaPrimaryHref;
+const finalCtaSecondaryLabel = cmsData?.finalCtaSecondaryLabel || CONTACT_DEFAULTS.finalCtaSecondaryLabel;
+const finalCtaSecondaryHref  = cmsData?.finalCtaSecondaryHref  || CONTACT_DEFAULTS.finalCtaSecondaryHref;
+const finalCtaGradientAccent = cmsData?.finalCtaGradientAccent || CONTACT_DEFAULTS.finalCtaGradientAccent;
+
+const pageBuilder  = cmsData?.pageBuilder ?? [];
+const docId        = cmsData?._id ?? 'contactPage';
+const seo          = cmsData?.seo ?? {};
+
+const da = createDataAttribute({ id: docId, type: 'contactPage' });
+let heroSectionAttr: string | undefined;
+let officesSectionAttr: string | undefined;
+try {
+  heroSectionAttr    = da('heroHeading');
+  officesSectionAttr = da('offices');
+} catch {}
+
+// Fallback SVG icons per card index (for default cards without CMS icon)
+const fallbackCardIcons = [
+  // Support — mail
+  `<path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>`,
+  // General — chat
+  `<path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"/>`,
+  // Careers — people
+  `<path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/>`,
+];
+
+const cardBgColors = ['bg-blue-50', 'bg-violet-50', 'bg-emerald-50'];
+const cardIconColors = ['text-blue-600', 'text-violet-600', 'text-emerald-600'];
+---
+
+<BaseLayout seo={{
+  metaTitle: seo.metaTitle || 'Contact Us — Desk365',
+  metaDescription: seo.metaDescription || 'Get in touch with the Desk365 team. Access our help center, reach out by email, or book a demo. We would love to hear from you!',
+  ogImage: seo.ogImage,
+}}>
+
+<!-- ─── Hero ────────────────────────────────────────────────────────────────── -->
+<section class="contact-hero d365-section--white" data-sanity={heroSectionAttr}>
+  <div class="d365-container text-center">
+    <p class="d365-eyebrow">{heroEyebrow}</p>
+    <h1 class="d365-heading d365-heading--xl">{heroHeading}</h1>
+    <p class="contact-hero__sub">{heroSubheading}</p>
+    <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center">
+      <a href={heroPrimaryCtaHref} class="d365-btn d365-btn--green">{heroPrimaryCtaLabel}</a>
+      <a href={heroSecondaryCtaHref} class="d365-btn d365-btn--outline-blue">{heroSecondaryCtaLabel}</a>
+    </div>
+  </div>
+</section>
+
+<!-- ─── Direct Contact ─────────────────────────────────────────────────────── -->
+<section class="d365-section--sm d365-section--gray" style="padding:40px 24px">
+  <div class="d365-container">
+    <div class="contact-cards">
+      {contactCards.map((card, i) => {
+        const email = resolveEmail(card.emailKey || '');
+        const hasCmsIcon = card.icon?.asset?.url;
+        const fallbackSvg = fallbackCardIcons[i % fallbackCardIcons.length];
+        const bgColor = cardBgColors[i % cardBgColors.length];
+        const iconColor = cardIconColors[i % cardIconColors.length];
+        return (
+          <div class="contact-card">
+            <div class={`contact-card__icon ${bgColor}`}>
+              {hasCmsIcon ? (
+                <img src={card.icon!.asset!.url} alt="" width="22" height="22" style="object-fit:contain" />
+              ) : (
+                <svg class={iconColor} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" set:html={fallbackSvg}></svg>
+              )}
+            </div>
+            <h3 class="contact-card__title">{card.title}</h3>
+            <p class="contact-card__desc">{card.description}</p>
+            <a href={`mailto:${email}`} class="contact-card__link">
+              {email}
+            </a>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+</section>
+
+<!-- ─── Locations ─────────────────────────────────────────────────────────── -->
+<section class="d365-section d365-section--white" data-sanity={officesSectionAttr}>
+  <div class="d365-container">
+    <div class="d365-section-header">
+      <p class="d365-eyebrow">{officesEyebrow}</p>
+      <h2 class="d365-heading">{officesHeading}</h2>
+    </div>
+    <div class="offices-grid">
+      {offices.map(office => (
+        <div class="office-card">
+          <span class="office-card__flag">{office.flag}</span>
+          <div>
+            <h3 class="office-card__city">{office.city}</h3>
+            <p class="office-card__region">{office.region}</p>
+            <p class="office-card__desc">{office.description}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- ─── Resources ─────────────────────────────────────────────────────────── -->
+<section class="d365-section d365-section--gray">
+  <div class="d365-container">
+    <div class="d365-section-header">
+      <p class="d365-eyebrow">{resourcesEyebrow}</p>
+      <h2 class="d365-heading">{resourcesHeading}</h2>
+      <p class="d365-body">{resourcesSubheading}</p>
+    </div>
+    <div class="resources-grid">
+      {resources.map((r: any) => (
+        <a
+          href={r.linkHref}
+          class="resource-card"
+          {...r.external ? { target: '_blank', rel: 'noopener noreferrer' } : {}}
+        >
+          {r.icon?.asset?.url ? (
+            <div class="resource-card__icon">
+              <img src={r.icon.asset.url} alt="" width="22" height="22" style="object-fit:contain" />
+            </div>
+          ) : r.icon ? (
+            <div class={`resource-card__icon ${(r as any).bgColor || ''}`}>
+              <svg class={(r as any).iconColor || ''} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" set:html={r.icon}></svg>
+            </div>
+          ) : null}
+          <h3 class="resource-card__title">{r.title}</h3>
+          <p class="resource-card__desc">{r.description}</p>
+          <span class="d365-link" style="font-size:13px">
+            {r.linkLabel}
+          </span>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- ─── Final CTA ──────────────────────────────────────────────────────────── -->
+<section class="contact-cta" style={`background: linear-gradient(135deg, var(--d365-blue) 0%, ${finalCtaGradientAccent} 100%)`}>
+  <div class="d365-container text-center">
+    <h2 class="d365-heading d365-heading--white">{finalCtaHeading}</h2>
+    <p style="color:rgba(255,255,255,0.8); font-size:17px; margin-bottom:32px">
+      {finalCtaSubheading}
+    </p>
+    <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center">
+      <a href={finalCtaPrimaryHref} class="d365-btn d365-btn--green">{finalCtaPrimaryLabel}</a>
+      <a href={finalCtaSecondaryHref} class="d365-btn d365-btn--outline-white">{finalCtaSecondaryLabel}</a>
+    </div>
+  </div>
+</section>
+
+{/* Sanity Page Builder sections */}
+{pageBuilder.map((section: any) => (
+  <HomeSectionRenderer section={section} isPreview={isPreview} docId={docId} docType="contactPage" />
+))}
+
+</BaseLayout>
+
+<style>
+  .contact-hero {
+    padding: 72px 24px 56px;
+  }
+  .contact-hero__sub {
+    font-size: 18px;
+    line-height: 1.7;
+    color: var(--d365-text-body);
+    max-width: 600px;
+    margin: 0 auto 32px;
+  }
+
+  /* ── Contact Cards ── */
+  .contact-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+  }
+  @media (min-width: 860px) {
+    .contact-cards { grid-template-columns: repeat(3, 1fr); }
+  }
+  .contact-card {
+    background: #fff;
+    border: 1.5px solid var(--d365-border);
+    border-radius: var(--d365-radius-card);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: box-shadow var(--transition-base), transform var(--transition-base);
+  }
+  .contact-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
+  .contact-card__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-bottom: 4px;
+  }
+  .contact-card__icon svg { width: 22px; height: 22px; }
+  .contact-card__title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--d365-text-dark);
+    margin: 0;
+  }
+  .contact-card__desc {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--d365-text-body);
+    margin: 0;
+  }
+  .contact-card__link {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--d365-blue);
+    text-decoration: none;
+    transition: color var(--transition-base);
+  }
+  .contact-card__link:hover { color: var(--d365-blue-dark); }
+
+  /* ── Offices ── */
+  .offices-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .office-card {
+    border: 1.5px solid var(--d365-border);
+    border-radius: var(--d365-radius-card);
+    padding: 28px;
+    background: var(--d365-bg-gray);
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  .office-card__flag { font-size: 40px; flex-shrink: 0; line-height: 1; }
+  .office-card__city {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--d365-text-dark);
+    margin: 0 0 2px;
+  }
+  .office-card__region {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--d365-blue);
+    margin: 0 0 8px;
+  }
+  .office-card__desc {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--d365-text-body);
+    margin: 0;
+  }
+
+  /* ── Resources Grid ── */
+  .resources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+  }
+  @media (min-width: 900px) {
+    .resources-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  .resource-card {
+    background: #fff;
+    border: 1.5px solid var(--d365-border);
+    border-radius: var(--d365-radius-card);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    text-decoration: none;
+    transition: box-shadow var(--transition-base), transform var(--transition-base), border-color var(--transition-base);
+  }
+  .resource-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+    border-color: var(--d365-blue);
+  }
+  .resource-card__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .resource-card__icon svg { width: 22px; height: 22px; }
+  .resource-card__title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--d365-text-dark);
+    margin: 0;
+    transition: color var(--transition-base);
+  }
+  .resource-card:hover .resource-card__title { color: var(--d365-blue); }
+  .resource-card__desc {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--d365-text-body);
+    margin: 0;
+    flex: 1;
+  }
+
+  /* ── CTA ── */
+  .contact-cta {
+    padding: 88px 24px;
+  }
+</style>

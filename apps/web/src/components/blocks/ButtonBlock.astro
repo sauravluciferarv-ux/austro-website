@@ -1,5 +1,8 @@
 ---
 import type { PageSectionBlock } from '../../lib/types';
+import {
+  resolveSpacing, resolveBorder, mergeStyles, resolveTypographyClass, resolveResponsiveCss, resolveScopedCss,
+} from '../../lib/styleResolver';
 
 interface Props {
   block: PageSectionBlock;
@@ -11,40 +14,69 @@ const { block, isPreview, dataSanity } = Astro.props;
 const {
   text = 'Button',
   href = '#',
-  style = 'primary',
-  size = 'md',
+  // schema uses `variant`, legacy data may have `style`
+  variant = (block as any).style ?? 'primary',
+  // schema uses `btnSize`, legacy data may have inline `size` string
+  btnSize = (block as any).btnSize ?? (block as any).size ?? 'md',
   alignment = 'left',
   openInNewTab,
+  bgColor,
+  textColor,
+  hoverBgColor,
+  hoverTextColor,
   blockId,
   blockClass,
-} = block;
+} = block as any;
 
-const id = blockId || `block-${block._key}`;
+const id  = blockId  || `block-${block._key}`;
 const cls = blockClass || `btn-${block._key}`;
 
 const sizeMap: Record<string, string> = {
+  xs: 'px-3 py-1.5 text-xs',
   sm: 'px-4 py-2 text-sm',
   md: 'px-6 py-3 text-base',
   lg: 'px-8 py-4 text-lg',
+  xl: 'px-10 py-5 text-xl',
 };
-const styleMap: Record<string, string> = {
-  primary: 'bg-blue-600 text-white hover:bg-blue-700',
+
+const variantMap: Record<string, string> = {
+  primary:   'bg-blue-600 text-white hover:bg-blue-700',
   secondary: 'bg-gray-600 text-white hover:bg-gray-700',
-  outline: 'border-2 border-blue-600 text-blue-600 hover:bg-blue-50',
-  ghost: 'text-blue-600 hover:bg-blue-50',
-  link: 'text-blue-600 underline hover:text-blue-800',
+  outline:   'border-2 border-blue-600 text-blue-600 hover:bg-blue-50',
+  ghost:     'text-blue-600 hover:bg-blue-50',
+  link:      'text-blue-600 underline hover:text-blue-800',
+  danger:    'bg-red-600 text-white hover:bg-red-700',
 };
+
 const alignMap: Record<string, string> = {
   left: 'justify-start',
   center: 'justify-center',
   right: 'justify-end',
+  'full-width': 'justify-stretch',
 };
 
-const hideClasses = [
-  block.hideOnMobile && 'hidden md:flex',
-  block.hideOnDesktop && 'flex md:hidden',
-].filter(Boolean);
+// Build inline override styles for color customisation
+const btnInlineStyle = mergeStyles(
+  bgColor   ? `background-color:${bgColor}`   : '',
+  textColor ? `color:${textColor}`             : '',
+  resolveBorder(block.border),
+  resolveSpacing(block.spacing),
+);
+
+const presetClass = resolveTypographyClass(block.typography);
+const wrapStyle   = resolveSpacing(block.spacing);
+const responsiveCss = resolveResponsiveCss(cls, block.responsive);
+const scopedCss     = resolveScopedCss(cls, block.customCss);
+
+// hover color overrides require a <style> block (can't do hover inline)
+const hoverCss = (hoverBgColor || hoverTextColor)
+  ? `.${cls} a:hover{${hoverBgColor ? `background-color:${hoverBgColor};` : ''}${hoverTextColor ? `color:${hoverTextColor};` : ''}}`
+  : '';
 ---
+
+{(responsiveCss || scopedCss || hoverCss) && (
+  <style is:inline set:html={responsiveCss + scopedCss + hoverCss} />
+)}
 
 <div
   id={id}
@@ -52,9 +84,9 @@ const hideClasses = [
     cls,
     'flex',
     alignMap[alignment] ?? 'justify-start',
-    ...hideClasses,
     isPreview && 'pb-outline-block',
   ]}
+  style={wrapStyle || undefined}
   data-block-type="buttonBlock"
   data-sanity={dataSanity}
 >
@@ -62,11 +94,16 @@ const hideClasses = [
     href={href}
     target={openInNewTab ? '_blank' : '_self'}
     rel={openInNewTab ? 'noopener noreferrer' : undefined}
+    aria-label={(block as any).ariaLabel || undefined}
     class:list={[
       'inline-flex items-center gap-2 rounded-lg font-medium transition-colors',
-      sizeMap[size] ?? sizeMap.md,
-      styleMap[style] ?? styleMap.primary,
+      sizeMap[btnSize] ?? sizeMap.md,
+      // If user has set custom bg/text colors, skip the variant class so overrides win
+      (!bgColor && !textColor) ? (variantMap[variant] ?? variantMap.primary) : '',
+      presetClass,
+      alignment === 'full-width' ? 'w-full justify-center' : '',
     ]}
+    style={btnInlineStyle || undefined}
   >
     {text}
   </a>

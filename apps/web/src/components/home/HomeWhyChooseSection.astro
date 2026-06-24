@@ -1,15 +1,16 @@
 ---
 import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
-import type { D365WhyChooseSection } from '../../lib/types';
+import type { D365WhyChooseSection, D365SectionStyleProps } from '../../lib/types';
 
 interface Props {
   data?: D365WhyChooseSection;
   isPreview?: boolean;
   docId?: string;
   docType?: string;
+  styleProps?: D365SectionStyleProps;
 }
 
-const { data, docId, docType = 'homepage' } = Astro.props;
+const { data, docId, docType = 'homepage', styleProps } = Astro.props;
 
 const heading = data?.heading ?? 'Why choose Desk365?';
 const body = data?.body ?? "Customers who choose Desk365 feel the difference. Built for and by customers, every feature, every detail is crafted so our users' lives are simplified.";
@@ -26,15 +27,26 @@ const staticCards = [
 ];
 
 const cards = data?.cards?.length
-  ? data.cards.map(c => ({ title: c.title, description: c.description ?? '' }))
+  ? data.cards.map(c => ({ _key: c._key, title: c.title, description: c.description ?? '', iconImage: c.iconImage?.asset?.url }))
   : staticCards;
 
 let sanityAttr: string | undefined;
+let daFn: ((path: string) => string) | undefined;
 if (docId && data?._key) {
   try {
     const da = createDataAttribute({ id: docId, type: docType });
     sanityAttr = da(`pageBuilder[_key=="${data._key}"]`);
+    daFn = (path: string) => da(path);
   } catch {}
+}
+
+function awardImgAttr() {
+  if (!daFn || !data?._key) return undefined;
+  return daFn(`pageBuilder[_key=="${data._key}"].awardImage`);
+}
+function cardIconImgAttr(cardKey: string | undefined) {
+  if (!daFn || !data?._key || !cardKey) return undefined;
+  return daFn(`pageBuilder[_key=="${data._key}"].cards[_key=="${cardKey}"].iconImage`);
 }
 
 const whyIcons = [
@@ -45,7 +57,13 @@ const whyIcons = [
 ];
 ---
 
-<section id="d365-why-choose" class="d365-why-choose d365-section--white" data-sanity={sanityAttr}>
+{styleProps?.css && <style is:inline set:html={styleProps.css} />}
+<section
+  id={styleProps?.sectionId ?? 'd365-why-choose'}
+  class:list={['d365-why-choose', 'd365-section--white', styleProps?.extraClass]}
+  style={styleProps?.inlineStyle || undefined}
+  data-sanity={sanityAttr}
+>
   <div class="d365-container">
 
     <!-- Awards badge row -->
@@ -55,6 +73,7 @@ const whyIcons = [
         alt="Desk365 - Users Love Us award"
         class="d365-why-choose__award-img"
         loading="lazy"
+        data-sanity={awardImgAttr()}
       />
       <p class="d365-why-choose__award-text">{awardText}</p>
     </div>
@@ -67,7 +86,20 @@ const whyIcons = [
     <div class="d365-why-choose__grid">
       {cards.map((card, i) => (
         <div class="d365-card d365-why-card">
-          <div class="d365-icon-box" set:html={whyIcons[i % whyIcons.length]} style="color: var(--d365-blue);" />
+          {card.iconImage ? (
+            <div class="d365-icon-box">
+              <img
+                src={card.iconImage}
+                alt={card.title}
+                loading="lazy"
+                width="24"
+                height="24"
+                data-sanity={cardIconImgAttr(card._key)}
+              />
+            </div>
+          ) : (
+            <div class="d365-icon-box" set:html={whyIcons[i % whyIcons.length]} style="color: var(--d365-blue);" />
+          )}
           <h3 class="d365-why-card__title">{card.title}</h3>
           <p class="d365-why-card__desc">{card.description}</p>
         </div>

@@ -224,6 +224,7 @@ export interface D365HeroSection {
   _type: 'd365HeroSection';
   _key?: string;
   headlinePrefix?: string;
+  headlineConnector?: string;
   rotatingWords?: string[];
   subheadline?: string;
   footnote?: string;
@@ -358,6 +359,7 @@ export interface D365CapabilityItem {
   _key?: string;
   title: string;
   description?: string;
+  iconImage?: { asset: { url: string } };
   icon?: string;
 }
 
@@ -413,6 +415,7 @@ export interface D365TestimonialItem {
   name: string;
   title?: string;
   company?: string;
+  avatarImage?: { asset: { url: string } };
   rating?: number;
   reviewPlatform?: string;
 }
@@ -429,6 +432,7 @@ export interface D365WhyChooseCard {
   _key?: string;
   title: string;
   description?: string;
+  iconImage?: { asset: { url: string } };
   icon?: string;
 }
 
@@ -559,6 +563,74 @@ export interface AuthorDoc {
   avatar?: SanityImage;
 }
 
+// ── Visual Editor Style Object Types ────────────────────────────────────────
+
+export interface StyleSpacing {
+  paddingTop?: string;
+  paddingRight?: string;
+  paddingBottom?: string;
+  paddingLeft?: string;
+  marginTop?: string;
+  marginRight?: string;
+  marginBottom?: string;
+  marginLeft?: string;
+}
+
+export interface StyleTypography {
+  preset?: string;
+  fontSize?: string;
+  fontWeight?: string;
+  lineHeight?: string;
+  letterSpacing?: string;
+  textTransform?: string;
+  textAlign?: string;
+  color?: string;
+}
+
+export interface StyleBackground {
+  type?: 'none' | 'color' | 'gradient' | 'image';
+  color?: string;
+  gradient?: string;
+  image?: { asset?: { url?: string } };
+  imagePosition?: string;
+  imageSize?: string;
+  overlay?: string;
+  opacity?: number;
+}
+
+export interface StyleBorder {
+  borderWidth?: string;
+  borderStyle?: string;
+  borderColor?: string;
+  borderRadius?: string;
+  boxShadow?: string;
+}
+
+export interface StyleSize {
+  width?: string;
+  maxWidth?: string;
+  minWidth?: string;
+  height?: string;
+  minHeight?: string;
+  maxHeight?: string;
+}
+
+export interface StyleResponsive {
+  desktop?: StyleSpacing;
+  tablet?: StyleSpacing;
+  mobile?: StyleSpacing;
+  hideOnMobile?: boolean;
+  hideOnTablet?: boolean;
+  hideOnDesktop?: boolean;
+}
+
+export interface D365SectionStyleProps {
+  sectionId: string;
+  extraClass: string;
+  inlineStyle: string;
+  css: string;
+}
+
 // ── Page Builder Types ───────────────────────────────────────────────────────
 
 export interface PortableTextBlock {
@@ -575,6 +647,14 @@ export interface PageSectionBlock {
   blockId?: string;
   blockClass?: string;
   customCss?: string;
+  // New visual editor style objects
+  typography?: StyleTypography;
+  spacing?: StyleSpacing;
+  border?: StyleBorder;
+  size?: StyleSize;
+  background?: StyleBackground;
+  responsive?: StyleResponsive;
+  // Legacy visibility (kept for backward compat, prefer responsive.hideOnMobile)
   hideOnMobile?: boolean;
   hideOnDesktop?: boolean;
   // Heading
@@ -597,10 +677,11 @@ export interface PageSectionBlock {
   muted?: boolean;
   controls?: boolean;
   aspectRatio?: string;
-  // Button
+  // Button (btnSize avoids collision with size?: StyleSize above)
   href?: string;
   style?: string;
-  size?: string;
+  btnSize?: string;
+  variant?: string;
   icon?: string;
   // Divider
   color?: string;

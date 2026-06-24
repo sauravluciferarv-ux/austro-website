@@ -1,15 +1,16 @@
 ---
 import { createDataAttribute } from '@sanity/visual-editing/create-data-attribute';
-import type { D365StatsSection } from '../../lib/types';
+import type { D365StatsSection, D365SectionStyleProps } from '../../lib/types';
 
 interface Props {
   data?: D365StatsSection;
   isPreview?: boolean;
   docId?: string;
   docType?: string;
+  styleProps?: D365SectionStyleProps;
 }
 
-const { data, docId, docType = 'homepage' } = Astro.props;
+const { data, docId, docType = 'homepage', styleProps } = Astro.props;
 
 const stats = data?.stats?.length
   ? data.stats
@@ -29,7 +30,13 @@ if (docId && data?._key) {
 }
 ---
 
-<section id="d365-stats" class="d365-stats" data-sanity={sanityAttr}>
+{styleProps?.css && <style is:inline set:html={styleProps.css} />}
+<section
+  id={styleProps?.sectionId ?? 'd365-stats'}
+  class:list={['d365-stats', styleProps?.extraClass]}
+  style={styleProps?.inlineStyle || undefined}
+  data-sanity={sanityAttr}
+>
   <div class="d365-container">
     <div class="d365-stats__grid">
       {stats.map((stat, i) => (
