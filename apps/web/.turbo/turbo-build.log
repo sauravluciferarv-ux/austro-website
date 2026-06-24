@@ -2,29 +2,132 @@
 > desk365-web@0.0.1 build
 > astro build && npm run check:staging-urls
 
-18:08:17 [types] Generated 62ms
-18:08:17 [build] output: "static"
-18:08:17 [build] directory: C:\Users\Saurav Desktop\Desktop\astro sanity\apps\web\dist\
-18:08:17 [build] Collecting build info...
-18:08:17 [build] ✓ Completed in 122ms.
-18:08:17 [build] Building static entrypoints...
-18:08:17 [vite] [32m✓ built in 887ms[39m
-18:08:17 [build] ✓ Completed in 918ms.
+15:40:38 [vite] Re-optimizing dependencies because vite config has changed
+15:40:38 [types] Generated 294ms
+15:40:38 [build] output: "hybrid"
+15:40:38 [build] directory: C:\Users\Saurav Desktop\Desktop\astro sanity\apps\web\.vercel\output\
+15:40:38 [build] adapter: @astrojs/vercel/serverless
+15:40:38 [build] Collecting build info...
+15:40:38 [build] ✓ Completed in 598ms.
+15:40:39 [build] Building hybrid entrypoints...
+[Shiki] The language "groq" doesn't exist, falling back to "plaintext".
+[Shiki] The language "groq" doesn't exist, falling back to "plaintext".
+[Shiki] The language "groq" doesn't exist, falling back to "plaintext".
+[Shiki] The language "groq" doesn't exist, falling back to "plaintext".
+15:40:47 [vite] [32m✓ built in 8.00s[39m
+15:40:47 [build] ✓ Completed in 8.16s.
 
  building client (vite) 
-18:08:17 [vite] transforming...
-18:08:17 [vite] [32m✓[39m 3 modules transformed.
-18:08:17 [vite] rendering chunks...
-18:08:17 [vite] [32m✓ built in 15ms[39m
+15:40:47 [vite] transforming...
+../../node_modules/framer-motion/dist/es/components/AnimatePresence/PopChild.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/components/AnimatePresence/PopChild.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/components/AnimatePresence/PresenceChild.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/components/AnimatePresence/PresenceChild.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/components/LayoutGroup/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/components/LayoutGroup/index.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/components/LazyMotion/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/components/LazyMotion/index.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/motion/utils/use-visual-state.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/motion/utils/use-visual-state.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/components/MotionConfig/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/components/MotionConfig/index.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/utils/use-isomorphic-effect.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/utils/use-isomorphic-effect.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/utils/use-unmount-effect.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/utils/use-unmount-effect.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/render/dom/features-min.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/render/dom/features-min.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/render/dom/features-animation.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/render/dom/features-animation.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/utils/use-motion-value-event.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/utils/use-motion-value-event.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/value/use-motion-template.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/value/use-motion-template.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/value/use-follow-value.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/value/use-follow-value.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/value/use-scroll.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/value/use-scroll.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/value/use-spring.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/value/use-spring.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/value/use-time.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/value/use-time.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/value/use-will-change/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/value/use-will-change/index.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/value/use-velocity.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/value/use-velocity.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/value/use-transform.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/value/use-transform.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/render/dom/features-max.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/render/dom/features-max.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/utils/use-force-update.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/utils/use-force-update.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/utils/reduced-motion/use-reduced-motion-config.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/utils/reduced-motion/use-reduced-motion-config.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/animation/hooks/use-animate.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/animation/hooks/use-animate.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/components/AnimatePresence/use-presence.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/components/AnimatePresence/use-presence.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/animation/hooks/use-animate-style.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/animation/hooks/use-animate-style.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/animation/hooks/use-animation.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/animation/hooks/use-animation.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/components/AnimatePresence/use-presence-data.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/components/AnimatePresence/use-presence-data.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/events/use-dom-event.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/events/use-dom-event.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/utils/use-in-view.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/utils/use-in-view.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/utils/use-animation-frame.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/utils/use-animation-frame.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/utils/use-cycle.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/utils/use-cycle.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/utils/use-page-in-view.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/utils/use-page-in-view.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/context/MotionContext/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/context/MotionContext/index.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/context/LayoutGroupContext.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/context/LayoutGroupContext.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/context/MotionConfigContext.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/context/MotionConfigContext.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/context/PresenceContext.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/context/PresenceContext.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/context/SwitchLayoutGroupContext.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/context/SwitchLayoutGroupContext.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/utils/use-instant-transition.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/utils/use-instant-transition.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/animation/hooks/use-animated-state.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/animation/hooks/use-animated-state.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/context/DeprecatedLayoutGroupContext.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/context/DeprecatedLayoutGroupContext.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/components/AnimateSharedLayout.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/components/AnimateSharedLayout.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/value/use-inverted-scale.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/value/use-inverted-scale.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/value/use-motion-value.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/value/use-motion-value.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/utils/reduced-motion/use-reduced-motion.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/utils/reduced-motion/use-reduced-motion.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/components/AnimatePresence/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/components/AnimatePresence/index.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/context/LazyContext.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/context/LazyContext.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/utils/use-constant.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/utils/use-constant.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/utils/use-is-mounted.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/utils/use-is-mounted.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/value/use-combine-values.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/value/use-combine-values.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/value/use-computed.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/value/use-computed.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/components/Reorder/Group.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/components/Reorder/Group.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/components/Reorder/Item.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/components/Reorder/Item.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/context/ReorderContext.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/context/ReorderContext.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/motion/features/layout/MeasureLayout.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/motion/features/layout/MeasureLayout.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/motion/index.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/motion/index.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/context/MotionContext/create.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/context/MotionContext/create.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/render/dom/use-render.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/render/dom/use-render.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/render/svg/use-svg-visual-state.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/render/svg/use-svg-visual-state.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/render/html/use-html-visual-state.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/render/html/use-html-visual-state.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/motion/utils/use-motion-ref.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/motion/utils/use-motion-ref.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/motion/utils/use-visual-element.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/motion/utils/use-visual-element.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/render/html/use-props.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/render/html/use-props.mjs" was ignored.
+../../node_modules/framer-motion/dist/es/render/svg/use-props.mjs (1:0): Module level directives cause errors when bundled, "use client" in "../../node_modules/framer-motion/dist/es/render/svg/use-props.mjs" was ignored.
+15:40:59 [vite] [32m✓[39m 1581 modules transformed.
+15:41:00 [vite] rendering chunks...
+15:41:00 [vite] computing gzip size...
+15:41:00 [vite] [2m.vercel/output/static/[22m[36m_astro/hoisted.BZcWrtym.js                                      [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.31 kB[22m
+15:41:00 [vite] [2m.vercel/output/static/[22m[36m_astro/hoisted.DtXIXG5E.js                                      [39m[1m[2m  0.42 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+15:41:00 [vite] [2m.vercel/output/static/[22m[36m_astro/hoisted.lPDZ00qb.js                                      [39m[1m[2m  0.55 kB[22m[1m[22m[2m │ gzip:   0.32 kB[22m
+15:41:00 [vite] [2m.vercel/output/static/[22m[36m_astro/hoisted.BtoB7vmg.js                                      [39m[1m[2m  0.74 kB[22m[1m[22m[2m │ gzip:   0.35 kB[22m
+15:41:00 [vite] [2m.vercel/output/static/[22m[36m_astro/hoisted.Dyx8RkTO.js                                      [39m[1m[2m  5.90 kB[22m[1m[22m[2m │ gzip:   1.79 kB[22m
+15:41:00 [vite] [2m.vercel/output/static/[22m[36m_astro/Header.astro_astro_type_script_index_0_lang.DikDk5Xz.js  [39m[1m[2m 15.45 kB[22m[1m[22m[2m │ gzip:   5.90 kB[22m
+15:41:00 [vite] [2m.vercel/output/static/[22m[36m_astro/refractor.BJsswmlA.js                                    [39m[1m[2m 42.13 kB[22m[1m[22m[2m │ gzip:  16.93 kB[22m
+15:41:00 [vite] [2m.vercel/output/static/[22m[36m_astro/renderVisualEditing.C6hOW9DQ.js                          [39m[1m[33m803.95 kB[39m[22m[2m │ gzip: 256.96 kB[22m
+15:41:00 [WARN] [vite] [33m
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+15:41:00 [vite] [32m✓ built in 13.28s[39m
 
- generating static routes 
-18:08:18 ▶ src/pages/index.astro
-18:08:18   └─ /index.html (+684ms)
-18:08:18 ✓ Completed in 809ms.
+ prerendering static routes 
+15:41:01 ▶ src/pages/CLAUDE.md
+15:41:01   └─ /CLAUDE/index.html15:41:01 [WARN] `Astro.request.headers` is unavailable in "static" output mode, and in prerendered pages within "hybrid" and "server" output modes. If you need access to request headers, make sure that `output` is configured as either `"server"` or `output: "hybrid"` in your config file, and that the page accessing the headers is rendered on-demand.
+ (+31ms)
+15:41:01 λ src/pages/author-sitemap.xml.ts
+15:41:01   └─ /author-sitemap.xml15:41:01 [WARN] `Astro.request.headers` is unavailable in "static" output mode, and in prerendered pages within "hybrid" and "server" output modes. If you need access to request headers, make sure that `output` is configured as either `"server"` or `output: "hybrid"` in your config file, and that the page accessing the headers is rendered on-demand.
+ (+374ms)
+15:41:02 λ src/pages/page-sitemap.xml.ts
+15:41:02   └─ /page-sitemap.xml15:41:02 [WARN] `Astro.request.headers` is unavailable in "static" output mode, and in prerendered pages within "hybrid" and "server" output modes. If you need access to request headers, make sure that `output` is configured as either `"server"` or `output: "hybrid"` in your config file, and that the page accessing the headers is rendered on-demand.
+ (+210ms)
+15:41:02 λ src/pages/post-sitemap.xml.ts
+15:41:02   └─ /post-sitemap.xml15:41:02 [WARN] `Astro.request.headers` is unavailable in "static" output mode, and in prerendered pages within "hybrid" and "server" output modes. If you need access to request headers, make sure that `output` is configured as either `"server"` or `output: "hybrid"` in your config file, and that the page accessing the headers is rendered on-demand.
+ (+238ms)
+15:41:02 λ src/pages/sitemap_index.xml.ts
+15:41:02   └─ /sitemap_index.xml15:41:02 [WARN] `Astro.request.headers` is unavailable in "static" output mode, and in prerendered pages within "hybrid" and "server" output modes. If you need access to request headers, make sure that `output` is configured as either `"server"` or `output: "hybrid"` in your config file, and that the page accessing the headers is rendered on-demand.
+ (+9ms)
+15:41:02 ✓ Completed in 1.57s.
 
-18:08:18 [WARN] [@astrojs/sitemap]  i18n  `defaultLocale` must exist in `locales` keys.
-18:08:18 [build] 1 page(s) built in 1.88s
-18:08:18 [build] Complete!
+15:41:02 [build] Rearranging server assets...
+15:41:02 [WARN] [@astrojs/vercel/serverless] 
+	The local Node.js version (24) is not supported by Vercel Serverless Functions.
+	Your project will use Node.js 18 as the runtime instead.
+	Consider switching your local version to 18.
+
+15:41:02 [@astrojs/vercel/serverless] Bundling function ..\..\_functions\entry.mjs
+15:41:05 [build] Waiting for integration "@astrojs/vercel/serverless", hook "astro:build:done"...
+15:41:10 [build] Server built in 32.33s
+15:41:10 [build] Complete!
 
 > desk365-web@0.0.1 check:staging-urls
 > node -e "const {execSync}=require('child_process');try{execSync('grep -r staging.desk365.io dist/',{stdio:'pipe'});process.exit(1)}catch{process.exit(0)}"

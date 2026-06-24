@@ -19,8 +19,8 @@ export default defineConfig({
   integrations: [
     tailwind({ applyBaseStyles: false }),
   ],
-  // Hybrid mode: pages are static by default; routes with `prerender = false`
-  // are server-rendered (used for the preview API and the homepage).
-  output: 'hybrid',
+  // On Vercel: hybrid mode so routes with `prerender = false` are server-rendered.
+  // Locally (no adapter): static mode so the build works without an adapter.
+  output: process.env.VERCEL ? 'hybrid' : 'static',
   adapter,
 });
